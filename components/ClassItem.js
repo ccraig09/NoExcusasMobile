@@ -82,7 +82,7 @@ const styles = StyleSheet.create({
     left: 0,
   },
   cardTitle: {
-    color: "yellow",
+    color: Colors.noExprimary,
     fontSize: 24,
     fontWeight: "bold",
     marginTop: 20,

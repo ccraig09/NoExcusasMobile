@@ -1,6 +1,6 @@
 import React from "react";
 import { createStackNavigator } from "react-navigation-stack";
-import { createAppContainer } from "react-navigation";
+import { createAppContainer, createSwitchNavigator } from "react-navigation";
 import { Platform, Text, Modal } from "react-native";
 import { createBottomTabNavigator } from "react-navigation-tabs";
 import { createMaterialBottomTabNavigator } from "react-navigation-material-bottom-tabs";
@@ -17,6 +17,10 @@ import VideoScreen from "../screens/VideoScreen";
 import SectionScreen from "../screens/SectionScreen";
 import CategoryScreen from "../screens/CategoryScreen";
 import ClassStart from "../screens/ClassStart";
+import AuthScreen from "../screens/AuthScreen";
+import StartupScreen from "../screens/StartupScreen";
+
+import LogoutScreen from "../screens/LogoutScreen";
 
 const defaultStackNavOptions = {
   // headerShown: false,
@@ -71,6 +75,10 @@ const ProfileStack = createStackNavigator(
   }
 );
 
+const LogoutStack = createStackNavigator({
+  Logout: LogoutScreen,
+});
+
 const tabScreenConfig = {
   Home: {
     screen: HomeStack,
@@ -78,7 +86,7 @@ const tabScreenConfig = {
       tabBarIcon: (tabInfo) => {
         return <Ionicons name="ios-home" size={28} color={tabInfo.tintColor} />;
       },
-      tabBarColor: Colors.primary,
+      tabBarColor: Colors.noExprimary,
       tabBarLabel:
         Platform.OS === "android" ? (
           <Text style={{ fontFamily: "open-sans-bold" }}>Home</Text>
@@ -96,12 +104,30 @@ const tabScreenConfig = {
           <Ionicons name="ios-person" size={28} color={tabInfo.tintColor} />
         );
       },
-      tabBarColor: Colors.accent,
+      tabBarColor: "gray",
       tabBarLabel:
         Platform.OS === "android" ? (
           <Text style={{ fontFamily: "open-sans-bold" }}>Profile</Text>
         ) : (
           "Profile"
+        ),
+    },
+  },
+  Logout: {
+    screen: LogoutStack,
+    navigationOptions: {
+      tabBarLabel: "NoClue",
+      tabBarIcon: (tabInfo) => {
+        return (
+          <Ionicons name="ios-settings" size={28} color={tabInfo.tintColor} />
+        );
+      },
+      tabBarColor: "blue",
+      tabBarLabel:
+        Platform.OS === "android" ? (
+          <Text style={{ fontFamily: "open-sans-bold" }}>LogoutDroi</Text>
+        ) : (
+          "Logout"
         ),
     },
   },
@@ -125,4 +151,19 @@ const MainNavigator =
         },
       });
 
-export default createAppContainer(MainNavigator);
+const AuthNavigator = createStackNavigator(
+  {
+    Auth: AuthScreen,
+  }
+  // {
+  //   defaultNavigationOptions: defaultNavOptions,
+  // }
+);
+
+const MainFinalNavigator = createSwitchNavigator({
+  Startup: StartupScreen,
+  Auth: AuthNavigator,
+  Main: MainNavigator,
+});
+
+export default createAppContainer(MainFinalNavigator);
