@@ -1,5 +1,5 @@
 import React from "react";
-import { View, StyleSheet, Button } from "react-native";
+import { View, StyleSheet, Button, Alert } from "react-native";
 import { useDispatch } from "react-redux";
 import * as authActions from "../store/actions/auth";
 
@@ -10,8 +10,20 @@ const LogoutSreen = (props) => {
       <Button
         title="Logout"
         onPress={() => {
-          dispatch(authActions.logout());
-          props.navigation.navigate("Auth");
+          Alert.alert("Are you sure you want to logout?", "", [
+            {
+              text: "No",
+              style: "default",
+            },
+            {
+              text: "Si",
+              style: "destructive",
+              onPress: () => {
+                dispatch(authActions.logout());
+                props.navigation.navigate("Auth");
+              },
+            },
+          ]);
         }}
       />
     </View>

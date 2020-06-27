@@ -15,6 +15,7 @@ import HomeScreen from "../screens/HomeScreen";
 import ProfileScreen from "../screens/ProfileScreen";
 import VideoScreen from "../screens/VideoScreen";
 import SectionScreen from "../screens/SectionScreen";
+import EvalScreen from "../screens/EvalScreen";
 import CategoryScreen from "../screens/CategoryScreen";
 import ClassStart from "../screens/ClassStart";
 import AuthScreen from "../screens/AuthScreen";
@@ -64,7 +65,7 @@ const ProfileStack = createStackNavigator(
   {
     Profile: ProfileScreen,
     // Eval: Evals,
-    // Eval1: Eval1Screen,
+    Eval1: EvalScreen,
     // Eval2: Eval2Screen,
   },
   {

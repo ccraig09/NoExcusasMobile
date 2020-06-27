@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useCallback, useReducer, useEffect } from "react";
 import {
   StatusBar,
   Dimensions,
@@ -10,12 +10,18 @@ import {
   Button,
   FlatList,
   Image,
+  Modal,
   TouchableOpacity,
   Text,
+  Alert,
   // Text,
 } from "react-native";
 
 import styled from "styled-components";
+import { useSelector, useDispatch } from "react-redux";
+import Input from "../components/UI/Input";
+import HeaderButton from "../components/UI/HeaderButton";
+
 import { Ionicons } from "@expo/vector-icons";
 import { connect } from "react-redux";
 import { AsyncStorage } from "react-native";
@@ -23,6 +29,7 @@ import { AsyncStorage } from "react-native";
 import { ProgressChart } from "react-native-chart-kit";
 import { DataTable } from "react-native-paper";
 import Colors from "../constants/Colors";
+import * as detailsActions from "../store/actions/membersDetails";
 // import { TouchableOpacity } from "react-native-gesture-handler";
 // import { addItem, getItems, getBCG } from "../components/Firebase";
 // import { ListItem, Divider } from "react-native-elements";
@@ -32,9 +39,225 @@ let screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
 StatusBar.setHidden(true);
 
+const FORM_INPUT_UPDATE = "FORM_INPUT_UPDATE";
+
+const formReducer = (state, action) => {
+  if (action.type === "FORM_INPUT_UPDATE") {
+    const updatedValues = {
+      ...state.inputValues,
+      [action.input]: action.value,
+    };
+    const updatedValidities = {
+      ...state.inputValidities,
+      [action.input]: action.isValid,
+    };
+    let updatedFormIsValid = true;
+    for (const key in updatedValidities) {
+      updatedFormIsValid = updatedFormIsValid && updatedValidities[key];
+    }
+    return {
+      formIsValid: updatedFormIsValid,
+      inputValidities: updatedValidities,
+      inputValues: updatedValues,
+    };
+  }
+  return state;
+};
+
 const ProfileScreen = (props) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState();
+
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const editMember = useSelector((state) => state.memberdeets.details);
+  const [fName, setFName] = useState(editMember.fName);
+  const [lName, setlName] = useState(editMember.lName);
+
+  const dispatch = useDispatch();
+  // const sendMemberDetailsHandler = async () => {
+  //   setIsLoading(true);
+  //   await dispatch(detailsActions.addMemberDetails(cartItems, cartTotalAmount));
+  //   setIsLoading(false);
+  // };
+  const [formState, dispatchFormState] = useReducer(formReducer, {
+    inputValues: {
+      fName: editMember.fName,
+      lName: editMember.lName,
+      // imageUrl: editMember ? editMember.imageUrl : "",
+      // description: editMember ? editMember.description : "",
+      // price: "",
+    },
+    inputValidities: {
+      fName: true,
+      lName: true,
+      // imageUrl: editMember ? true : false,
+      // description: editMember ? true : false,
+      // price: editMember ? true : false,
+    },
+    formIsValid: true,
+  });
+
+  useEffect(() => {
+    if (error) {
+      Alert.alert("An error occured!", error, [{ text: "Okay" }]);
+    }
+  }, [error]);
+
+  // const submitHandler = useCallback(async () => {
+  //   if (!formState.formIsValid) {
+  //     Alert.alert("Wrong input!", "Please check the errors in the form.", [
+  //       { text: "Okay" },
+  //     ]);
+  //     return;
+  //   }
+  //   setError(null);
+  //   setIsLoading(true);
+  //   try {
+  //     if (editMember) {
+  //       await dispatch(
+  //         detailsActions.addMemberDetails(formState.inputValues.fName)
+  //       );
+  //     } else {
+  //       await dispatch(
+  //         detailsActions.addMemberDetails(formState.inputValues.fName)
+  //       );
+  //     }
+  //     props.navigation.goBack();
+  //   } catch (err) {
+  //     setError(err.message);
+  //   }
+
+  //   setIsLoading(false);
+  // }, [dispatch, formState]);
+
+  // useEffect(() => {
+  //   props.navigation.setParams({ submit: submitHandler });
+  // }, [submitHandler]);
+
+  const inputChangeHandler = useCallback(
+    (inputIdentifier, inputValue, inputValidity) => {
+      dispatchFormState({
+        type: FORM_INPUT_UPDATE,
+        value: inputValue,
+        isValid: inputValidity,
+        input: inputIdentifier,
+      });
+    },
+    [dispatchFormState]
+  );
+
+  const updateDetailsHandler = useCallback(async () => {
+    // if (!formState.formIsValid) {
+    //   Alert.alert("Wrong input!", "Please check the errors in the form.", [
+    //     { text: "Okay" },
+    //   ]);
+    //   return;
+    // }
+    // setError(null);
+    // setIsLoading(true);
+    try {
+      await dispatch(detailsActions.addMemberDetails(fName, lName));
+      // await dispatch(detailsActions.addMemberDetails(lName));
+    } catch (err) {
+      setError(err.message);
+    }
+    // setIsLoading(false);
+    setModalVisible(!modalVisible);
+    // console.log(fName);
+  }, [dispatch, fName, lName]);
+
+  const age = "carl";
   return (
     <RootView>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          // Alert.alert("Modal has been closed.");
+          setModalVisible(!modalVisible);
+        }}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <Text style={styles.modalText}>edit info!</Text>
+            <ScrollView>
+              <View style={styles.form}>
+                <TextInput
+                  style={styles.input}
+                  placeholder={age}
+                  value={fName}
+                  onChangeText={(text) => setFName(text)}
+                />
+                <TextInput
+                  style={styles.input}
+                  value={lName}
+                  onChangeText={(text) => setlName(text)}
+                />
+                {/* <Input
+                  id="fName"
+                  label="Nombre"
+                  errorText="Entra un nombre valido por favor!"
+                  keyboardType="default"
+                  autoCapitalize="sentences"
+                  autoCorrect
+                  returnKeyType="next"
+                  onInputChange={inputChangeHandler}
+                  initialValue={""}
+                  // initiallyValid={!!editMember}
+                  required
+                /> */}
+                {/* <Input
+                  id="imageUrl"
+                  label="Image Url"
+                  errorText="Please enter a valid image url!"
+                  keyboardType="default"
+                  returnKeyType="next"
+                  onInputChange={inputChangeHandler}
+                  initialValue={editMember ? editMember.imageUrl : ""}
+                  initiallyValid={!!editMember}
+                  required
+                />
+                {editMember ? null : (
+                  <Input
+                    id="price"
+                    label="Price"
+                    errorText="Please enter a valid price!"
+                    keyboardType="decimal-pad"
+                    returnKeyType="next"
+                    onInputChange={inputChangeHandler}
+                    required
+                    min={0.1}
+                  />
+                )}
+                <Input
+                  id="description"
+                  label="Description"
+                  errorText="Please enter a valid description!"
+                  keyboardType="default"
+                  autoCapitalize="sentences"
+                  autoCorrect
+                  multiline
+                  numberOfLines={3}
+                  onInputChange={inputChangeHandler}
+                  initialValue={editMember ? editMember.description : ""}
+                  initiallyValid={!!editMember}
+                  required
+                  minLength={5}
+                /> */}
+              </View>
+            </ScrollView>
+
+            <TouchableOpacity
+              style={{ ...styles.openButton, backgroundColor: "#2196F3" }}
+              onPress={updateDetailsHandler}
+            >
+              <Text style={styles.textStyle}>save</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
       <Container>
         <ScrollView>
           <Header>
@@ -84,7 +307,16 @@ const ProfileScreen = (props) => {
               </Item>
             </ItemContainer>
           </ScrollView>
-          <Subtitle>{"User Info".toUpperCase()}</Subtitle>
+          <View style={styles.edit}>
+            <Subtitle>{"User Info".toUpperCase()}</Subtitle>
+            <TouchableOpacity
+              onPress={() => {
+                setModalVisible(true);
+              }}
+            >
+              <Text style={styles.textStyle}>Edit Profile</Text>
+            </TouchableOpacity>
+          </View>
 
           <UserContainer>
             <DataTable>
@@ -174,7 +406,6 @@ const ProfileScreen = (props) => {
                   <DataTable.Cell numeric>7.8</DataTable.Cell>
                   <DataTable.Cell numeric>6.0</DataTable.Cell>
                 </DataTable.Row>
-
                 <DataTable.Row>
                   <DataTable.Cell>Fat</DataTable.Cell>
                   <DataTable.Cell numeric>25</DataTable.Cell>
@@ -210,16 +441,41 @@ const ProfileScreen = (props) => {
     </RootView>
   );
 };
-
+// ProfileScreen.navigationOptions = (navData) => {
+//   const submitFn = navData.navigation.getParam("submit");
+//   return {
+//     headerShown: false,
+//     // title: navData.navigation.getParam("productId")
+//     //   ? "Edit Product"
+//     //   : "Add Product",
+//     headerRight: () => (
+//       <HeaderButtons HeaderButtonComponent={HeaderButton}>
+//         <Item
+//           title="Save"
+//           iconName={
+//             Platform.OS === "android" ? "md-checkmark" : "ios-checkmark"
+//           }
+//           onPress={submitFn}
+//         />
+//       </HeaderButtons>
+//     ),
+//   };
+// };
 ProfileScreen.navigationOptions = {
   headerShown: false,
 };
 
 const styles = StyleSheet.create({
+  // input: {
+  //   flex: 1,
+  //   paddingLeft: 16,
+  //   fontSize: 16,
+  // },
   input: {
-    flex: 1,
-    paddingLeft: 16,
-    fontSize: 16,
+    paddingHorizontal: 2,
+    paddingVertical: 5,
+    borderBottomColor: "#ccc",
+    borderBottomWidth: 1,
   },
   button: {
     margin: 10,
@@ -245,6 +501,58 @@ const styles = StyleSheet.create({
   image: {
     width: 200,
     height: 200,
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 22,
+  },
+  modalView: {
+    width: "80%",
+    margin: 20,
+    backgroundColor: "#E8E8E8",
+    borderRadius: 20,
+    padding: 35,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  openButton: {
+    backgroundColor: "#F194FF",
+    borderRadius: 20,
+    padding: 10,
+    elevation: 2,
+  },
+  textStyle: {
+    color: "white",
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: "center",
+  },
+  edit: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    width: "100%",
+  },
+  textStyle: {
+    color: "red",
+    fontWeight: "bold",
+    textAlign: "center",
+    marginRight: 10,
+  },
+  form: {
+    margin: 20,
   },
 });
 

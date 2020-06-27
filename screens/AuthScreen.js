@@ -8,6 +8,8 @@ import {
   Platform,
   ActivityIndicator,
   Alert,
+  Text,
+  TouchableOpacity,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import Input from "../components/UI/Input";
@@ -15,6 +17,7 @@ import Card from "../components/UI/Card";
 import Colors from "../constants/Colors";
 import { useDispatch } from "react-redux";
 import * as authActions from "../store/actions/auth";
+import { Entypo } from "@expo/vector-icons";
 
 const FORM_INPUT_UPDATE = "FORM_INPUT_UPDATE";
 
@@ -159,6 +162,28 @@ const AuthScreen = (props) => {
                   setIsSignUp((prevState) => !prevState);
                 }}
               />
+              <View style={styles.socialContainer}>
+                <Text style={{ marginBottom: 10 }}>Iniciar sesión con</Text>
+                <View style={styles.socialRow}>
+                  <TouchableOpacity padding="80">
+                    <Entypo
+                      name="facebook-with-circle"
+                      size={65}
+                      color="#3b5998"
+                      margin="20"
+                      onPress={() => authActions.loginWithFacebook()}
+                    />
+                  </TouchableOpacity>
+                  <TouchableOpacity padding="80">
+                    <Entypo
+                      name="google--with-circle"
+                      size={65}
+                      color="#B23121"
+                      onPress={() => authActions.signInWithGoogleAsync()}
+                    />
+                  </TouchableOpacity>
+                </View>
+              </View>
             </View>
           </ScrollView>
         </Card>
@@ -188,6 +213,17 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     marginTop: 10,
+  },
+  socialContainer: {
+    marginTop: 10,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  socialRow: {
+    flexDirection: "row",
+    width: "60%",
+    marginTop: 10,
+    justifyContent: "space-between",
   },
 });
 

@@ -7,13 +7,28 @@ import * as Font from "expo-font";
 import ReduxThunk from "redux-thunk";
 
 import { enableScreens } from "react-native-screens";
+import authReducer from "./store/reducers/auth";
+import memberReducer from "./store/reducers/membersDetails";
 
 import productsReducer from "./store/reducers/products";
+// import { encode, decode } from "react-native-base64";
+
+import { decode, encode } from "base-64";
+
+if (!global.btoa) {
+  global.btoa = encode;
+}
+
+if (!global.atob) {
+  global.atob = decode;
+}
 
 enableScreens();
 
 const rootReducer = combineReducers({
   products: productsReducer,
+  memberdeets: memberReducer,
+  auth: authReducer,
 });
 
 const store = createStore(rootReducer, applyMiddleware(ReduxThunk));
