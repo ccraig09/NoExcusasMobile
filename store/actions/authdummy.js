@@ -115,46 +115,100 @@ export const signup = (email, password) => {
         var errorCode = error.code;
         var errorMessage = error.message;
         let message = "Something went wrong!";
-        if (errorCode === "auth/email-already-in-use") {
-          message = "This email exists already!";
+        if (errorCode == "auth/email-already-in-use") {
+          message = "This email is already in use!";
         } else if (errorCode === "auth/weak-password") {
           message = "This password is not valid";
         } else if (errorCode === "auth/invalid-email") {
           message = "This email is not valid";
         }
         throw new Error(message);
-
-        // ...
       });
+    const resData = await user.toJSON().stsTokenManager;
+    console.log(resData);
     firebase.auth().onAuthStateChanged(function (user) {
       if (user) {
-        console.log(user);
-        // user.getIdToken().then(function (idToken) {
-        var token = user.toJSON().stsTokenManager.accessToken;
-        var id = user.uid;
-        var time = user.toJSON().stsTokenManager.expirationTime;
-        console.log("this is tkn", token);
-        console.log("this is id", id);
-        console.log("this is time", time);
+        user.getIdToken().then(function (idToken) {
+          console.log(idToken);
+          // var expirationTime = user.toJSON().stsTokenManager.expirationTime;
+          console.log("expire time   " + expirationTime);
+          console.log("name retrieve test11" + user.email);
+          console.log("id retrieve test" + user.uid);
+          // User is signed in.
+        });
       }
     });
-
-    // console.log(resData);
-    var user = firebase.auth().currentUser;
-    console.log(user);
-
-    const id = user.uid;
-    const resData = await user.toJSON().stsTokenManager;
-    var token = resData.accessToken;
-
-    dispatch(authenticate(id, token, parseInt(resData.expirationTime) * 1000));
-
+    dispatch(
+      authenticate(idToken, user.uid, parseInt(resData.expirationTime) * 1000)
+    );
     const expirationDate = new Date(
       new Date().getTime() + parseInt(resData.expirationTime) * 1000
     );
-    saveDataToStorage(resData.uid, token, expirationDate);
+    saveDataToStorage(idToken, user.uid, expirationDate);
   };
 };
+
+//   var user = firebase.auth().currentUser;
+
+//   if (user) {
+//     // User is signed in.
+//     firebase
+//       .auth()
+//       .currentUser.getIdToken()
+//       .then((token) => {
+//         // console.log("the token is", token);
+
+//         // console.log(user);
+//         console.log("name retrieve test222   " + user.email);
+//         console.log("token retrieve test22   " + token);
+//         console.log("id retrieve test22   " + user.uid);
+//         console.log("expire time   " + expirationTime);
+//       });
+//   } else {
+//     // No user is signed in.
+//   }
+//   dispatch(authenticate(token, user.uid));
+// };
+
+//   const response = await fetch(
+//     "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyC7T1dVJFpMAu8YT64sA1IjDduZc2dkV2M",
+//     {
+//       method: "POST",
+//       headers: {
+//         "Content-Type": "application/json",
+//       },
+//       body: JSON.stringify({
+//         email: email,
+//         password: password,
+//         returnSecureToken: true,
+//       }),
+//     }
+//   );
+
+//   if (!response.ok) {
+//     const errorResData = await response.json();
+//     const errorId = errorResData.error.message;
+//     let message = "Something went wrong!";
+//     if (errorId === "EMAIL_EXISTS") {
+//       message = "This email exists already!";
+//     }
+//     throw new Error(message);
+//   }
+
+//   const resData = await response.json();
+//   console.log(resData);
+dispatch(
+  authenticate(
+    resData.localId,
+    resData.idToken,
+    parseInt(resData.expiresIn) * 1000
+  )
+);
+//   const expirationDate = new Date(
+//     new Date().getTime() + parseInt(resData.expiresIn) * 1000
+//   );
+//   saveDataToStorage(resData.idToken, resData.localId, expirationDate);
+// };
 
 export const login = (email, password) => {
   return async (dispatch) => {

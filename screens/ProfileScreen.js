@@ -9,6 +9,7 @@ import {
   TextInput,
   Button,
   FlatList,
+  ActivityIndicator,
   Image,
   Modal,
   TouchableOpacity,
@@ -71,8 +72,8 @@ const ProfileScreen = (props) => {
   const [modalVisible, setModalVisible] = useState(false);
 
   const editMember = useSelector((state) => state.memberdeets.details);
-  const [fName, setFName] = useState(editMember.fName);
-  const [lName, setlName] = useState(editMember.lName);
+  // const [fName, setFName] = useState(editMember.fName);
+  // const [lName, setlName] = useState(editMember.lName);
 
   const dispatch = useDispatch();
   // const sendMemberDetailsHandler = async () => {
@@ -82,20 +83,20 @@ const ProfileScreen = (props) => {
   // };
   const [formState, dispatchFormState] = useReducer(formReducer, {
     inputValues: {
-      fName: editMember.fName,
-      lName: editMember.lName,
+      fName: "",
+      lName: "",
       // imageUrl: editMember ? editMember.imageUrl : "",
       // description: editMember ? editMember.description : "",
       // price: "",
     },
     inputValidities: {
-      fName: true,
-      lName: true,
+      fName: false,
+      lName: false,
       // imageUrl: editMember ? true : false,
       // description: editMember ? true : false,
       // price: editMember ? true : false,
     },
-    formIsValid: true,
+    formIsValid: false,
   });
 
   useEffect(() => {
@@ -104,32 +105,37 @@ const ProfileScreen = (props) => {
     }
   }, [error]);
 
-  // const submitHandler = useCallback(async () => {
-  //   if (!formState.formIsValid) {
-  //     Alert.alert("Wrong input!", "Please check the errors in the form.", [
-  //       { text: "Okay" },
-  //     ]);
-  //     return;
-  //   }
-  //   setError(null);
-  //   setIsLoading(true);
-  //   try {
-  //     if (editMember) {
-  //       await dispatch(
-  //         detailsActions.addMemberDetails(formState.inputValues.fName)
-  //       );
-  //     } else {
-  //       await dispatch(
-  //         detailsActions.addMemberDetails(formState.inputValues.fName)
-  //       );
-  //     }
-  //     props.navigation.goBack();
-  //   } catch (err) {
-  //     setError(err.message);
-  //   }
+  const submitHandler = useCallback(async () => {
+    if (!formState.formIsValid) {
+      Alert.alert("Wrong input!", "Please check the errors in the form.", [
+        { text: "Okay" },
+      ]);
+      return;
+    }
+    setError(null);
+    setIsLoading(true);
+    try {
+      if (editMember) {
+        await dispatch(
+          detailsActions.addMemberDetails(
+            formState.inputValues.fName,
+            formState.inputValues.lName
+          )
+        );
+      }
+      // } else {
+      //   await dispatch(
+      //     detailsActions.addMemberDetails(formState.inputValues.fName)
+      //   );
+      // }
+      // props.navigation.goBack();
+    } catch (err) {
+      setError(err.message);
+    }
 
-  //   setIsLoading(false);
-  // }, [dispatch, formState]);
+    setIsLoading(false);
+    setModalVisible(!modalVisible);
+  }, [dispatch, formState]);
 
   // useEffect(() => {
   //   props.navigation.setParams({ submit: submitHandler });
@@ -147,27 +153,34 @@ const ProfileScreen = (props) => {
     [dispatchFormState]
   );
 
-  const updateDetailsHandler = useCallback(async () => {
-    // if (!formState.formIsValid) {
-    //   Alert.alert("Wrong input!", "Please check the errors in the form.", [
-    //     { text: "Okay" },
-    //   ]);
-    //   return;
-    // }
-    // setError(null);
-    // setIsLoading(true);
-    try {
-      await dispatch(detailsActions.addMemberDetails(fName, lName));
-      // await dispatch(detailsActions.addMemberDetails(lName));
-    } catch (err) {
-      setError(err.message);
-    }
-    // setIsLoading(false);
-    setModalVisible(!modalVisible);
-    // console.log(fName);
-  }, [dispatch, fName, lName]);
+  // const updateDetailsHandler = useCallback(async () => {
+  //   // if (!formState.formIsValid) {
+  //   //   Alert.alert("Wrong input!", "Please check the errors in the form.", [
+  //   //     { text: "Okay" },
+  //   //   ]);
+  //   //   return;
+  //   // }
+  //   // setError(null);
+  //   // setIsLoading(true);
+  //   try {
+  //     await dispatch(detailsActions.addMemberDetails(fName, lName));
+  //     // await dispatch(detailsActions.addMemberDetails(lName));
+  //   } catch (err) {
+  //     setError(err.message);
+  //   }
+  //   // setIsLoading(false);
+  //   setModalVisible(!modalVisible);
+  //   // console.log(fName);
+  // }, [dispatch, fName, lName]);
 
   const age = "carl";
+  if (isLoading) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" color={Colors.noExprimary} />
+      </View>
+    );
+  }
   return (
     <RootView>
       <Modal
@@ -184,17 +197,37 @@ const ProfileScreen = (props) => {
             <Text style={styles.modalText}>edit info!</Text>
             <ScrollView>
               <View style={styles.form}>
-                <TextInput
-                  style={styles.input}
-                  placeholder={age}
-                  value={fName}
-                  onChangeText={(text) => setFName(text)}
+                <Input
+                  id="fName"
+                  label="Nombre"
+                  errorText="Entra un nombre valido por favor!"
+                  keyboardType="default"
+                  autoCapitalize="sentences"
+                  autoCorrect
+                  returnKeyType="next"
+                  onInputChange={inputChangeHandler}
+                  initialValue={""}
+                  initiallyValid={!!editMember}
+                  required
                 />
-                <TextInput
+                <Input
+                  id="lName"
+                  label="Apellido"
+                  errorText="Entra un apellido valido por favor!"
+                  keyboardType="default"
+                  autoCapitalize="sentences"
+                  autoCorrect
+                  returnKeyType="next"
+                  onInputChange={inputChangeHandler}
+                  initialValue={""}
+                  initiallyValid={!!editMember}
+                  required
+                />
+                {/* <TextInput
                   style={styles.input}
                   value={lName}
                   onChangeText={(text) => setlName(text)}
-                />
+                /> */}
                 {/* <Input
                   id="fName"
                   label="Nombre"
@@ -251,7 +284,7 @@ const ProfileScreen = (props) => {
 
             <TouchableOpacity
               style={{ ...styles.openButton, backgroundColor: "#2196F3" }}
-              onPress={updateDetailsHandler}
+              onPress={submitHandler}
             >
               <Text style={styles.textStyle}>save</Text>
             </TouchableOpacity>
