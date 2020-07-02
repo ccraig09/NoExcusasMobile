@@ -92,6 +92,42 @@ const AuthScreen = (props) => {
       setIsLoading(false);
     }
   };
+  const authHandlerGoogle = async () => {
+    let action;
+    if (isSignup) {
+      action = authActions.signInWithGoogleAsync();
+    } else {
+      action = authActions.signInWithGoogleAsync();
+    }
+    setError(null);
+    setIsLoading(true);
+    try {
+      await dispatch(action);
+      if (!error);
+      props.navigation.navigate("Main");
+    } catch (err) {
+      setError(err.message);
+      setIsLoading(false);
+    }
+  };
+  const authHandlerFacebook = async () => {
+    let action;
+    if (isSignup) {
+      action = authActions.loginWithFacebook();
+    } else {
+      action = authActions.loginWithFacebook();
+    }
+    setError(null);
+    setIsLoading(true);
+    try {
+      await dispatch(action);
+      if (!error);
+      props.navigation.navigate("Main");
+    } catch (err) {
+      setError(err.message);
+      setIsLoading(false);
+    }
+  };
 
   const inputChangeHandler = useCallback(
     (inputIdentifier, inputValue, inputValidity) => {
@@ -172,7 +208,7 @@ const AuthScreen = (props) => {
                       size={65}
                       color="#3b5998"
                       margin="20"
-                      onPress={() => authActions.loginWithFacebook()}
+                      onPress={authHandlerFacebook}
                     />
                   </TouchableOpacity>
                   <TouchableOpacity padding="80">
@@ -180,7 +216,7 @@ const AuthScreen = (props) => {
                       name="google--with-circle"
                       size={65}
                       color="#B23121"
-                      onPress={() => authActions.signInWithGoogleAsync()}
+                      onPress={authHandlerGoogle}
                     />
                   </TouchableOpacity>
                 </View>

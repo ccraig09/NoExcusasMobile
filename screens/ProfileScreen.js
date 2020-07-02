@@ -207,7 +207,7 @@ const ProfileScreen = (props) => {
                   returnKeyType="next"
                   onInputChange={inputChangeHandler}
                   initialValue={""}
-                  initiallyValid={!!editMember}
+                  // initiallyValid={!!editMember}
                   required
                 />
                 <Input
@@ -220,7 +220,7 @@ const ProfileScreen = (props) => {
                   returnKeyType="next"
                   onInputChange={inputChangeHandler}
                   initialValue={""}
-                  initiallyValid={!!editMember}
+                  // initiallyValid={!!editMember}
                   required
                 />
                 {/* <TextInput
