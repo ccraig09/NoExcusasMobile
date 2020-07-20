@@ -1,23 +1,129 @@
-import React from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
   StyleSheet,
   SafeAreaView,
+  Alert,
+  AsyncStorage,
   ScrollView,
   FlatList,
+  ActivityIndicator,
 } from "react-native";
+import { Avatar } from "react-native-elements";
 import styled from "styled-components";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import ClassItem from "../components/ClassItem";
 import CardioBlock from "../components/CardioBlock";
+import Colors from "../constants/Colors";
+import * as detailsActions from "../store/actions/membersDetails";
+
+const currentHour = new Date().getHours();
+
+const greetingMessage =
+  currentHour >= 4 && currentHour < 12 // after 4:00AM and before 12:00PM
+    ? "Buenos Días "
+    : currentHour >= 12 && currentHour <= 17 // after 12:00PM and before 6:00pm
+    ? "Buenas Tardes"
+    : currentHour > 17 || currentHour < 4 // after 5:59pm or before 4:00AM (to accommodate night owls)
+    ? "Buenas Noches" // if for some reason the calculation didn't work
+    : "Bienvenido";
 
 const HomeScreen = (props) => {
   const classes = useSelector((state) => state.products.availableClasses);
+  const [firstName, setFirstName] = useState();
+  const [lastName, setLastName] = useState();
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [userPhoto, setUserPhoto] = useState();
+
+  // const [isLoading, setIsLoading] = useState(false);
+  const dispatch = useDispatch();
+  const [error, setError] = useState();
+
+  useEffect(() => {
+    setIsLoading(true);
+
+    loadDetails().then(() => {
+      setIsLoading(false);
+    });
+  }, [dispatch, loadDetails]);
+
+  const loadDetails = useCallback(async () => {
+    setError(null);
+    setIsRefreshing(true);
+    try {
+      await dispatch(detailsActions.fetchMemberDetails());
+      AsyncStorage.getItem("userData").then((value) => {
+        const data = JSON.parse(value);
+        setUserPhoto(data.avatar);
+      });
+      AsyncStorage.getItem("resData").then((value) => {
+        const data = JSON.parse(value);
+        console.log("resData should be and is ", data);
+
+        console.log("loaded member deets after first load", data);
+
+        setFirstName(data.loadedDetails.FirstName);
+        setLastName(data.loadedDetails.LastName);
+      });
+    } catch (err) {
+      setError(err.message);
+    }
+    setIsRefreshing(false);
+  }, [dispatch, setError, setIsRefreshing]);
+
+  // const user = AsyncStorage.getItem("userId");
+  // if (!user) {
+  //   console.log(user);
+  //   return (
+  //     <View style={styles.centered}>
+  //       <ActivityIndicator size="large" color={Colors.noExprimary} />
+  //     </View>
+  //   );
+  // }
+  if (isLoading) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" color={Colors.noExprimary} />
+        <Text>Cargando detalles del usuario</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.RootView}>
       <View style={styles.Container}>
         <SafeAreaView>
+          <View
+            style={{
+              width: "100%",
+              marginTop: 30,
+              paddingLeft: 40,
+              alignItems: "center",
+              flexDirection: "row",
+            }}
+          >
+            <Avatar
+              rounded
+              size="large"
+              // style={{ padding: 0 }}
+              source={{
+                uri: userPhoto,
+              }}
+              showEditButton={true}
+            />
+            <View style={styles.displayName}>
+              <Text style={styles.subtitle}>{greetingMessage}, </Text>
+              {/* <View style={{ flexDirection: "row" }}> */}
+              <Text style={styles.hello}>
+                {firstName} {lastName}
+              </Text>
+            </View>
+          </View>
+          {/* <View></View> */}
+          {/* </View> */}
+
           <ScrollView>
             <View style={styles.TitleBar}></View>
             <Subtitle>{"Entrenamientos".toUpperCase()}</Subtitle>
@@ -81,6 +187,7 @@ const styles = StyleSheet.create({
     backgroundColor: "black",
     flex: 1,
   },
+  centered: { flex: 1, justifyContent: "center", alignItems: "center" },
   Container: {
     flex: 1,
     backgroundColor: "#f0f3f5",
@@ -89,7 +196,7 @@ const styles = StyleSheet.create({
   },
   TitleBar: {
     width: "100%",
-    marginTop: 50,
+    marginTop: 10,
     paddingLeft: 80,
   },
   classRow: {
@@ -97,6 +204,25 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingLeft: 12,
     paddingTop: 30,
+  },
+  displayName: {
+    marginBottom: 25,
+    // width: "100%",
+    // height: 20,
+
+    alignItems: "center",
+    marginTop: 20,
+    marginLeft: 10,
+  },
+  hello: {
+    fontWeight: "bold",
+    color: "#3c4560",
+    fontSize: 20,
+  },
+  subtitle: {
+    color: "#b8bece",
+    fontWeight: "500",
+    fontSize: 16,
   },
 });
 

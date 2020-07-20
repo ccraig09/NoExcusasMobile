@@ -85,11 +85,11 @@ const AuthScreen = (props) => {
     setIsLoading(true);
     try {
       await dispatch(action);
+      setIsLoading(false);
       if (!error);
       props.navigation.navigate("Main");
     } catch (err) {
       setError(err.message);
-      setIsLoading(false);
     }
   };
   const authHandlerGoogle = async () => {
@@ -103,11 +103,11 @@ const AuthScreen = (props) => {
     setIsLoading(true);
     try {
       await dispatch(action);
+      setIsLoading(false);
       if (!error);
       props.navigation.navigate("Main");
     } catch (err) {
       setError(err.message);
-      setIsLoading(false);
     }
   };
   const authHandlerFacebook = async () => {
@@ -121,11 +121,11 @@ const AuthScreen = (props) => {
     setIsLoading(true);
     try {
       await dispatch(action);
+      setIsLoading(false);
       if (!error);
       props.navigation.navigate("Main");
     } catch (err) {
       setError(err.message);
-      setIsLoading(false);
     }
   };
 

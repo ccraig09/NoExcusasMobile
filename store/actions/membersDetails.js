@@ -1,25 +1,8 @@
 import MemberDetails from "../../models/memberDetail";
 export const UPDATE_MEMBER = "UPDATE_MEMBER";
+import { AsyncStorage } from "react-native";
 export const SET_MEMBER = "SET_MEMBER";
 import firebase from "../../components/firebase";
-
-// import * as firebase from "firebase/app";
-// import "firebase/auth";
-// import "firebase/firestore";
-
-// const firebaseConfig = {
-//   apiKey: "AIzaSyC7T1dVJFpMAu8YT64sA1IjDduZc2dkV2M",
-//   authDomain: "no-excusas.firebaseapp.com",
-//   databaseURL: "https://no-excusas.firebaseio.com",
-//   projectId: "no-excusas",
-//   storageBucket: "no-excusas.appspot.com",
-//   messagingSenderId: "734413363397",
-//   appId: "1:734413363397:web:dac9605a445fa0402df8ac",
-//   measurementId: "G-0EMD528XFE",
-// };
-// if (!firebase.apps.length) {
-//   firebase.initializeApp(firebaseConfig);
-// }
 
 export const db = firebase.firestore().collection("Members");
 
@@ -28,47 +11,141 @@ export default firebase;
 export const fetchMemberDetails = () => {
   return async (dispatch, getState) => {
     const userId = getState().auth.userId;
+    console.log("get state worked and userid is:", userId);
     try {
-      const response = await fetch(
-        `https://No-Excusas.firebaseio.com/memberDetails/${userId}.json`
-      );
+      let loadedDetails;
 
-      if (!response.ok) {
-        throw new Error("Something went wrong!");
-      }
+      await db
+        .doc(userId)
+        .get()
+        .then(function (doc) {
+          if (doc.exists) {
+            console.log("doc data is: ", doc.data().FirstName);
+            loadedDetails = doc.data();
+            console.log("loadedDetails are:", loadedDetails);
+            saveDataToStorage(loadedDetails);
+          } else {
+            // doc.data() will be undefined in this case
+            console.log("No such document!");
+          }
+        })
+        .catch(function (error) {
+          console.log("Error getting document:", error);
+        });
 
-      const resData = await response.json();
-      const loadedMemberDetails = [];
+      console.log("second check for detatils being loaded...:", loadedDetails);
 
-      for (const key in resData) {
-        loadedMemberDetails.push(
-          new MemberDetails(
-            key,
-            resData[key].fName,
-            resData[key].lName,
-            resData[key].age,
-            resData[key].weight,
-            resData[key].height,
-            resData[key].medHistory,
-            resData[key].occupation,
-            resData[key].bmi,
-            resData[key].fat,
-            resData[key].muscle,
-            resData[key].kcal,
-            resData[key].meta,
-            resData[key].vis,
-            resData[key].startDate,
-            resData[key].endDate,
-            resData[key].daysLeft,
-            resData[key].basePic,
-            resData[key].newPic
-          )
-        );
-      }
-      dispatch({ type: SET_MEMBER, memberDetails: loadedMemberDetails });
+      AsyncStorage.getItem("resData").then((value) => {
+        const data = JSON.parse(value);
+        console.log("resData should be and is from action ", data);
+        dispatch({ type: SET_MEMBER, details: data });
+      });
     } catch (err) {
       throw err;
     }
+  };
+};
+// try {
+//   const response = await fetch(
+//     `https://No-Excusas.firebaseio.com/memberDetails/${userId}.json`
+//   );
+
+//   if (!response.ok) {
+//     throw new Error("Something went wrong!");
+//   }
+
+//   const resData = await response.json();
+//   const loadedMemberDetails = [];
+
+//   for (const key in resData) {
+//     loadedMemberDetails.push(
+//       new MemberDetails(
+//         key,
+//         resData[key].fName,
+//         resData[key].lName,
+//         resData[key].age,
+//         resData[key].weight,
+//         resData[key].height,
+//         resData[key].medHistory,
+//         resData[key].occupation,
+//         resData[key].bmi,
+//         resData[key].fat,
+//         resData[key].muscle,
+//         resData[key].kcal,
+//         resData[key].meta,
+//         resData[key].vis,
+//         resData[key].startDate,
+//         resData[key].endDate,
+//         resData[key].daysLeft,
+//         resData[key].basePic,
+//         resData[key].newPic
+//       )
+//     );
+//   }
+//   dispatch({ type: SET_MEMBER, memberDetails: loadedMemberDetails });
+// } catch (err) {
+//   throw err;
+// }
+//   };
+// };
+
+export const baseDetails = (name, last) => {
+  return async () => {
+    firebase.auth().onAuthStateChanged(function (user) {
+      if (user) {
+        var userId = user.uid.toString();
+        try {
+          db.doc(userId)
+            .update({
+              FirstName: name,
+              LastName: last,
+
+              // Height: height,
+              // Weight: weight,
+              // BMI: bmi,
+              // Fat: fat,
+              // Muscle: muscle,
+              // KCAL: kcal,
+              // Metabolical: meta,
+              // ViFat: vifat,
+            })
+            .catch(function (error) {
+              console.log("Error getting document:", error);
+            });
+        } catch (err) {
+          setError(err.message);
+        }
+      }
+    });
+  };
+};
+export const baseInfo = (age, height, gender) => {
+  return async () => {
+    firebase.auth().onAuthStateChanged(function (user) {
+      if (user) {
+        var userId = user.uid.toString();
+        try {
+          db.doc(userId)
+            .update({
+              Age: age,
+              Height: height,
+              Gender: gender,
+              // Weight: weight,
+              // BMI: bmi,
+              // Fat: fat,
+              // Muscle: muscle,
+              // KCAL: kcal,
+              // Metabolical: meta,
+              // ViFat: vifat,
+            })
+            .catch(function (error) {
+              console.log("Error getting document:", error);
+            });
+        } catch (err) {
+          setError(err.message);
+        }
+      }
+    });
   };
 };
 
@@ -179,4 +256,13 @@ export const addMemberDetails = (
       },
     });
   };
+};
+
+const saveDataToStorage = (loadedDetails) => {
+  AsyncStorage.setItem(
+    "resData",
+    JSON.stringify({
+      loadedDetails: loadedDetails,
+    })
+  );
 };

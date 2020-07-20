@@ -94,6 +94,7 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     borderBottomColor: "#ccc",
     borderBottomWidth: 1,
+    color: "black",
   },
   errorContainer: {
     marginVertical: 5,
