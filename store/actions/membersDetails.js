@@ -22,8 +22,8 @@ export const fetchMemberDetails = () => {
           if (doc.exists) {
             console.log("doc data is: ", doc.data().FirstName);
             loadedDetails = doc.data();
+            dispatch({ type: SET_MEMBER, details: loadedDetails });
             console.log("loadedDetails are:", loadedDetails);
-            saveDataToStorage(loadedDetails);
           } else {
             // doc.data() will be undefined in this case
             console.log("No such document!");
@@ -35,16 +35,50 @@ export const fetchMemberDetails = () => {
 
       console.log("second check for detatils being loaded...:", loadedDetails);
 
-      AsyncStorage.getItem("resData").then((value) => {
-        const data = JSON.parse(value);
-        console.log("resData should be and is from action ", data);
-        dispatch({ type: SET_MEMBER, details: data });
-      });
+      console.log("thrid check for details...:", loadedDetails);
     } catch (err) {
       throw err;
     }
   };
 };
+
+// export const fetchMemberDetails = () => {
+//   return async (dispatch, getState) => {
+//     const userId = getState().auth.userId;
+//     console.log("get state worked and userid is:", userId);
+//     try {
+//       let loadedDetails;
+
+//       await db
+//         .doc(userId)
+//         .get()
+//         .then(function (doc) {
+//           if (doc.exists) {
+//             console.log("doc data is: ", doc.data().FirstName);
+//             loadedDetails = doc.data();
+//             console.log("loadedDetails are:", loadedDetails);
+//             saveDataToStorage(loadedDetails);
+//           } else {
+//             // doc.data() will be undefined in this case
+//             console.log("No such document!");
+//           }
+//         })
+//         .catch(function (error) {
+//           console.log("Error getting document:", error);
+//         });
+
+//       console.log("second check for detatils being loaded...:", loadedDetails);
+
+//       AsyncStorage.getItem("resData").then((value) => {
+//         const data = JSON.parse(value);
+//         console.log("resData should be and is from action ", data);
+//         dispatch({ type: SET_MEMBER, details: data });
+//       });
+//     } catch (err) {
+//       throw err;
+//     }
+//   };
+// };
 // try {
 //   const response = await fetch(
 //     `https://No-Excusas.firebaseio.com/memberDetails/${userId}.json`
@@ -126,7 +160,7 @@ export const baseInfo = (age, height, gender) => {
         var userId = user.uid.toString();
         try {
           db.doc(userId)
-            .update({
+            .set({
               Age: age,
               Height: height,
               Gender: gender,

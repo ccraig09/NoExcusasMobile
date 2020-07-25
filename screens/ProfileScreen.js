@@ -57,6 +57,7 @@ const greetingMessage =
 export const db = firebase.firestore().collection("Members");
 
 const ProfileScreen = (props) => {
+  const loadedMemberDeets = useSelector((state) => state.memberdeets.details);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState();
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -64,7 +65,7 @@ const ProfileScreen = (props) => {
 
   const [modalVisible, setModalVisible] = useState(false);
   const [baseInfoModal, setBaseInfoModal] = useState(false);
-  const loadedMemberDeets = useSelector((state) => state.memberdeets.details);
+  // const loadedMemberDeets = useSelector((state) => state.memberdeets.details);
   const [gender, setGender] = useState();
   const [firstName, setFirstName] = useState();
   const [lastName, setLastName] = useState();
@@ -79,7 +80,7 @@ const ProfileScreen = (props) => {
   const [vifat, setVifat] = useState();
   const [userPhoto, setUserPhoto] = useState();
   const dispatch = useDispatch();
-
+  // setFirstName(loadedMemberDeets.FirstName);
   // const submitDetails = (name, last, age) => {
   //   console.log("final name to past!!!!", name);
   //   firebase.auth().onAuthStateChanged(function (user) {
@@ -115,41 +116,53 @@ const ProfileScreen = (props) => {
     setIsRefreshing(true);
     try {
       await dispatch(detailsActions.fetchMemberDetails());
-      AsyncStorage.getItem("userData").then((value) => {
-        const data = JSON.parse(value);
-        setUserPhoto(data.avatar);
-      });
-      AsyncStorage.getItem("resData").then((value) => {
-        const data = JSON.parse(value);
-        console.log("resData should be and is ", data);
+      // await assign();
+      // AsyncStorage.getItem("userData").then((value) => {
+      //   const data = JSON.parse(value);
+      //   setUserPhoto(data.avatar);
 
-        console.log("loaded member deets after first load", data);
-        setAge(data.loadedDetails.Age);
-        setFirstName(data.loadedDetails.FirstName);
-        setLastName(data.loadedDetails.LastName);
-        setHeight(data.loadedDetails.Height);
-        setGender(data.loadedDetails.Gender);
-      });
+      // setAge(loadedMemberDeets.Age);
+      // setFirstName(loadedMemberDeets.FirstName);
+      // setLastName(loadedMemberDeets.LastName);
+      // setHeight(loadedMemberDeets.Height);
+      // setGender(loadedMemberDeets.Gender);
+
+      // AsyncStorage.getItem("resData").then((value) => {
+      //   const data = JSON.parse(value);
+      //   console.log("resData should be and is ", data);
+
+      //   console.log("loaded member deets after first load", data);
+      //   setAge(data.loadedDetails.Age);
+      //   setFirstName(data.loadedDetails.FirstName);
+      //   setLastName(data.loadedDetails.LastName);
+      //   setHeight(data.loadedDetails.Height);
+      //   setGender(data.loadedDetails.Gender);
+      // });
     } catch (err) {
       setError(err.message);
     }
     setIsRefreshing(false);
-  }, [dispatch, setError, setIsRefreshing]);
+  }, [dispatch, setIsRefreshing, setError]);
 
   useEffect(() => {
     const willFocusSub = props.navigation.addListener("willFocus", loadDetails);
-
     return () => {
       willFocusSub.remove();
     };
   }, [loadDetails]);
+
+  // useEffect(() => {
+  //   const willFocusSub = props.navigation.addListener("willFocus", assign);
+  //   return () => {
+  //     willFocusSub.remove();
+  //   };
+  // }, [assign]);
+
   useEffect(() => {
     setIsLoading(true);
-
-    loadDetails().then(() => {
-      setIsLoading(false);
-    });
-  }, [dispatch, loadDetails]);
+    loadDetails();
+    setIsLoading(false);
+  }, [loadDetails]);
 
   const submitHandler = useCallback(async (name, last) => {
     try {
@@ -361,8 +374,8 @@ const ProfileScreen = (props) => {
             </AvatarView>
             <View style={styles.displayName}>
               <Text style={styles.hello}>{greetingMessage}, </Text>
-              <Text style={styles.hello}>{firstName} </Text>
-              <Text style={styles.hello}>{lastName}</Text>
+              <Text style={styles.hello}>{loadedMemberDeets.FirstName} </Text>
+              <Text style={styles.hello}>{loadedMemberDeets.LastName}</Text>
             </View>
             <ScrollView
               style={{
@@ -564,11 +577,14 @@ const ProfileScreen = (props) => {
                   <DataTable.Title numeric>Gender</DataTable.Title>
                 </DataTable.Header>
                 <DataTable.Row>
-                  <DataTable.Cell numeric>{age}</DataTable.Cell>
-                  <DataTable.Cell numeric>{height}</DataTable.Cell>
                   <DataTable.Cell numeric>
-                    {"   "}
-                    {gender}
+                    {loadedMemberDeets.Age}
+                  </DataTable.Cell>
+                  <DataTable.Cell numeric>
+                    {loadedMemberDeets.Height}
+                  </DataTable.Cell>
+                  <DataTable.Cell numeric>
+                    {loadedMemberDeets.Gender}
                   </DataTable.Cell>
                 </DataTable.Row>
               </DataTable>

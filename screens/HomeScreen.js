@@ -31,6 +31,7 @@ const greetingMessage =
 
 const HomeScreen = (props) => {
   const classes = useSelector((state) => state.products.availableClasses);
+  const loadedMemberDeets = useSelector((state) => state.memberdeets.details);
   const [firstName, setFirstName] = useState();
   const [lastName, setLastName] = useState();
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -58,15 +59,13 @@ const HomeScreen = (props) => {
         const data = JSON.parse(value);
         setUserPhoto(data.avatar);
       });
-      AsyncStorage.getItem("resData").then((value) => {
-        const data = JSON.parse(value);
-        console.log("resData should be and is ", data);
+      //   AsyncStorage.getItem("resData").then((value) => {
+      //     const data = JSON.parse(value);
+      //     console.log("resData should be and is ", data);
 
-        console.log("loaded member deets after first load", data);
-
-        setFirstName(data.loadedDetails.FirstName);
-        setLastName(data.loadedDetails.LastName);
-      });
+      //     setFirstName(data.loadedDetails.FirstName);
+      //     setLastName(data.loadedDetails.LastName);
+      //   });
     } catch (err) {
       setError(err.message);
     }
@@ -116,9 +115,7 @@ const HomeScreen = (props) => {
             <View style={styles.displayName}>
               <Text style={styles.subtitle}>{greetingMessage}, </Text>
               {/* <View style={{ flexDirection: "row" }}> */}
-              <Text style={styles.hello}>
-                {firstName} {lastName}
-              </Text>
+              <Text style={styles.hello}>{loadedMemberDeets.FirstName}</Text>
             </View>
           </View>
           {/* <View></View> */}

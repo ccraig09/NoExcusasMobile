@@ -179,10 +179,10 @@ export const signup = (email, password) => {
         // user.getIdToken().then(function (idToken) {
         var token = userRes.accessToken.toString();
         var userId = user.uid.toString();
-        var time = userRes.expirationTime.toString();
+        // var time = userRes.expirationTime.toString();
         console.log("this is tkn", token);
         console.log("this is id", userId);
-        console.log("this is time", time);
+        // console.log("this is time", time);
 
         dispatch(
           authenticate(
@@ -232,10 +232,10 @@ export const login = (email, password) => {
         // user.getIdToken().then(function (idToken) {
         var token = userRes.accessToken.toString();
         var userId = user.uid.toString();
-        var time = userRes.expirationTime.toString();
+        // var time = userRes.expirationTime.toString();
         console.log("this is tkn", token);
         console.log("this is id", userId);
-        console.log("this is time", time);
+        // console.log("this is time", time);
 
         dispatch(
           authenticate(
