@@ -10,7 +10,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { useSelector } from "react-redux";
-import { PlayIcon } from "../components/icons";
+import { PlayIcon } from "./UI/icons";
 
 import CategoryItem from "../components/CategoryItem";
 

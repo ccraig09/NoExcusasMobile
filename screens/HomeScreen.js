@@ -17,6 +17,8 @@ import ClassItem from "../components/ClassItem";
 import CardioBlock from "../components/CardioBlock";
 import Colors from "../constants/Colors";
 import * as detailsActions from "../store/actions/membersDetails";
+import NotificationButton from "../components/UI/NotificationButton";
+import { TouchableOpacity } from "react-native-gesture-handler";
 
 const currentHour = new Date().getHours();
 
@@ -97,29 +99,40 @@ const HomeScreen = (props) => {
           <View
             style={{
               width: "100%",
-              marginTop: 30,
-              paddingLeft: 40,
-              alignItems: "center",
+              marginTop: 20,
               flexDirection: "row",
+              justifyContent: "space-between",
+              paddingRight: 10,
+              paddingLeft: 20,
             }}
           >
-            <Avatar
-              rounded
-              size="large"
-              // style={{ padding: 0 }}
-              source={{
-                uri: userPhoto,
+            <View
+              style={{
+                alignItems: "center",
+                flexDirection: "row",
               }}
-              showEditButton={true}
-            />
-            <View style={styles.displayName}>
-              <Text style={styles.subtitle}>{greetingMessage}, </Text>
-              {/* <View style={{ flexDirection: "row" }}> */}
-              <Text style={styles.hello}>{loadedMemberDeets.FirstName}</Text>
+            >
+              <Avatar
+                rounded
+                size="large"
+                // style={{ padding: 0 }}
+                source={{
+                  uri: userPhoto,
+                }}
+                showEditButton={true}
+              />
+              <View style={styles.displayName}>
+                <Text style={styles.subtitle}>{greetingMessage}, </Text>
+                {/* <View style={{ flexDirection: "row" }}> */}
+                <Text style={styles.hello}>{loadedMemberDeets.FirstName}</Text>
+              </View>
+            </View>
+            <View style={{ alignItems: "flex-end" }}>
+              <TouchableOpacity onPress={() => {}}>
+                <NotificationButton />
+              </TouchableOpacity>
             </View>
           </View>
-          {/* <View></View> */}
-          {/* </View> */}
 
           <ScrollView>
             <View style={styles.TitleBar}></View>
@@ -204,10 +217,7 @@ const styles = StyleSheet.create({
   },
   displayName: {
     marginBottom: 25,
-    // width: "100%",
-    // height: 20,
-
-    alignItems: "center",
+    alignItems: "flex-start",
     marginTop: 20,
     marginLeft: 10,
   },

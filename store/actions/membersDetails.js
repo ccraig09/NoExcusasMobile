@@ -133,6 +133,7 @@ export const baseDetails = (name, last) => {
             .update({
               FirstName: name,
               LastName: last,
+              timestamp: firebase.firestore.FieldValue.serverTimestamp(),
 
               // Height: height,
               // Weight: weight,
@@ -164,13 +165,42 @@ export const baseInfo = (age, height, gender) => {
               Age: age,
               Height: height,
               Gender: gender,
-              // Weight: weight,
-              // BMI: bmi,
-              // Fat: fat,
-              // Muscle: muscle,
-              // KCAL: kcal,
-              // Metabolical: meta,
-              // ViFat: vifat,
+            })
+            .catch(function (error) {
+              console.log("Error getting document:", error);
+            });
+        } catch (err) {
+          setError(err.message);
+        }
+      }
+    });
+  };
+};
+export const evalInfo = (
+  bmi,
+  fat,
+  muscle,
+  kcal,
+  metabolical,
+  visceral,
+  weight
+) => {
+  return async () => {
+    firebase.auth().onAuthStateChanged(function (user) {
+      if (user) {
+        var userId = user.uid.toString();
+        try {
+          db.doc(userId)
+            .set({
+              BaseEval: {
+                BMI: bmi,
+                Fat: fat,
+                Muscle: muscle,
+                KCAL: kcal,
+                Metabolical: metabolical,
+                ViFat: visceral,
+                Weight: weight,
+              },
             })
             .catch(function (error) {
               console.log("Error getting document:", error);

@@ -1,7 +1,7 @@
 import React from "react";
 import { StyleSheet } from "react-native";
 import { useSelector } from "react-redux";
-import { PlayIcon } from "../components/icons";
+import { PlayIcon } from "../components/UI/icons";
 
 import ClassStartItem from "../components/ClassStartItem";
 

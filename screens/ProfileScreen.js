@@ -65,6 +65,7 @@ const ProfileScreen = (props) => {
 
   const [modalVisible, setModalVisible] = useState(false);
   const [baseInfoModal, setBaseInfoModal] = useState(false);
+  const [evalInfoModal, setEvalInfoModal] = useState(false);
   // const loadedMemberDeets = useSelector((state) => state.memberdeets.details);
   const [gender, setGender] = useState();
   const [firstName, setFirstName] = useState();
@@ -80,6 +81,7 @@ const ProfileScreen = (props) => {
   const [vifat, setVifat] = useState();
   const [userPhoto, setUserPhoto] = useState();
   const dispatch = useDispatch();
+  const bmiGoal = 23;
   // setFirstName(loadedMemberDeets.FirstName);
   // const submitDetails = (name, last, age) => {
   //   console.log("final name to past!!!!", name);
@@ -116,10 +118,11 @@ const ProfileScreen = (props) => {
     setIsRefreshing(true);
     try {
       await dispatch(detailsActions.fetchMemberDetails());
-      // await assign();
-      // AsyncStorage.getItem("userData").then((value) => {
-      //   const data = JSON.parse(value);
-      //   setUserPhoto(data.avatar);
+
+      AsyncStorage.getItem("userData").then((value) => {
+        const data = JSON.parse(value);
+        setUserPhoto(data.avatar);
+      });
 
       // setAge(loadedMemberDeets.Age);
       // setFirstName(loadedMemberDeets.FirstName);
@@ -182,6 +185,27 @@ const ProfileScreen = (props) => {
     loadDetails();
     setBaseInfoModal(!baseInfoModal);
   });
+  const submitEvalInfo = useCallback(
+    async (bmi, fat, muscle, kcal, metabolical, visceral, weight) => {
+      try {
+        dispatch(
+          detailsActions.evalInfo(
+            bmi,
+            fat,
+            muscle,
+            kcal,
+            metabolical,
+            visceral,
+            weight
+          )
+        );
+      } catch (err) {
+        setError(err.message);
+      }
+      loadDetails();
+      setEvalInfoModal(!evalInfoModal);
+    }
+  );
 
   const tapBackground = () => {
     setShowAlert(true);
@@ -243,6 +267,43 @@ const ProfileScreen = (props) => {
       .typeError("Debe ser un número")
       .max(123456, "Digitos validos por altura por favor")
       .required("La altura es requerido"),
+  });
+  const validationSchemaEval = yup.object().shape({
+    bmi: yup
+      .number()
+      .typeError("Debe ser un número")
+      .max(99, "Dos digitos por edad por favor")
+      .required("La edad es requerido"),
+    fat: yup
+      .number()
+      .typeError("Debe ser un número")
+      .max(99, "Dos digitos por edad por favor")
+      .required("La edad es requerido"),
+    muscle: yup
+      .number()
+      .typeError("Debe ser un número")
+      .max(99, "Dos digitos por edad por favor")
+      .required("La edad es requerido"),
+    kcal: yup
+      .number()
+      .typeError("Debe ser un número")
+      .max(9999, "Dos digitos por edad por favor")
+      .required("La edad es requerido"),
+    metabolical: yup
+      .number()
+      .typeError("Debe ser un número")
+      .max(99, "Dos digitos por edad por favor")
+      .required("La edad es requerido"),
+    visceral: yup
+      .number()
+      .typeError("Debe ser un número")
+      .max(99, "Dos digitos por edad por favor")
+      .required("La edad es requerido"),
+    weight: yup
+      .number()
+      .typeError("Debe ser un número")
+      .max(999999, "Dos digitos por edad por favor")
+      .required("La edad es requerido"),
   });
 
   if (isLoading) {
@@ -347,6 +408,7 @@ const ProfileScreen = (props) => {
       <Container>
         <SafeAreaView>
           <ScrollView
+            showsHorizontalScrollIndicator={false}
             refreshControl={
               <RefreshControl
                 refreshing={isRefreshing}
@@ -375,7 +437,6 @@ const ProfileScreen = (props) => {
             <View style={styles.displayName}>
               <Text style={styles.hello}>{greetingMessage}, </Text>
               <Text style={styles.hello}>{loadedMemberDeets.FirstName} </Text>
-              <Text style={styles.hello}>{loadedMemberDeets.LastName}</Text>
             </View>
             <ScrollView
               style={{
@@ -490,7 +551,7 @@ const ProfileScreen = (props) => {
                           }}
                           onSubmit={(values, actions) => {
                             const { age, height, gender } = values;
-                            console.log("submitting height", height);
+
                             submitBaseInfo(age, height, gender);
                             actions.setSubmitting(false);
                           }}
@@ -569,12 +630,169 @@ const ProfileScreen = (props) => {
               </KeyboardAvoidingView>
             </Modal>
 
+            <Modal
+              isVisible={evalInfoModal}
+              animationIn="slideInLeft"
+              customBackdrop={
+                <TouchableWithoutFeedback onPress={tapBackground}>
+                  <View style={{ flex: 1, backgroundColor: "black" }}></View>
+                </TouchableWithoutFeedback>
+              }
+              avoidKeyboard
+              onBackButtonPress={tapBackground}
+              onSwipeComplete={() => setEvalInfoModal(!evalInfoModal)}
+              swipeDirection={["left", "right"]}
+              propagateSwipe
+            >
+              <KeyboardAvoidingView
+                behavior={Platform.OS === "android" ? "padding" : "position"}
+                keyboardVerticalOffset={-80}
+                // style={styles.screen}
+              >
+                <View style={styles.centeredView}>
+                  <AwesomeAlert
+                    show={showAlert}
+                    showProgress={false}
+                    title="Salir sin guardar?"
+                    message=""
+                    closeOnTouchOutside={true}
+                    closeOnHardwareBackPress={false}
+                    showCancelButton={true}
+                    showConfirmButton={true}
+                    cancelText="No, continuar"
+                    confirmText="Si, sin guardar"
+                    confirmButtonColor="#DD6B55"
+                    onCancelPressed={() => {
+                      setShowAlert(false);
+                    }}
+                    onConfirmPressed={() => {
+                      setEvalInfoModal(!evalInfoModal);
+                      setShowAlert(false);
+                    }}
+                  />
+                  <View style={styles.modalView}>
+                    <ScrollView>
+                      <View style={styles.form}>
+                        <Text style={styles.modalText}>edit info!</Text>
+
+                        <Formik
+                          initialValues={{
+                            bmi: "",
+                            fat: "",
+                            muscle: "",
+                            kcal: "",
+                            metabolical: "",
+                            visceral: "",
+                            weight: "",
+                          }}
+                          onSubmit={(values, actions) => {
+                            const {
+                              bmi,
+                              fat,
+                              muscle,
+                              kcal,
+                              metabolical,
+                              visceral,
+                              weight,
+                            } = values;
+
+                            submitEvalInfo(
+                              bmi,
+                              fat,
+                              muscle,
+                              kcal,
+                              metabolical,
+                              visceral,
+                              weight
+                            );
+                            actions.setSubmitting(false);
+                          }}
+                          validationSchema={validationSchemaEval}
+                        >
+                          {(formikProps) => (
+                            <React.Fragment>
+                              <View style={{ marginTop: 50 }}>
+                                <StyledInput
+                                  label="IMC"
+                                  formikProps={formikProps}
+                                  formikKey="bmi"
+                                  keyboardType="numeric"
+                                  maxLength={2}
+                                  // placeholder={}
+                                />
+                                <StyledInput
+                                  label="Grasa"
+                                  formikProps={formikProps}
+                                  formikKey="fat"
+                                  keyboardType="numeric"
+                                  maxLength={2}
+                                  // placeholder={}
+                                />
+                                <StyledInput
+                                  label="Músculo"
+                                  formikProps={formikProps}
+                                  formikKey="muscle"
+                                  keyboardType="numeric"
+                                  maxLength={2}
+                                  // placeholder={}
+                                />
+                                <StyledInput
+                                  label="KCAL"
+                                  formikProps={formikProps}
+                                  formikKey="kcal"
+                                  keyboardType="numeric"
+                                  maxLength={4}
+                                  // placeholder={}
+                                />
+                                <StyledInput
+                                  label="Edad Metabolica"
+                                  formikProps={formikProps}
+                                  formikKey="metabolical"
+                                  keyboardType="numeric"
+                                  maxLength={2}
+                                  // placeholder={}
+                                />
+                                <StyledInput
+                                  label="Grasa Visceral"
+                                  formikProps={formikProps}
+                                  formikKey="visceral"
+                                  keyboardType="numeric"
+                                  maxLength={2}
+                                  // placeholder={}
+                                />
+                                <StyledInput
+                                  label="Peso"
+                                  formikProps={formikProps}
+                                  formikKey="weight"
+                                  keyboardType="numeric"
+                                  maxLength={5}
+                                  // placeholder={}
+                                />
+                              </View>
+                              {formikProps.isSubmitting ? (
+                                <ActivityIndicator />
+                              ) : (
+                                <Button
+                                  title="Submit"
+                                  onPress={formikProps.handleSubmit}
+                                />
+                              )}
+                            </React.Fragment>
+                          )}
+                        </Formik>
+                      </View>
+                    </ScrollView>
+                  </View>
+                </View>
+              </KeyboardAvoidingView>
+            </Modal>
+
             <UserContainer>
               <DataTable>
                 <DataTable.Header>
-                  <DataTable.Title numeric>Age</DataTable.Title>
-                  <DataTable.Title numeric>Height</DataTable.Title>
-                  <DataTable.Title numeric>Gender</DataTable.Title>
+                  <DataTable.Title numeric>Edad</DataTable.Title>
+                  <DataTable.Title numeric>Altura</DataTable.Title>
+                  <DataTable.Title numeric>Género</DataTable.Title>
                 </DataTable.Header>
                 <DataTable.Row>
                   <DataTable.Cell numeric>
@@ -601,12 +819,15 @@ const ProfileScreen = (props) => {
 
             <Subtitle>Progress Chart</Subtitle>
 
-            <ProgressChart
+            {/* <ProgressChart
               data={{
-                data: [0.9, 0.6, 0.8, 0.6, 0.6, 0.8],
+                labels: ["Swim", "Bike", "Run"],
+                data: [bmiGoal, 0.6, 0.8, 0.6, 0.6, 0.8],
               }}
               width={screenWidth}
               height={285}
+              radius={12}
+              strokeWidth={13}
               chartConfig={{
                 backgroundColor: "#e26a00",
                 backgroundGradientFrom: "#fb8c00",
@@ -623,7 +844,63 @@ const ProfileScreen = (props) => {
                 marginLeft: 20,
                 marginRight: 10,
               }}
-            />
+            /> */}
+            <View
+              style={{ justifyContent: "space-between", flexDirection: "row" }}
+            >
+              <ProgressChart
+                data={{
+                  // labels: ["IMC"],
+                  data: [0.7],
+                }}
+                width={150}
+                height={150}
+                radius={16}
+                strokeWidth={13}
+                chartConfig={{
+                  backgroundColor: "#e26a00",
+                  backgroundGradientFrom: "#fb8c00",
+                  backgroundGradientTo: "#ffc733",
+                  decimalPlaces: 2, // optional, defaults to 2dp
+                  color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                  style: {
+                    borderRadius: 16,
+                  },
+                }}
+                style={{
+                  // alignSelf: "center",
+                  borderRadius: 16,
+                  marginLeft: 20,
+                  marginRight: 10,
+                }}
+              />
+              <ProgressChart
+                data={{
+                  // labels: ["IMC"],
+                  data: [0.7],
+                }}
+                width={150}
+                height={150}
+                radius={16}
+                strokeWidth={13}
+                chartConfig={{
+                  backgroundColor: "#e26a00",
+                  backgroundGradientFrom: "#fb8c00",
+                  backgroundGradientTo: "#ffc733",
+                  decimalPlaces: 2, // optional, defaults to 2dp
+                  color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                  style: {
+                    borderRadius: 6,
+                  },
+                }}
+                style={{
+                  // alignSelf: "center",
+                  borderRadius: 10,
+                  marginLeft: 20,
+                  marginRight: 10,
+                }}
+              />
+            </View>
 
             <Subtitle>{"Base Results".toUpperCase()}</Subtitle>
 
@@ -631,51 +908,74 @@ const ProfileScreen = (props) => {
               <DataContainer>
                 <DataTable>
                   <DataTable.Header>
-                    <DataTable.Title>Composition</DataTable.Title>
-                    <DataTable.Title numeric>Current</DataTable.Title>
-                    <DataTable.Title numeric>Goal</DataTable.Title>
+                    <DataTable.Title>Composición</DataTable.Title>
+                    <DataTable.Title numeric>Cálculo Actual</DataTable.Title>
+                    <DataTable.Title numeric>Meta</DataTable.Title>
                   </DataTable.Header>
                   <DataTable.Row>
-                    <DataTable.Cell>BMI</DataTable.Cell>
-                    <DataTable.Cell numeric>7.8</DataTable.Cell>
-                    <DataTable.Cell numeric>6.0</DataTable.Cell>
+                    <DataTable.Cell>IMC</DataTable.Cell>
+                    <DataTable.Cell numeric>
+                      {loadedMemberDeets.BaseEval.BMI}
+                    </DataTable.Cell>
+                    <DataTable.Cell numeric>{bmiGoal}</DataTable.Cell>
                   </DataTable.Row>
                   <DataTable.Row>
-                    <DataTable.Cell>Fat</DataTable.Cell>
-                    <DataTable.Cell numeric>25</DataTable.Cell>
+                    <DataTable.Cell>Grasa</DataTable.Cell>
+                    <DataTable.Cell numeric>
+                      {loadedMemberDeets.BaseEval.Fat}
+                    </DataTable.Cell>
                     <DataTable.Cell numeric>32</DataTable.Cell>
                   </DataTable.Row>
                   <DataTable.Row>
-                    <DataTable.Cell>Muscle</DataTable.Cell>
-                    <DataTable.Cell numeric>7.8</DataTable.Cell>
+                    <DataTable.Cell>Músculo</DataTable.Cell>
+                    <DataTable.Cell numeric>
+                      {loadedMemberDeets.BaseEval.Muscle}
+                    </DataTable.Cell>
                     <DataTable.Cell numeric>6.0</DataTable.Cell>
                   </DataTable.Row>
 
                   <DataTable.Row>
                     <DataTable.Cell>KCAL</DataTable.Cell>
-                    <DataTable.Cell numeric>25</DataTable.Cell>
+                    <DataTable.Cell numeric>
+                      {loadedMemberDeets.BaseEval.KCAL}
+                    </DataTable.Cell>
                     <DataTable.Cell numeric>32</DataTable.Cell>
                   </DataTable.Row>
                   <DataTable.Row>
-                    <DataTable.Cell>Metabolical Age</DataTable.Cell>
-                    <DataTable.Cell numeric>7.8</DataTable.Cell>
+                    <DataTable.Cell>Edad Metabolica</DataTable.Cell>
+                    <DataTable.Cell numeric>
+                      {loadedMemberDeets.BaseEval.Metabolical}
+                    </DataTable.Cell>
                     <DataTable.Cell numeric>6.0</DataTable.Cell>
                   </DataTable.Row>
 
                   <DataTable.Row>
-                    <DataTable.Cell>Viceral Fat</DataTable.Cell>
-                    <DataTable.Cell numeric>25</DataTable.Cell>
+                    <DataTable.Cell>Grasa Viceral</DataTable.Cell>
+                    <DataTable.Cell numeric>
+                      {loadedMemberDeets.BaseEval.ViFat}
+                    </DataTable.Cell>
                     <DataTable.Cell numeric>32</DataTable.Cell>
                   </DataTable.Row>
                   <DataTable.Row>
-                    <DataTable.Cell>Weight</DataTable.Cell>
-                    <DataTable.Cell numeric>22</DataTable.Cell>
+                    <DataTable.Cell>Peso</DataTable.Cell>
+                    <DataTable.Cell numeric>
+                      {loadedMemberDeets.BaseEval.Weight}
+                    </DataTable.Cell>
                     {/* leave blank , no goal required for weight */}
                     <DataTable.Cell numeric></DataTable.Cell>
                   </DataTable.Row>
                 </DataTable>
               </DataContainer>
             </Content>
+
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => {
+                setEvalInfoModal(true);
+              }}
+            >
+              <Text style={styles.buttonText}>Editar Eval</Text>
+            </TouchableOpacity>
           </ScrollView>
         </SafeAreaView>
       </Container>
@@ -933,7 +1233,7 @@ const Subtitle = styled.Text`
 `;
 
 const Content = styled.View`
-  height: ${screenHeight}px;
+  /* height: ${screenHeight}px; */
   width: ${screenWidth}px;
   background: #f0f3f5;
   padding: 20px;
