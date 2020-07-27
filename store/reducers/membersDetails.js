@@ -8,9 +8,12 @@ const initialState = {
 export default (state = initialState, action) => {
   switch (action.type) {
     case SET_MEMBER:
-      return Object.assign({}, state, {
+      return {
         details: action.details,
-      });
+      };
+    // return Object.assign({}, state, {
+    //   details: action.details,
+    // });
 
     // case UPDATE_MEMBER:
     //   const updateMember = new MemberDetails(

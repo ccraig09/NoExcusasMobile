@@ -130,20 +130,23 @@ export const baseDetails = (name, last) => {
         var userId = user.uid.toString();
         try {
           db.doc(userId)
-            .update({
-              FirstName: name,
-              LastName: last,
-              timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+            .set(
+              {
+                FirstName: name,
+                LastName: last,
+                Nametimestamp: firebase.firestore.FieldValue.serverTimestamp(),
 
-              // Height: height,
-              // Weight: weight,
-              // BMI: bmi,
-              // Fat: fat,
-              // Muscle: muscle,
-              // KCAL: kcal,
-              // Metabolical: meta,
-              // ViFat: vifat,
-            })
+                // Height: height,
+                // Weight: weight,
+                // BMI: bmi,
+                // Fat: fat,
+                // Muscle: muscle,
+                // KCAL: kcal,
+                // Metabolical: meta,
+                // ViFat: vifat,
+              },
+              { merge: true }
+            )
             .catch(function (error) {
               console.log("Error getting document:", error);
             });
@@ -154,18 +157,23 @@ export const baseDetails = (name, last) => {
     });
   };
 };
-export const baseInfo = (age, height, gender) => {
+export const baseInfo = (age, height, gender, weight) => {
   return async () => {
     firebase.auth().onAuthStateChanged(function (user) {
       if (user) {
         var userId = user.uid.toString();
         try {
           db.doc(userId)
-            .set({
-              Age: age,
-              Height: height,
-              Gender: gender,
-            })
+            .set(
+              {
+                Age: age,
+                Height: height,
+                Gender: gender,
+                Weight: weight,
+                basetimestamp: firebase.firestore.FieldValue.serverTimestamp(),
+              },
+              { merge: true }
+            )
             .catch(function (error) {
               console.log("Error getting document:", error);
             });
@@ -176,32 +184,26 @@ export const baseInfo = (age, height, gender) => {
     });
   };
 };
-export const evalInfo = (
-  bmi,
-  fat,
-  muscle,
-  kcal,
-  metabolical,
-  visceral,
-  weight
-) => {
+export const evalInfo = (bmi, fat, muscle, kcal, metabolical, visceral) => {
   return async () => {
     firebase.auth().onAuthStateChanged(function (user) {
       if (user) {
         var userId = user.uid.toString();
         try {
           db.doc(userId)
-            .set({
-              BaseEval: {
+            .set(
+              {
                 BMI: bmi,
                 Fat: fat,
                 Muscle: muscle,
                 KCAL: kcal,
                 Metabolical: metabolical,
                 ViFat: visceral,
-                Weight: weight,
+
+                Evaltimestamp: firebase.firestore.FieldValue.serverTimestamp(),
               },
-            })
+              { merge: true }
+            )
             .catch(function (error) {
               console.log("Error getting document:", error);
             });

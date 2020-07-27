@@ -14,6 +14,7 @@ import {
   TouchableOpacity,
   Text,
   Button,
+  Picker,
   Alert,
   RefreshControl,
 } from "react-native";
@@ -21,7 +22,7 @@ import Modal from "react-native-modal";
 import AwesomeAlert from "react-native-awesome-alerts";
 import { Formik } from "formik";
 import * as yup from "yup";
-import { Picker } from "@react-native-community/picker";
+// import { Picker } from "@react-native-community/picker";
 import styled, { useTheme } from "styled-components";
 import { useSelector, useDispatch } from "react-redux";
 import Input from "../components/UI/Input";
@@ -33,11 +34,17 @@ import { connect } from "react-redux";
 import { AsyncStorage } from "react-native";
 // import AvatarProfile from "../components/AvatarProfile";
 import { ProgressChart } from "react-native-chart-kit";
-import { DataTable } from "react-native-paper";
+// import { DataTable } from "react-native-paper";
 import Colors from "../constants/Colors";
 import * as detailsActions from "../store/actions/membersDetails";
 import firebase from "../components/firebase";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+import BaseInfoDT from "../components/BaseInfoDataTable";
+import BaseEvalDT from "../components/BaseEvalDataTable";
+// import ProgressCircle from "../components/UI/ProgressCircle";
+// import PercentageCircle from "react-native-percentage-circle";
+import ProgressWheel from "../components/UI/ProgressWheel";
 
 let screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
@@ -66,22 +73,32 @@ const ProfileScreen = (props) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [baseInfoModal, setBaseInfoModal] = useState(false);
   const [evalInfoModal, setEvalInfoModal] = useState(false);
-  // const loadedMemberDeets = useSelector((state) => state.memberdeets.details);
-  const [gender, setGender] = useState();
-  const [firstName, setFirstName] = useState();
-  const [lastName, setLastName] = useState();
-  const [age, setAge] = useState();
-  const [height, setHeight] = useState();
-  const [weight, setWeight] = useState();
-  const [bmi, setBmi] = useState();
-  const [fat, setFat] = useState();
-  const [muscle, setMuscle] = useState();
-  const [kcal, setKcal] = useState();
-  const [meta, setMeta] = useState();
-  const [vifat, setVifat] = useState();
+  // const [gender, setGender] = useState();
+  // const [firstName, setFirstName] = useState();
+  // const [lastName, setLastName] = useState();
+  // const [age, setAge] = useState();
+  // const [height, setHeight] = useState();
+  // const [weight, setWeight] = useState();
+  // const [bmi, setBmi] = useState();
+  // const [fat, setFat] = useState();
+  // const [muscle, setMuscle] = useState();
+  // const [kcal, setKcal] = useState();
+  // const [meta, setMeta] = useState();
+  // const [vifat, setVifat] = useState();
   const [userPhoto, setUserPhoto] = useState();
   const dispatch = useDispatch();
-  const bmiGoal = 23;
+  const firstName = loadedMemberDeets.FirstName;
+  const lastName = loadedMemberDeets.LastName;
+  const age = loadedMemberDeets.Age;
+  const height = loadedMemberDeets.Height;
+  const bmi = loadedMemberDeets.BMI;
+  const fat = loadedMemberDeets.Fat;
+  const muscle = loadedMemberDeets.Muscle;
+  const kcal = loadedMemberDeets.KCAL;
+  const meta = loadedMemberDeets.Metabolical;
+  const vifat = loadedMemberDeets.ViFat;
+  const gender = loadedMemberDeets.Gender;
+  const weight = loadedMemberDeets.Weight;
   // setFirstName(loadedMemberDeets.FirstName);
   // const submitDetails = (name, last, age) => {
   //   console.log("final name to past!!!!", name);
@@ -113,18 +130,18 @@ const ProfileScreen = (props) => {
   //   });
   // };
 
-  const loadDetails = useCallback(async () => {
+  const loadDetails = useCallback(() => {
     setError(null);
     setIsRefreshing(true);
+
     try {
-      await dispatch(detailsActions.fetchMemberDetails());
+      dispatch(detailsActions.fetchMemberDetails());
 
       AsyncStorage.getItem("userData").then((value) => {
         const data = JSON.parse(value);
         setUserPhoto(data.avatar);
       });
 
-      // setAge(loadedMemberDeets.Age);
       // setFirstName(loadedMemberDeets.FirstName);
       // setLastName(loadedMemberDeets.LastName);
       // setHeight(loadedMemberDeets.Height);
@@ -176,9 +193,9 @@ const ProfileScreen = (props) => {
     loadDetails();
     setModalVisible(!modalVisible);
   });
-  const submitBaseInfo = useCallback(async (age, height, gender) => {
+  const submitBaseInfo = useCallback(async (age, height, gender, weight) => {
     try {
-      dispatch(detailsActions.baseInfo(age, height, gender));
+      dispatch(detailsActions.baseInfo(age, height, gender, weight));
     } catch (err) {
       setError(err.message);
     }
@@ -186,18 +203,10 @@ const ProfileScreen = (props) => {
     setBaseInfoModal(!baseInfoModal);
   });
   const submitEvalInfo = useCallback(
-    async (bmi, fat, muscle, kcal, metabolical, visceral, weight) => {
+    async (bmi, fat, muscle, kcal, metabolical, visceral) => {
       try {
         dispatch(
-          detailsActions.evalInfo(
-            bmi,
-            fat,
-            muscle,
-            kcal,
-            metabolical,
-            visceral,
-            weight
-          )
+          detailsActions.evalInfo(bmi, fat, muscle, kcal, metabolical, visceral)
         );
       } catch (err) {
         setError(err.message);
@@ -260,50 +269,41 @@ const ProfileScreen = (props) => {
     age: yup
       .number()
       .typeError("Debe ser un número")
-      .max(99, "Dos digitos por edad por favor")
-      .required("La edad es requerido"),
+      .max(99, "Dos digitos por edad por favor"),
     height: yup
       .number()
       .typeError("Debe ser un número")
-      .max(123456, "Digitos validos por altura por favor")
-      .required("La altura es requerido"),
+      .max(123456, "Digitos validos por altura por favor"),
   });
   const validationSchemaEval = yup.object().shape({
     bmi: yup
       .number()
       .typeError("Debe ser un número")
-      .max(99, "Dos digitos por edad por favor")
-      .required("La edad es requerido"),
+      .max(99, "Dos digitos por edad por favor"),
     fat: yup
       .number()
       .typeError("Debe ser un número")
-      .max(99, "Dos digitos por edad por favor")
-      .required("La edad es requerido"),
+      .max(99, "Dos digitos por edad por favor"),
     muscle: yup
       .number()
       .typeError("Debe ser un número")
-      .max(99, "Dos digitos por edad por favor")
-      .required("La edad es requerido"),
+      .max(99, "Dos digitos por edad por favor"),
     kcal: yup
       .number()
       .typeError("Debe ser un número")
-      .max(9999, "Dos digitos por edad por favor")
-      .required("La edad es requerido"),
+      .max(9999, "Dos digitos por edad por favor"),
     metabolical: yup
       .number()
       .typeError("Debe ser un número")
-      .max(99, "Dos digitos por edad por favor")
-      .required("La edad es requerido"),
+      .max(99, "Dos digitos por edad por favor"),
     visceral: yup
       .number()
       .typeError("Debe ser un número")
-      .max(99, "Dos digitos por edad por favor")
-      .required("La edad es requerido"),
+      .max(99, "Dos digitos por edad por favor"),
     weight: yup
       .number()
       .typeError("Debe ser un número")
-      .max(999999, "Dos digitos por edad por favor")
-      .required("La edad es requerido"),
+      .max(999999, "Dos digitos por edad por favor"),
   });
 
   if (isLoading) {
@@ -436,7 +436,7 @@ const ProfileScreen = (props) => {
             </AvatarView>
             <View style={styles.displayName}>
               <Text style={styles.hello}>{greetingMessage}, </Text>
-              <Text style={styles.hello}>{loadedMemberDeets.FirstName} </Text>
+              <Text style={styles.hello}>{firstName} </Text>
             </View>
             <ScrollView
               style={{
@@ -548,11 +548,12 @@ const ProfileScreen = (props) => {
                             age: "",
                             height: "",
                             gender: "",
+                            weight: "",
                           }}
                           onSubmit={(values, actions) => {
-                            const { age, height, gender } = values;
+                            const { age, height, gender, weight } = values;
 
-                            submitBaseInfo(age, height, gender);
+                            submitBaseInfo(age, height, gender, weight);
                             actions.setSubmitting(false);
                           }}
                           validationSchema={validationSchemaBase}
@@ -585,12 +586,12 @@ const ProfileScreen = (props) => {
                                   <Picker.Item
                                     label="Masculino"
                                     color="blue"
-                                    value="Masculino"
+                                    value="M"
                                   />
                                   <Picker.Item
                                     label="Femenino"
                                     color="red"
-                                    value="Femenino"
+                                    value="F"
                                   />
                                 </Picker>
                               </View>
@@ -610,6 +611,14 @@ const ProfileScreen = (props) => {
                                   keyboardType="numeric"
                                   maxLength={6}
                                   placeholder={height}
+                                />
+                                <StyledInput
+                                  label="Peso"
+                                  formikProps={formikProps}
+                                  formikKey="weight"
+                                  keyboardType="numeric"
+                                  maxLength={5}
+                                  // placeholder={}
                                 />
                               </View>
                               {formikProps.isSubmitting ? (
@@ -683,7 +692,6 @@ const ProfileScreen = (props) => {
                             kcal: "",
                             metabolical: "",
                             visceral: "",
-                            weight: "",
                           }}
                           onSubmit={(values, actions) => {
                             const {
@@ -693,7 +701,6 @@ const ProfileScreen = (props) => {
                               kcal,
                               metabolical,
                               visceral,
-                              weight,
                             } = values;
 
                             submitEvalInfo(
@@ -702,8 +709,7 @@ const ProfileScreen = (props) => {
                               muscle,
                               kcal,
                               metabolical,
-                              visceral,
-                              weight
+                              visceral
                             );
                             actions.setSubmitting(false);
                           }}
@@ -760,14 +766,6 @@ const ProfileScreen = (props) => {
                                   maxLength={2}
                                   // placeholder={}
                                 />
-                                <StyledInput
-                                  label="Peso"
-                                  formikProps={formikProps}
-                                  formikKey="weight"
-                                  keyboardType="numeric"
-                                  maxLength={5}
-                                  // placeholder={}
-                                />
                               </View>
                               {formikProps.isSubmitting ? (
                                 <ActivityIndicator />
@@ -787,26 +785,12 @@ const ProfileScreen = (props) => {
               </KeyboardAvoidingView>
             </Modal>
 
-            <UserContainer>
-              <DataTable>
-                <DataTable.Header>
-                  <DataTable.Title numeric>Edad</DataTable.Title>
-                  <DataTable.Title numeric>Altura</DataTable.Title>
-                  <DataTable.Title numeric>Género</DataTable.Title>
-                </DataTable.Header>
-                <DataTable.Row>
-                  <DataTable.Cell numeric>
-                    {loadedMemberDeets.Age}
-                  </DataTable.Cell>
-                  <DataTable.Cell numeric>
-                    {loadedMemberDeets.Height}
-                  </DataTable.Cell>
-                  <DataTable.Cell numeric>
-                    {loadedMemberDeets.Gender}
-                  </DataTable.Cell>
-                </DataTable.Row>
-              </DataTable>
-            </UserContainer>
+            <BaseInfoDT
+              age={age}
+              height={height}
+              gender={gender}
+              weight={weight}
+            />
 
             <TouchableOpacity
               style={styles.button}
@@ -819,154 +803,123 @@ const ProfileScreen = (props) => {
 
             <Subtitle>Progress Chart</Subtitle>
 
-            {/* <ProgressChart
-              data={{
-                labels: ["Swim", "Bike", "Run"],
-                data: [bmiGoal, 0.6, 0.8, 0.6, 0.6, 0.8],
-              }}
-              width={screenWidth}
-              height={285}
-              radius={12}
-              strokeWidth={13}
-              chartConfig={{
-                backgroundColor: "#e26a00",
-                backgroundGradientFrom: "#fb8c00",
-                backgroundGradientTo: "#ffc733",
-                decimalPlaces: 2, // optional, defaults to 2dp
-                color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-                style: {
-                  borderRadius: 16,
-                },
-              }}
-              style={{
-                alignSelf: "center",
-                borderRadius: 26,
-                marginLeft: 20,
-                marginRight: 10,
-              }}
-            /> */}
-            <View
-              style={{ justifyContent: "space-between", flexDirection: "row" }}
-            >
-              <ProgressChart
-                data={{
-                  // labels: ["IMC"],
-                  data: [0.7],
-                }}
-                width={150}
-                height={150}
-                radius={16}
-                strokeWidth={13}
-                chartConfig={{
-                  backgroundColor: "#e26a00",
-                  backgroundGradientFrom: "#fb8c00",
-                  backgroundGradientTo: "#ffc733",
-                  decimalPlaces: 2, // optional, defaults to 2dp
-                  color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-                  style: {
-                    borderRadius: 16,
-                  },
-                }}
-                style={{
-                  // alignSelf: "center",
-                  borderRadius: 16,
-                  marginLeft: 20,
-                  marginRight: 10,
-                }}
-              />
-              <ProgressChart
-                data={{
-                  // labels: ["IMC"],
-                  data: [0.7],
-                }}
-                width={150}
-                height={150}
-                radius={16}
-                strokeWidth={13}
-                chartConfig={{
-                  backgroundColor: "#e26a00",
-                  backgroundGradientFrom: "#fb8c00",
-                  backgroundGradientTo: "#ffc733",
-                  decimalPlaces: 2, // optional, defaults to 2dp
-                  color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-                  style: {
-                    borderRadius: 6,
-                  },
-                }}
-                style={{
-                  // alignSelf: "center",
-                  borderRadius: 10,
-                  marginLeft: 20,
-                  marginRight: 10,
-                }}
-              />
+            <View style={styles.wheelBlock}>
+              <View>
+                <View style={styles.wheel}>
+                  <ProgressWheel
+                    composition={"IMC"}
+                    current={parseInt(bmi)}
+                    Meta={18}
+                  />
+                </View>
+                <View
+                  style={{
+                    marginTop: 10,
+                  }}
+                >
+                  <View>
+                    <BaseEvalDT current={bmi} metaTitle={"Meta"} Meta={18} />
+                  </View>
+                </View>
+              </View>
+
+              <View>
+                <View style={styles.wheel}>
+                  <ProgressWheel
+                    composition={"Grasa"}
+                    current={parseInt(fat)}
+                    Meta={10}
+                  />
+                </View>
+                <View
+                  style={{
+                    marginTop: 10,
+                  }}
+                >
+                  <View>
+                    <BaseEvalDT current={fat} metaTitle={"Meta"} Meta={10} />
+                  </View>
+                </View>
+              </View>
             </View>
+            <View style={styles.wheelBlock}>
+              <View>
+                <View style={styles.wheel}>
+                  <ProgressWheel
+                    composition={"Músculo"}
+                    current={parseInt(muscle)}
+                    Meta={48}
+                  />
+                </View>
+                <View
+                  style={{
+                    marginTop: 10,
+                  }}
+                >
+                  <View>
+                    <BaseEvalDT current={muscle} metaTitle={"Meta"} Meta={48} />
+                  </View>
+                </View>
+              </View>
 
-            <Subtitle>{"Base Results".toUpperCase()}</Subtitle>
+              <View>
+                <View style={styles.wheel}>
+                  <ProgressWheel
+                    composition={"KCAL"}
+                    current={parseInt(kcal)}
+                    Meta={2000}
+                  />
+                </View>
+                <View
+                  style={{
+                    marginTop: 10,
+                  }}
+                >
+                  <View>
+                    <BaseEvalDT current={kcal} metaTitle={"Meta"} Meta={2000} />
+                  </View>
+                </View>
+              </View>
+            </View>
+            <View style={styles.wheelBlock}>
+              <View>
+                <View style={styles.wheel}>
+                  <ProgressWheel
+                    composition={"Metabolica"}
+                    current={parseInt(meta)}
+                    Meta={15}
+                  />
+                </View>
+                <View
+                  style={{
+                    marginTop: 10,
+                  }}
+                >
+                  <View>
+                    <BaseEvalDT current={meta} metaTitle={"Meta"} Meta={19} />
+                  </View>
+                </View>
+              </View>
 
-            <Content>
-              <DataContainer>
-                <DataTable>
-                  <DataTable.Header>
-                    <DataTable.Title>Composición</DataTable.Title>
-                    <DataTable.Title numeric>Cálculo Actual</DataTable.Title>
-                    <DataTable.Title numeric>Meta</DataTable.Title>
-                  </DataTable.Header>
-                  <DataTable.Row>
-                    <DataTable.Cell>IMC</DataTable.Cell>
-                    <DataTable.Cell numeric>
-                      {loadedMemberDeets.BaseEval.BMI}
-                    </DataTable.Cell>
-                    <DataTable.Cell numeric>{bmiGoal}</DataTable.Cell>
-                  </DataTable.Row>
-                  <DataTable.Row>
-                    <DataTable.Cell>Grasa</DataTable.Cell>
-                    <DataTable.Cell numeric>
-                      {loadedMemberDeets.BaseEval.Fat}
-                    </DataTable.Cell>
-                    <DataTable.Cell numeric>32</DataTable.Cell>
-                  </DataTable.Row>
-                  <DataTable.Row>
-                    <DataTable.Cell>Músculo</DataTable.Cell>
-                    <DataTable.Cell numeric>
-                      {loadedMemberDeets.BaseEval.Muscle}
-                    </DataTable.Cell>
-                    <DataTable.Cell numeric>6.0</DataTable.Cell>
-                  </DataTable.Row>
-
-                  <DataTable.Row>
-                    <DataTable.Cell>KCAL</DataTable.Cell>
-                    <DataTable.Cell numeric>
-                      {loadedMemberDeets.BaseEval.KCAL}
-                    </DataTable.Cell>
-                    <DataTable.Cell numeric>32</DataTable.Cell>
-                  </DataTable.Row>
-                  <DataTable.Row>
-                    <DataTable.Cell>Edad Metabolica</DataTable.Cell>
-                    <DataTable.Cell numeric>
-                      {loadedMemberDeets.BaseEval.Metabolical}
-                    </DataTable.Cell>
-                    <DataTable.Cell numeric>6.0</DataTable.Cell>
-                  </DataTable.Row>
-
-                  <DataTable.Row>
-                    <DataTable.Cell>Grasa Viceral</DataTable.Cell>
-                    <DataTable.Cell numeric>
-                      {loadedMemberDeets.BaseEval.ViFat}
-                    </DataTable.Cell>
-                    <DataTable.Cell numeric>32</DataTable.Cell>
-                  </DataTable.Row>
-                  <DataTable.Row>
-                    <DataTable.Cell>Peso</DataTable.Cell>
-                    <DataTable.Cell numeric>
-                      {loadedMemberDeets.BaseEval.Weight}
-                    </DataTable.Cell>
-                    {/* leave blank , no goal required for weight */}
-                    <DataTable.Cell numeric></DataTable.Cell>
-                  </DataTable.Row>
-                </DataTable>
-              </DataContainer>
-            </Content>
+              <View>
+                <View style={styles.wheel}>
+                  <ProgressWheel
+                    composition={"Viseral"}
+                    current={parseInt(vifat)}
+                    Meta={1}
+                  />
+                </View>
+                <View
+                  style={{
+                    marginTop: 10,
+                  }}
+                >
+                  <View>
+                    <BaseEvalDT current={vifat} metaTitle={"Meta"} Meta={3} />
+                  </View>
+                </View>
+              </View>
+            </View>
 
             <TouchableOpacity
               style={styles.button}
@@ -1126,6 +1079,22 @@ const styles = StyleSheet.create({
     marginTop: -80,
     height: 20,
     width: 200,
+  },
+  wheel: {
+    backgroundColor: "#dfdbdb",
+    borderRadius: 10,
+    paddingTop: 20,
+    paddingBottom: 20,
+    width: 150,
+  },
+  wheelBlock: {
+    justifyContent: "space-between",
+    flexDirection: "row",
+    marginLeft: 30,
+    marginRight: 30,
+    borderRadius: 10,
+    paddingTop: 20,
+    paddingBottom: 20,
   },
 });
 
