@@ -7,7 +7,7 @@ const ProgressWheel = (props) => {
   const B = props.Meta;
   const C = A - B;
   const D = 2 / C;
-  const E = (D * 100).toFixed(2);
+  const X = (D * 100).toFixed(2);
   let result;
   if (props.percent < 35) {
     result = "#ff0000";
@@ -24,7 +24,7 @@ const ProgressWheel = (props) => {
       style={{
         justifyContent: "center",
         alignItems: "center",
-        backgroundColor: "#dfdbdb",
+        backgroundColor: "#ffc733",
         padding: 10,
         borderRadius: 10,
       }}
@@ -38,10 +38,10 @@ const ProgressWheel = (props) => {
         color={result}
         animateFromValue={0}
         duration={5000}
-        progress={E}
+        progress={Math.abs(X)}
         fullColor={Platform.OS === "ios" ? "#00ff00" : null}
       />
-      <Text style={{ fontSize: 18 }}>{Math.abs(E)}%</Text>
+      <Text style={{ fontSize: 18 }}>{Math.abs(X)}%</Text>
     </View>
   );
 };

@@ -42,87 +42,6 @@ export const fetchMemberDetails = () => {
   };
 };
 
-// export const fetchMemberDetails = () => {
-//   return async (dispatch, getState) => {
-//     const userId = getState().auth.userId;
-//     console.log("get state worked and userid is:", userId);
-//     try {
-//       let loadedDetails;
-
-//       await db
-//         .doc(userId)
-//         .get()
-//         .then(function (doc) {
-//           if (doc.exists) {
-//             console.log("doc data is: ", doc.data().FirstName);
-//             loadedDetails = doc.data();
-//             console.log("loadedDetails are:", loadedDetails);
-//             saveDataToStorage(loadedDetails);
-//           } else {
-//             // doc.data() will be undefined in this case
-//             console.log("No such document!");
-//           }
-//         })
-//         .catch(function (error) {
-//           console.log("Error getting document:", error);
-//         });
-
-//       console.log("second check for detatils being loaded...:", loadedDetails);
-
-//       AsyncStorage.getItem("resData").then((value) => {
-//         const data = JSON.parse(value);
-//         console.log("resData should be and is from action ", data);
-//         dispatch({ type: SET_MEMBER, details: data });
-//       });
-//     } catch (err) {
-//       throw err;
-//     }
-//   };
-// };
-// try {
-//   const response = await fetch(
-//     `https://No-Excusas.firebaseio.com/memberDetails/${userId}.json`
-//   );
-
-//   if (!response.ok) {
-//     throw new Error("Something went wrong!");
-//   }
-
-//   const resData = await response.json();
-//   const loadedMemberDetails = [];
-
-//   for (const key in resData) {
-//     loadedMemberDetails.push(
-//       new MemberDetails(
-//         key,
-//         resData[key].fName,
-//         resData[key].lName,
-//         resData[key].age,
-//         resData[key].weight,
-//         resData[key].height,
-//         resData[key].medHistory,
-//         resData[key].occupation,
-//         resData[key].bmi,
-//         resData[key].fat,
-//         resData[key].muscle,
-//         resData[key].kcal,
-//         resData[key].meta,
-//         resData[key].vis,
-//         resData[key].startDate,
-//         resData[key].endDate,
-//         resData[key].daysLeft,
-//         resData[key].basePic,
-//         resData[key].newPic
-//       )
-//     );
-//   }
-//   dispatch({ type: SET_MEMBER, memberDetails: loadedMemberDetails });
-// } catch (err) {
-//   throw err;
-// }
-//   };
-// };
-
 export const baseDetails = (name, last) => {
   return async () => {
     firebase.auth().onAuthStateChanged(function (user) {
@@ -157,7 +76,8 @@ export const baseDetails = (name, last) => {
     });
   };
 };
-export const baseInfo = (age, height, gender, weight) => {
+
+export const baseInfo = (age) => {
   return async () => {
     firebase.auth().onAuthStateChanged(function (user) {
       if (user) {
@@ -167,9 +87,7 @@ export const baseInfo = (age, height, gender, weight) => {
             .set(
               {
                 Age: age,
-                Height: height,
-                Gender: gender,
-                Weight: weight,
+
                 basetimestamp: firebase.firestore.FieldValue.serverTimestamp(),
               },
               { merge: true }
@@ -184,7 +102,7 @@ export const baseInfo = (age, height, gender, weight) => {
     });
   };
 };
-export const evalInfo = (bmi, fat, muscle, kcal, metabolical, visceral) => {
+export const evalInfo = (bmi) => {
   return async () => {
     firebase.auth().onAuthStateChanged(function (user) {
       if (user) {
@@ -194,11 +112,11 @@ export const evalInfo = (bmi, fat, muscle, kcal, metabolical, visceral) => {
             .set(
               {
                 BMI: bmi,
-                Fat: fat,
-                Muscle: muscle,
-                KCAL: kcal,
-                Metabolical: metabolical,
-                ViFat: visceral,
+                // Fat: fat,
+                // Muscle: muscle,
+                // KCAL: kcal,
+                // Metabolical: metabolical,
+                // ViFat: visceral,
 
                 Evaltimestamp: firebase.firestore.FieldValue.serverTimestamp(),
               },

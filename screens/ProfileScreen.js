@@ -42,9 +42,12 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import BaseInfoDT from "../components/BaseInfoDataTable";
 import BaseEvalDT from "../components/BaseEvalDataTable";
+import DropDownPicker from "react-native-dropdown-picker";
+
 // import ProgressCircle from "../components/UI/ProgressCircle";
 // import PercentageCircle from "react-native-percentage-circle";
 import ProgressWheel from "../components/UI/ProgressWheel";
+import DataModal from "../components/DataModal";
 
 let screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
@@ -72,6 +75,7 @@ const ProfileScreen = (props) => {
 
   const [modalVisible, setModalVisible] = useState(false);
   const [baseInfoModal, setBaseInfoModal] = useState(false);
+  const [imcModal, setImcModal] = useState(false);
   const [evalInfoModal, setEvalInfoModal] = useState(false);
   // const [gender, setGender] = useState();
   // const [firstName, setFirstName] = useState();
@@ -193,28 +197,24 @@ const ProfileScreen = (props) => {
     loadDetails();
     setModalVisible(!modalVisible);
   });
-  const submitBaseInfo = useCallback(async (age, height, gender, weight) => {
+  const submitBaseInfo = useCallback(async (age) => {
     try {
-      dispatch(detailsActions.baseInfo(age, height, gender, weight));
+      dispatch(detailsActions.baseInfo(age));
     } catch (err) {
       setError(err.message);
     }
     loadDetails();
     setBaseInfoModal(!baseInfoModal);
   });
-  const submitEvalInfo = useCallback(
-    async (bmi, fat, muscle, kcal, metabolical, visceral) => {
-      try {
-        dispatch(
-          detailsActions.evalInfo(bmi, fat, muscle, kcal, metabolical, visceral)
-        );
-      } catch (err) {
-        setError(err.message);
-      }
-      loadDetails();
-      setEvalInfoModal(!evalInfoModal);
+  const submitEvalInfo = useCallback(async (bmi) => {
+    try {
+      dispatch(detailsActions.evalInfo(bmi));
+    } catch (err) {
+      setError(err.message);
     }
-  );
+    loadDetails();
+    setImcModal(!imcModal);
+  });
 
   const tapBackground = () => {
     setShowAlert(true);
@@ -479,7 +479,7 @@ const ProfileScreen = (props) => {
               </ItemContainer>
             </ScrollView>
             <View style={styles.edit}>
-              <Subtitle>{"User Info".toUpperCase()}</Subtitle>
+              <Subtitle>{"datos basicos".toUpperCase()}</Subtitle>
               <TouchableOpacity
                 onPress={() => {
                   setModalVisible(true);
@@ -489,7 +489,67 @@ const ProfileScreen = (props) => {
               </TouchableOpacity>
             </View>
 
-            <Modal
+            <DataModal
+              visible={baseInfoModal}
+              backPress={tapBackground}
+              swipeComplete={() => setBaseInfoModal(!baseInfoModal)}
+              show={showAlert}
+              alertTitle={"Salir sin guardar?"}
+              alertCancel={"No, continuar"}
+              alertConfirm={"Si, sin guardar"}
+              cancelPressed={() => {
+                setShowAlert(false);
+              }}
+              confirmedPressed={() => {
+                setBaseInfoModal(!baseInfoModal);
+                setShowAlert(false);
+              }}
+              initialValues={{ age: "" }}
+              submit={(values, actions) => {
+                const { age } = values;
+
+                submitBaseInfo(age);
+                actions.setSubmitting(false);
+              }}
+              schema={validationSchemaBase}
+              genderSelect={false}
+              formikLabel={"Edad"}
+              FormikKey={"age"}
+              formikKeyboard={"numeric"}
+              formikMaxLength={2}
+            />
+
+            <DataModal
+              visible={imcModal}
+              backPress={tapBackground}
+              swipeComplete={() => setImcModal(!imcModal)}
+              show={showAlert}
+              alertTitle={"Salir sin guardar?"}
+              alertCancel={"No, continuar"}
+              alertConfirm={"Si, sin guardar"}
+              cancelPressed={() => {
+                setShowAlert(false);
+              }}
+              confirmedPressed={() => {
+                setImcModal(!imcModal);
+                setShowAlert(false);
+              }}
+              initialValues={{ bmi: "" }}
+              submit={(values, actions) => {
+                const { bmi } = values;
+
+                submitEvalInfo(bmi);
+                actions.setSubmitting(false);
+              }}
+              schema={validationSchemaEval}
+              genderSelect={false}
+              formikLabel={"IMC"}
+              FormikKey={"bmi"}
+              formikKeyboard={"numeric"}
+              formikMaxLength={2}
+            />
+
+            {/* <Modal
               isVisible={baseInfoModal}
               animationIn="slideInLeft"
               customBackdrop={
@@ -565,6 +625,17 @@ const ProfileScreen = (props) => {
                                   Platform.OS === "android" ? "" : styles.picker
                                 }
                               >
+                                <DropDownPicker
+                                  items={[
+                                    { label: "Item 1", value: "item1" },
+                                    { label: "Item 2", value: "item2" },
+                                  ]}
+                                  defaultIndex={0}
+                                  containerStyle={{ height: 40 }}
+                                  onChangeItem={(item) =>
+                                    console.log(item.label, item.value)
+                                  }
+                                />
                                 <Picker
                                   selectedValue={formikProps.values.gender}
                                   mode="dropdown"
@@ -637,9 +708,9 @@ const ProfileScreen = (props) => {
                   </View>
                 </View>
               </KeyboardAvoidingView>
-            </Modal>
+            </Modal> */}
 
-            <Modal
+            {/* <Modal
               isVisible={evalInfoModal}
               animationIn="slideInLeft"
               customBackdrop={
@@ -783,7 +854,7 @@ const ProfileScreen = (props) => {
                   </View>
                 </View>
               </KeyboardAvoidingView>
-            </Modal>
+            </Modal> */}
 
             <BaseInfoDT
               age={age}
@@ -801,26 +872,38 @@ const ProfileScreen = (props) => {
               <Text style={styles.buttonText}>Editar Datos</Text>
             </TouchableOpacity>
 
-            <Subtitle>Progress Chart</Subtitle>
+            <Subtitle>Progreso</Subtitle>
 
             <View style={styles.wheelBlock}>
               <View>
-                <View style={styles.wheel}>
-                  <ProgressWheel
-                    composition={"IMC"}
-                    current={parseInt(bmi)}
-                    Meta={18}
-                  />
-                </View>
-                <View
-                  style={{
-                    marginTop: 10,
+                <TouchableOpacity
+                  onPress={() => {
+                    setImcModal(true);
                   }}
                 >
-                  <View>
-                    <BaseEvalDT current={bmi} metaTitle={"Meta"} Meta={18} />
+                  <View style={styles.wheel}>
+                    <ProgressWheel
+                      composition={"IMC"}
+                      current={parseInt(bmi)}
+                      Meta={18}
+                    />
                   </View>
-                </View>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => {
+                    setImcModal(true);
+                  }}
+                >
+                  <View
+                    style={{
+                      marginTop: 10,
+                    }}
+                  >
+                    <View>
+                      <BaseEvalDT current={bmi} metaTitle={"Meta"} Meta={18} />
+                    </View>
+                  </View>
+                </TouchableOpacity>
               </View>
 
               <View>
@@ -1081,7 +1164,7 @@ const styles = StyleSheet.create({
     width: 200,
   },
   wheel: {
-    backgroundColor: "#dfdbdb",
+    backgroundColor: "#ffc733",
     borderRadius: 10,
     paddingTop: 20,
     paddingBottom: 20,

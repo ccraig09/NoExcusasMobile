@@ -26,7 +26,7 @@ const BaseEvalDT = (props) => {
 export default BaseEvalDT;
 
 const DataContainer = styled.View`
-  background: #dfdbdb;
+  background: #ffc733;
   height: 80px;
   width: 150px;
   border-radius: 10px;
