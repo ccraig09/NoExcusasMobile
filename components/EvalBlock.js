@@ -1,48 +1,56 @@
 import React from "react";
-import { ScrollView, TouchableOpacity } from "react-native";
+import {
+  ScrollView,
+  TouchableOpacity,
+  View,
+  // Text,
+  StyleSheet,
+  Platform,
+} from "react-native";
 import styled from "styled-components";
-
-const { navigate } = this.props.navigation;
 
 export const EvalBlock = () => {
   return (
-    <ScrollView
-      style={{
-        flexDirection: "row",
-        padding: 20,
-        paddingLeft: 12,
-        paddingTop: 30,
-        marginTop: 40,
-      }}
-      horizontal={true}
-      showsHorizontalScrollIndicator={false}
-    >
-      {/* {evals.map((evalinfo, index) => ( */}
-      {/* key={index} text={evalinfo.text}  */}
-      <ItemContainer>
-        <TouchableOpacity onPress={() => navigate("Eval1")}>
-          <Item>
-            <Text>Eval 1</Text>
-          </Item>
-        </TouchableOpacity>
+    <Item>
+      <Text>{props.title}</Text>
+    </Item>
+    // <ScrollView
+    //   style={{
+    //     flexDirection: "row",
+    //     padding: 20,
+    //     paddingLeft: 12,
+    //     paddingTop: 30,
+    //     marginTop: 40,
+    //   }}
+    //   horizontal={true}
+    //   showsHorizontalScrollIndicator={false}
+    // >
+    //   {/* {evals.map((evalinfo, index) => ( */}
+    //   {/* key={index} text={evalinfo.text}  */}
+    //   <ItemContainer>
+    //     <TouchableOpacity onPress={() => navigate("Eval1")}>
+    //       <Item>
+    //         <Text>Eval 1</Text>
+    //       </Item>
+    //     </TouchableOpacity>
 
-        <Item>
-          <Text>Eval 2</Text>
-        </Item>
-        <Item>
-          <Text>Eval 3</Text>
-        </Item>
-        <Item>
-          <Text>Eval 4</Text>
-        </Item>
-        <Item>
-          <Text>Eval 5</Text>
-        </Item>
-        <Item>
-          <Text>Eval 6</Text>
-        </Item>
-      </ItemContainer>
-    </ScrollView>
+    //     <Item>
+    //       <Text>Eval 2</Text>
+    //     </Item>
+    //     <Item>
+    //       <Text>Eval 3</Text>
+    //     </Item>
+    //     <Item>
+    //       <Text>Eval 4</Text>
+    //     </Item>
+    //     <Item>
+    //       <Text>Eval 5</Text>
+    //     </Item>
+    //     <Item>
+    //       <Text>Eval 6</Text>
+    //     </Item>
+    //   </ItemContainer>
+    // </ScrollView>
   );
 };
 

@@ -16,38 +16,33 @@ import {
   Button,
   Picker,
   Alert,
+  FlatList,
   RefreshControl,
 } from "react-native";
 import Modal from "react-native-modal";
 import AwesomeAlert from "react-native-awesome-alerts";
 import { Formik } from "formik";
 import * as yup from "yup";
-// import { Picker } from "@react-native-community/picker";
+import { Ionicons } from "@expo/vector-icons";
+
 import styled, { useTheme } from "styled-components";
 import { useSelector, useDispatch } from "react-redux";
-import Input from "../components/UI/Input";
 import { Avatar } from "react-native-elements";
 import HeaderButton from "../components/UI/HeaderButton";
+import AnimatedSpring from "../components/UI/ProgressWheel";
+import EvalBlock from "../components/EvalBlock";
 
-import { Ionicons } from "@expo/vector-icons";
-import { connect } from "react-redux";
 import { AsyncStorage } from "react-native";
-// import AvatarProfile from "../components/AvatarProfile";
-import { ProgressChart } from "react-native-chart-kit";
-// import { DataTable } from "react-native-paper";
 import Colors from "../constants/Colors";
 import * as detailsActions from "../store/actions/membersDetails";
+import * as addEvalAction from "../store/actions/evals";
 import firebase from "../components/firebase";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import BaseInfoDT from "../components/BaseInfoDataTable";
 import BaseEvalDT from "../components/BaseEvalDataTable";
-import DropDownPicker from "react-native-dropdown-picker";
-
-// import ProgressCircle from "../components/UI/ProgressCircle";
-// import PercentageCircle from "react-native-percentage-circle";
 import ProgressWheel from "../components/UI/ProgressWheel";
 import DataModal from "../components/DataModal";
+import BasicInfoScroll from "../components/BasicInfoScrollview";
 
 let screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
@@ -68,27 +63,25 @@ export const db = firebase.firestore().collection("Members");
 
 const ProfileScreen = (props) => {
   const loadedMemberDeets = useSelector((state) => state.memberdeets.details);
+  const userEvals = useSelector((state) => state.evals.userEvals);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
 
   const [modalVisible, setModalVisible] = useState(false);
-  const [baseInfoModal, setBaseInfoModal] = useState(false);
+  const [ageModal, setAgeModal] = useState(false);
+  const [heightModal, setHeightModal] = useState(false);
+  const [weightModal, setWeightModal] = useState(false);
+  const [genderModal, setGenderModal] = useState(false);
   const [imcModal, setImcModal] = useState(false);
-  const [evalInfoModal, setEvalInfoModal] = useState(false);
-  // const [gender, setGender] = useState();
-  // const [firstName, setFirstName] = useState();
-  // const [lastName, setLastName] = useState();
-  // const [age, setAge] = useState();
-  // const [height, setHeight] = useState();
-  // const [weight, setWeight] = useState();
-  // const [bmi, setBmi] = useState();
-  // const [fat, setFat] = useState();
-  // const [muscle, setMuscle] = useState();
-  // const [kcal, setKcal] = useState();
-  // const [meta, setMeta] = useState();
-  // const [vifat, setVifat] = useState();
+  const [vifatModal, setVifatModal] = useState(false);
+  const [kcalModal, setKcalModal] = useState(false);
+  const [muscleModal, setMuscleModal] = useState(false);
+  const [fatModal, setFatModal] = useState(false);
+  const [metaModal, setMetaModal] = useState(false);
+  const [evalModal, setEvalModal] = useState(false);
+
   const [userPhoto, setUserPhoto] = useState();
   const dispatch = useDispatch();
   const firstName = loadedMemberDeets.FirstName;
@@ -103,36 +96,6 @@ const ProfileScreen = (props) => {
   const vifat = loadedMemberDeets.ViFat;
   const gender = loadedMemberDeets.Gender;
   const weight = loadedMemberDeets.Weight;
-  // setFirstName(loadedMemberDeets.FirstName);
-  // const submitDetails = (name, last, age) => {
-  //   console.log("final name to past!!!!", name);
-  //   firebase.auth().onAuthStateChanged(function (user) {
-  //     if (user) {
-  //       var userId = user.uid.toString();
-  //       try {
-  //         db.doc(userId)
-  //           .update({
-  //             FirstName: name,
-  //             LastName: last,
-  //             Age: age,
-  //             // Height: height,
-  //             // Weight: weight,
-  //             // BMI: bmi,
-  //             // Fat: fat,
-  //             // Muscle: muscle,
-  //             // KCAL: kcal,
-  //             // Metabolical: meta,
-  //             // ViFat: vifat,
-  //           })
-  //           .catch(function (error) {
-  //             console.log("Error getting document:", error);
-  //           });
-  //       } catch (err) {
-  //         setError(err.message);
-  //       }
-  //     }
-  //   });
-  // };
 
   const loadDetails = useCallback(() => {
     setError(null);
@@ -145,23 +108,6 @@ const ProfileScreen = (props) => {
         const data = JSON.parse(value);
         setUserPhoto(data.avatar);
       });
-
-      // setFirstName(loadedMemberDeets.FirstName);
-      // setLastName(loadedMemberDeets.LastName);
-      // setHeight(loadedMemberDeets.Height);
-      // setGender(loadedMemberDeets.Gender);
-
-      // AsyncStorage.getItem("resData").then((value) => {
-      //   const data = JSON.parse(value);
-      //   console.log("resData should be and is ", data);
-
-      //   console.log("loaded member deets after first load", data);
-      //   setAge(data.loadedDetails.Age);
-      //   setFirstName(data.loadedDetails.FirstName);
-      //   setLastName(data.loadedDetails.LastName);
-      //   setHeight(data.loadedDetails.Height);
-      //   setGender(data.loadedDetails.Gender);
-      // });
     } catch (err) {
       setError(err.message);
     }
@@ -197,113 +143,157 @@ const ProfileScreen = (props) => {
     loadDetails();
     setModalVisible(!modalVisible);
   });
-  const submitBaseInfo = useCallback(async (age) => {
+  const submitAgeInfo = useCallback(async (age) => {
     try {
-      dispatch(detailsActions.baseInfo(age));
+      dispatch(detailsActions.ageInfo(age));
     } catch (err) {
       setError(err.message);
     }
     loadDetails();
-    setBaseInfoModal(!baseInfoModal);
+    setAgeModal(!ageModal);
   });
-  const submitEvalInfo = useCallback(async (bmi) => {
+  const submitHeightInfo = useCallback(async (height) => {
     try {
-      dispatch(detailsActions.evalInfo(bmi));
+      dispatch(detailsActions.heightInfo(height));
+    } catch (err) {
+      setError(err.message);
+    }
+    loadDetails();
+    setHeightModal(!height);
+  });
+  const submitWeightInfo = useCallback(async (weight) => {
+    try {
+      dispatch(detailsActions.weightInfo(weight));
+    } catch (err) {
+      setError(err.message);
+    }
+    loadDetails();
+    setWeightModal(!weightModal);
+  });
+  const submitGenderInfo = useCallback(async (gender) => {
+    try {
+      dispatch(detailsActions.genderInfo(gender));
+    } catch (err) {
+      setError(err.message);
+    }
+    loadDetails();
+    setGenderModal(!genderModal);
+  });
+  const submitMetaInfo = useCallback(async (meta) => {
+    try {
+      dispatch(detailsActions.metaInfo(meta));
+    } catch (err) {
+      setError(err.message);
+    }
+    loadDetails();
+    setMetaModal(!metaModal);
+  });
+  const submitBmiInfo = useCallback(async (bmi) => {
+    try {
+      dispatch(detailsActions.bmiInfo(bmi));
     } catch (err) {
       setError(err.message);
     }
     loadDetails();
     setImcModal(!imcModal);
   });
+  const submitVifat = useCallback(async (vifat) => {
+    try {
+      dispatch(detailsActions.vifatInfo(vifat));
+    } catch (err) {
+      setError(err.message);
+    }
+    loadDetails();
+    setVifatModal(!vifatModal);
+  });
+  const submitKcalInfo = useCallback(async (kcal) => {
+    try {
+      dispatch(detailsActions.kcalInfo(kcal));
+    } catch (err) {
+      setError(err.message);
+    }
+    loadDetails();
+    setKcalModal(!kcalModal);
+  });
+  const submitMuscleInfo = useCallback(async (muscle) => {
+    try {
+      dispatch(detailsActions.muscleInfo(muscle));
+    } catch (err) {
+      setError(err.message);
+    }
+    loadDetails();
+    setMuscleModal(!muscleModal);
+  });
+  const submitFatInfo = useCallback(async (fat) => {
+    try {
+      dispatch(detailsActions.fatInfo(fat));
+    } catch (err) {
+      setError(err.message);
+    }
+    loadDetails();
+    setFatModal(!fatModal);
+  });
+
+  const addEvalSquareHandler = useCallback(async (title) => {
+    console.log("submitting evals ");
+    try {
+      dispatch(addEvalAction.createEval(title));
+    } catch (err) {
+      setError(err.message);
+    }
+    loadDetails();
+    setEvalModal(!evalModal);
+  });
 
   const tapBackground = () => {
     setShowAlert(true);
   };
 
-  const FieldWrapper = ({ children, label, formikProps, formikKey }) => (
-    <View style={{ marginHorizontal: 20, marginVertical: 5 }}>
-      <Text style={{ marginBottom: 3 }}>{label}</Text>
-      {children}
-      <Text style={{ color: "red" }}>
-        {formikProps.touched[formikKey] && formikProps.errors[formikKey]}
-      </Text>
-    </View>
-  );
-
-  const StyledInput = ({ label, formikProps, formikKey, ...rest }) => {
-    const inputStyles = {
-      borderWidth: 1,
-      borderColor: "black",
-      padding: 10,
-      marginBottom: 3,
-      borderRadius: 10,
-      color: "black",
-    };
-
-    if (formikProps.touched[formikKey] && formikProps.errors[formikKey]) {
-      inputStyles.borderColor = "red";
-    }
-
-    return (
-      <FieldWrapper
-        label={label}
-        formikKey={formikKey}
-        formikProps={formikProps}
-      >
-        <TextInput
-          style={inputStyles}
-          returnKeyType="next"
-          onChangeText={formikProps.handleChange(formikKey)}
-          onBlur={formikProps.handleBlur(formikKey)}
-          {...rest}
-        />
-      </FieldWrapper>
-    );
-  };
-
   const validationSchema = yup.object().shape({
     name: yup.string().label("name").required(),
     last: yup.string().label("last").required(),
+    title: yup.string().label("title").required(),
   });
   const validationSchemaBase = yup.object().shape({
+    title: yup.string().label("title").required(),
     age: yup
       .number()
       .typeError("Debe ser un número")
-      .max(99, "Dos digitos por edad por favor"),
+      .max(99, "Digitos validos por favor"),
     height: yup
       .number()
       .typeError("Debe ser un número")
-      .max(123456, "Digitos validos por altura por favor"),
+      .max(123456, "Digitos validos por favor"),
+    weight: yup
+      .number()
+      .typeError("Debe ser un número")
+      .max(999999, "Digitos validos por favor"),
   });
   const validationSchemaEval = yup.object().shape({
     bmi: yup
       .number()
       .typeError("Debe ser un número")
-      .max(99, "Dos digitos por edad por favor"),
+      .max(99, "Digitos validos por favor"),
     fat: yup
       .number()
       .typeError("Debe ser un número")
-      .max(99, "Dos digitos por edad por favor"),
+      .max(99, "Digitos validos por favor"),
     muscle: yup
       .number()
       .typeError("Debe ser un número")
-      .max(99, "Dos digitos por edad por favor"),
+      .max(99, "Digitos validos por favor"),
     kcal: yup
       .number()
       .typeError("Debe ser un número")
-      .max(9999, "Dos digitos por edad por favor"),
+      .max(9999, "Digitos validos por favor"),
     metabolical: yup
       .number()
       .typeError("Debe ser un número")
-      .max(99, "Dos digitos por edad por favor"),
+      .max(99, "Digitos validos por favor"),
     visceral: yup
       .number()
       .typeError("Debe ser un número")
-      .max(99, "Dos digitos por edad por favor"),
-    weight: yup
-      .number()
-      .typeError("Debe ser un número")
-      .max(999999, "Dos digitos por edad por favor"),
+      .max(99, "Digitos validos por favor"),
   });
 
   if (isLoading) {
@@ -438,21 +428,46 @@ const ProfileScreen = (props) => {
               <Text style={styles.hello}>{greetingMessage}, </Text>
               <Text style={styles.hello}>{firstName} </Text>
             </View>
-            <ScrollView
+
+            <View style={styles.edit}>
+              <Subtitle>{"evaluación".toUpperCase()}</Subtitle>
+              <TouchableOpacity
+                onPress={() => {
+                  setEvalModal(true);
+                }}
+                style={{ marginRight: 20 }}
+              >
+                <Ionicons
+                  name={Platform.OS === "android" ? "md-add" : "ios-add"}
+                  size={35}
+                  color={Colors.noExprimary}
+                />
+              </TouchableOpacity>
+            </View>
+
+            {/* <FlatList
+              data={userEvals}
+              keyExtractor={(item) => item.id}
+              renderItem={(itemData) => (
+                <EvalBlock title={itemData.item.title} />
+              )}
+            /> */}
+
+            {/* <ScrollView
               style={{
                 flexDirection: "row",
                 padding: 20,
                 paddingLeft: 12,
                 paddingTop: 30,
-                marginTop: 40,
+                marginTop: 10,
               }}
               horizontal={true}
               showsHorizontalScrollIndicator={false}
             >
               {/* {evals.map((evalinfo, index) => ( */}
-              {/* key={index} text={evalinfo.text}  */}
+            {/* key={index} text={evalinfo.text}  */}
 
-              <ItemContainer>
+            {/* <ItemContainer>
                 <TouchableOpacity
                   onPress={() => props.navigation.navigate("Eval1")}
                 >
@@ -477,7 +492,7 @@ const ProfileScreen = (props) => {
                   <Text>Eval 6</Text>
                 </Item>
               </ItemContainer>
-            </ScrollView>
+            </ScrollView> */}
             <View style={styles.edit}>
               <Subtitle>{"datos basicos".toUpperCase()}</Subtitle>
               <TouchableOpacity
@@ -490,9 +505,9 @@ const ProfileScreen = (props) => {
             </View>
 
             <DataModal
-              visible={baseInfoModal}
+              visible={evalModal}
               backPress={tapBackground}
-              swipeComplete={() => setBaseInfoModal(!baseInfoModal)}
+              swipeComplete={() => setEvalModal(!evalModal)}
               show={showAlert}
               alertTitle={"Salir sin guardar?"}
               alertCancel={"No, continuar"}
@@ -501,20 +516,20 @@ const ProfileScreen = (props) => {
                 setShowAlert(false);
               }}
               confirmedPressed={() => {
-                setBaseInfoModal(!baseInfoModal);
+                setEvalModal(!evalModal);
                 setShowAlert(false);
               }}
-              initialValues={{ age: "" }}
+              initialValues={{ title: "" }}
               submit={(values, actions) => {
-                const { age } = values;
+                const { title } = values;
 
-                submitBaseInfo(age);
+                addEvalSquareHandler(title);
                 actions.setSubmitting(false);
               }}
               schema={validationSchemaBase}
               genderSelect={false}
-              formikLabel={"Edad"}
-              FormikKey={"age"}
+              formikLabel={"TITLE"}
+              FormikKey={"title"}
               formikKeyboard={"numeric"}
               formikMaxLength={2}
             />
@@ -538,7 +553,7 @@ const ProfileScreen = (props) => {
               submit={(values, actions) => {
                 const { bmi } = values;
 
-                submitEvalInfo(bmi);
+                submitBmiInfo(bmi);
                 actions.setSubmitting(false);
               }}
               schema={validationSchemaEval}
@@ -546,331 +561,289 @@ const ProfileScreen = (props) => {
               formikLabel={"IMC"}
               FormikKey={"bmi"}
               formikKeyboard={"numeric"}
+              formikMaxLength={4}
+            />
+            <DataModal
+              visible={metaModal}
+              backPress={tapBackground}
+              swipeComplete={() => setMetaModal(!metaModal)}
+              show={showAlert}
+              alertTitle={"Salir sin guardar?"}
+              alertCancel={"No, continuar"}
+              alertConfirm={"Si, sin guardar"}
+              cancelPressed={() => {
+                setShowAlert(false);
+              }}
+              confirmedPressed={() => {
+                setMetaModal(!metaModal);
+                setShowAlert(false);
+              }}
+              initialValues={{ meta: "" }}
+              submit={(values, actions) => {
+                const { meta } = values;
+
+                submitMetaInfo(meta);
+                actions.setSubmitting(false);
+              }}
+              schema={validationSchemaEval}
+              genderSelect={false}
+              formikLabel={"EDAD METABOLICA"}
+              FormikKey={"meta"}
+              formikKeyboard={"numeric"}
               formikMaxLength={2}
             />
+            <DataModal
+              visible={vifatModal}
+              backPress={tapBackground}
+              swipeComplete={() => setVifatModal(!vifatModal)}
+              show={showAlert}
+              alertTitle={"Salir sin guardar?"}
+              alertCancel={"No, continuar"}
+              alertConfirm={"Si, sin guardar"}
+              cancelPressed={() => {
+                setShowAlert(false);
+              }}
+              confirmedPressed={() => {
+                setVifatModal(!vifatModal);
+                setShowAlert(false);
+              }}
+              initialValues={{ vifat: "" }}
+              submit={(values, actions) => {
+                const { vifat } = values;
 
-            {/* <Modal
-              isVisible={baseInfoModal}
-              animationIn="slideInLeft"
-              customBackdrop={
-                <TouchableWithoutFeedback onPress={tapBackground}>
-                  <View style={{ flex: 1, backgroundColor: "black" }}></View>
-                </TouchableWithoutFeedback>
-              }
-              avoidKeyboard
-              onBackButtonPress={tapBackground}
-              onSwipeComplete={() => setBaseInfoModal(!baseInfoModal)}
-              swipeDirection={["left", "right"]}
-              propagateSwipe
-            >
-              <KeyboardAvoidingView
-                behavior={Platform.OS === "android" ? "padding" : "position"}
-                keyboardVerticalOffset={-80}
-                // style={styles.screen}
-              >
-                <View style={styles.centeredView}>
-                  <AwesomeAlert
-                    show={showAlert}
-                    showProgress={false}
-                    title="Salir sin guardar?"
-                    message=""
-                    closeOnTouchOutside={true}
-                    closeOnHardwareBackPress={false}
-                    showCancelButton={true}
-                    showConfirmButton={true}
-                    cancelText="No, continuar"
-                    confirmText="Si, sin guardar"
-                    confirmButtonColor="#DD6B55"
-                    onCancelPressed={() => {
-                      setShowAlert(false);
-                    }}
-                    onConfirmPressed={() => {
-                      setBaseInfoModal(!baseInfoModal);
-                      setShowAlert(false);
-                    }}
-                  />
-                  <View style={styles.modalView}>
-                    <ScrollView>
-                      <View style={styles.form}>
-                        <Text style={styles.modalText}>edit info!</Text>
-                        <View
-                          style={{
-                            margin: 25,
-                            justifyContent: "center",
-                            alignItems: "center",
-                          }}
-                        >
-                          <Text>Elige un género</Text>
-                        </View>
+                submitVifat(vifat);
+                actions.setSubmitting(false);
+              }}
+              schema={validationSchemaEval}
+              genderSelect={false}
+              formikLabel={"Grasa Viseral"}
+              FormikKey={"vifat"}
+              formikKeyboard={"numeric"}
+              formikMaxLength={2}
+            />
+            <DataModal
+              visible={kcalModal}
+              backPress={tapBackground}
+              swipeComplete={() => setKcalModal(!kcalModal)}
+              show={showAlert}
+              alertTitle={"Salir sin guardar?"}
+              alertCancel={"No, continuar"}
+              alertConfirm={"Si, sin guardar"}
+              cancelPressed={() => {
+                setShowAlert(false);
+              }}
+              confirmedPressed={() => {
+                setKcalModal(!kcalModal);
+                setShowAlert(false);
+              }}
+              initialValues={{ kcal: "" }}
+              submit={(values, actions) => {
+                const { kcal } = values;
 
-                        <Formik
-                          initialValues={{
-                            age: "",
-                            height: "",
-                            gender: "",
-                            weight: "",
-                          }}
-                          onSubmit={(values, actions) => {
-                            const { age, height, gender, weight } = values;
+                submitKcalInfo(kcal);
+                actions.setSubmitting(false);
+              }}
+              schema={validationSchemaEval}
+              genderSelect={false}
+              formikLabel={"KCAL"}
+              FormikKey={"kcal"}
+              formikKeyboard={"numeric"}
+              formikMaxLength={4}
+            />
+            <DataModal
+              visible={muscleModal}
+              backPress={tapBackground}
+              swipeComplete={() => setMuscleModal(!muscleModal)}
+              show={showAlert}
+              alertTitle={"Salir sin guardar?"}
+              alertCancel={"No, continuar"}
+              alertConfirm={"Si, sin guardar"}
+              cancelPressed={() => {
+                setShowAlert(false);
+              }}
+              confirmedPressed={() => {
+                setMuscleModal(!muscleModal);
+                setShowAlert(false);
+              }}
+              initialValues={{ muscle: "" }}
+              submit={(values, actions) => {
+                const { muscle } = values;
 
-                            submitBaseInfo(age, height, gender, weight);
-                            actions.setSubmitting(false);
-                          }}
-                          validationSchema={validationSchemaBase}
-                        >
-                          {(formikProps) => (
-                            <React.Fragment>
-                              <View
-                                style={
-                                  Platform.OS === "android" ? "" : styles.picker
-                                }
-                              >
-                                <DropDownPicker
-                                  items={[
-                                    { label: "Item 1", value: "item1" },
-                                    { label: "Item 2", value: "item2" },
-                                  ]}
-                                  defaultIndex={0}
-                                  containerStyle={{ height: 40 }}
-                                  onChangeItem={(item) =>
-                                    console.log(item.label, item.value)
-                                  }
-                                />
-                                <Picker
-                                  selectedValue={formikProps.values.gender}
-                                  mode="dropdown"
-                                  style={{ height: 20, width: 200 }}
-                                  itemStyle={{ fontSize: 13 }}
-                                  // itemStyle={{ backgroundColor: "grey" }}
-                                  onValueChange={(itemValue) =>
-                                    formikProps.setFieldValue(
-                                      "gender",
-                                      itemValue
-                                    )
-                                  }
-                                >
-                                  <Picker.Item
-                                    label="Elige un género"
-                                    color="grey"
-                                    value="N/A"
-                                  />
-                                  <Picker.Item
-                                    label="Masculino"
-                                    color="blue"
-                                    value="M"
-                                  />
-                                  <Picker.Item
-                                    label="Femenino"
-                                    color="red"
-                                    value="F"
-                                  />
-                                </Picker>
-                              </View>
-                              <View style={{ marginTop: 50 }}>
-                                <StyledInput
-                                  label="Edad"
-                                  formikProps={formikProps}
-                                  formikKey="age"
-                                  keyboardType="numeric"
-                                  maxLength={2}
-                                  placeholder={age}
-                                />
-                                <StyledInput
-                                  label="Altura"
-                                  formikProps={formikProps}
-                                  formikKey="height"
-                                  keyboardType="numeric"
-                                  maxLength={6}
-                                  placeholder={height}
-                                />
-                                <StyledInput
-                                  label="Peso"
-                                  formikProps={formikProps}
-                                  formikKey="weight"
-                                  keyboardType="numeric"
-                                  maxLength={5}
-                                  // placeholder={}
-                                />
-                              </View>
-                              {formikProps.isSubmitting ? (
-                                <ActivityIndicator />
-                              ) : (
-                                <Button
-                                  title="Submit"
-                                  onPress={formikProps.handleSubmit}
-                                />
-                              )}
-                            </React.Fragment>
-                          )}
-                        </Formik>
-                      </View>
-                    </ScrollView>
-                  </View>
-                </View>
-              </KeyboardAvoidingView>
-            </Modal> */}
+                submitMuscleInfo(muscle);
+                actions.setSubmitting(false);
+              }}
+              schema={validationSchemaEval}
+              genderSelect={false}
+              formikLabel={"MÚSCULO"}
+              FormikKey={"muscle"}
+              formikKeyboard={"numeric"}
+              formikMaxLength={4}
+            />
+            <DataModal
+              visible={fatModal}
+              backPress={tapBackground}
+              swipeComplete={() => setFatModal(!fatModal)}
+              show={showAlert}
+              alertTitle={"Salir sin guardar?"}
+              alertCancel={"No, continuar"}
+              alertConfirm={"Si, sin guardar"}
+              cancelPressed={() => {
+                setShowAlert(false);
+              }}
+              confirmedPressed={() => {
+                setFatModal(!fatModal);
+                setShowAlert(false);
+              }}
+              initialValues={{ fat: "" }}
+              submit={(values, actions) => {
+                const { fat } = values;
 
-            {/* <Modal
-              isVisible={evalInfoModal}
-              animationIn="slideInLeft"
-              customBackdrop={
-                <TouchableWithoutFeedback onPress={tapBackground}>
-                  <View style={{ flex: 1, backgroundColor: "black" }}></View>
-                </TouchableWithoutFeedback>
-              }
-              avoidKeyboard
-              onBackButtonPress={tapBackground}
-              onSwipeComplete={() => setEvalInfoModal(!evalInfoModal)}
-              swipeDirection={["left", "right"]}
-              propagateSwipe
-            >
-              <KeyboardAvoidingView
-                behavior={Platform.OS === "android" ? "padding" : "position"}
-                keyboardVerticalOffset={-80}
-                // style={styles.screen}
-              >
-                <View style={styles.centeredView}>
-                  <AwesomeAlert
-                    show={showAlert}
-                    showProgress={false}
-                    title="Salir sin guardar?"
-                    message=""
-                    closeOnTouchOutside={true}
-                    closeOnHardwareBackPress={false}
-                    showCancelButton={true}
-                    showConfirmButton={true}
-                    cancelText="No, continuar"
-                    confirmText="Si, sin guardar"
-                    confirmButtonColor="#DD6B55"
-                    onCancelPressed={() => {
-                      setShowAlert(false);
-                    }}
-                    onConfirmPressed={() => {
-                      setEvalInfoModal(!evalInfoModal);
-                      setShowAlert(false);
-                    }}
-                  />
-                  <View style={styles.modalView}>
-                    <ScrollView>
-                      <View style={styles.form}>
-                        <Text style={styles.modalText}>edit info!</Text>
-
-                        <Formik
-                          initialValues={{
-                            bmi: "",
-                            fat: "",
-                            muscle: "",
-                            kcal: "",
-                            metabolical: "",
-                            visceral: "",
-                          }}
-                          onSubmit={(values, actions) => {
-                            const {
-                              bmi,
-                              fat,
-                              muscle,
-                              kcal,
-                              metabolical,
-                              visceral,
-                            } = values;
-
-                            submitEvalInfo(
-                              bmi,
-                              fat,
-                              muscle,
-                              kcal,
-                              metabolical,
-                              visceral
-                            );
-                            actions.setSubmitting(false);
-                          }}
-                          validationSchema={validationSchemaEval}
-                        >
-                          {(formikProps) => (
-                            <React.Fragment>
-                              <View style={{ marginTop: 50 }}>
-                                <StyledInput
-                                  label="IMC"
-                                  formikProps={formikProps}
-                                  formikKey="bmi"
-                                  keyboardType="numeric"
-                                  maxLength={2}
-                                  // placeholder={}
-                                />
-                                <StyledInput
-                                  label="Grasa"
-                                  formikProps={formikProps}
-                                  formikKey="fat"
-                                  keyboardType="numeric"
-                                  maxLength={2}
-                                  // placeholder={}
-                                />
-                                <StyledInput
-                                  label="Músculo"
-                                  formikProps={formikProps}
-                                  formikKey="muscle"
-                                  keyboardType="numeric"
-                                  maxLength={2}
-                                  // placeholder={}
-                                />
-                                <StyledInput
-                                  label="KCAL"
-                                  formikProps={formikProps}
-                                  formikKey="kcal"
-                                  keyboardType="numeric"
-                                  maxLength={4}
-                                  // placeholder={}
-                                />
-                                <StyledInput
-                                  label="Edad Metabolica"
-                                  formikProps={formikProps}
-                                  formikKey="metabolical"
-                                  keyboardType="numeric"
-                                  maxLength={2}
-                                  // placeholder={}
-                                />
-                                <StyledInput
-                                  label="Grasa Visceral"
-                                  formikProps={formikProps}
-                                  formikKey="visceral"
-                                  keyboardType="numeric"
-                                  maxLength={2}
-                                  // placeholder={}
-                                />
-                              </View>
-                              {formikProps.isSubmitting ? (
-                                <ActivityIndicator />
-                              ) : (
-                                <Button
-                                  title="Submit"
-                                  onPress={formikProps.handleSubmit}
-                                />
-                              )}
-                            </React.Fragment>
-                          )}
-                        </Formik>
-                      </View>
-                    </ScrollView>
-                  </View>
-                </View>
-              </KeyboardAvoidingView>
-            </Modal> */}
-
-            <BaseInfoDT
-              age={age}
-              height={height}
-              gender={gender}
-              weight={weight}
+                submitFatInfo(fat);
+                actions.setSubmitting(false);
+              }}
+              schema={validationSchemaEval}
+              genderSelect={false}
+              formikLabel={"GRASA"}
+              FormikKey={"fat"}
+              formikKeyboard={"numeric"}
+              formikMaxLength={4}
             />
 
-            <TouchableOpacity
-              style={styles.button}
-              onPress={() => {
-                setBaseInfoModal(true);
+            <DataModal
+              visible={ageModal}
+              backPress={tapBackground}
+              swipeComplete={() => setAgeModal(!ageModal)}
+              show={showAlert}
+              alertTitle={"Salir sin guardar?"}
+              alertCancel={"No, continuar"}
+              alertConfirm={"Si, sin guardar"}
+              cancelPressed={() => {
+                setShowAlert(false);
               }}
-            >
-              <Text style={styles.buttonText}>Editar Datos</Text>
-            </TouchableOpacity>
+              confirmedPressed={() => {
+                setAgeModal(!ageModal);
+                setShowAlert(false);
+              }}
+              initialValues={{ age: "" }}
+              submit={(values, actions) => {
+                const { age } = values;
+
+                submitAgeInfo(age);
+                actions.setSubmitting(false);
+              }}
+              schema={validationSchemaBase}
+              genderSelect={false}
+              formikLabel={"EDAD"}
+              FormikKey={"age"}
+              formikKeyboard={"numeric"}
+              formikMaxLength={2}
+            />
+            <DataModal
+              visible={heightModal}
+              backPress={tapBackground}
+              swipeComplete={() => setHeightModal(!heightModal)}
+              show={showAlert}
+              alertTitle={"Salir sin guardar?"}
+              alertCancel={"No, continuar"}
+              alertConfirm={"Si, sin guardar"}
+              cancelPressed={() => {
+                setShowAlert(false);
+              }}
+              confirmedPressed={() => {
+                setHeightModal(!heightModal);
+                setShowAlert(false);
+              }}
+              initialValues={{ height: "" }}
+              submit={(values, actions) => {
+                const { height } = values;
+
+                submitHeightInfo(height);
+                actions.setSubmitting(false);
+              }}
+              schema={validationSchemaBase}
+              genderSelect={false}
+              formikLabel={"ALTURA"}
+              FormikKey={"height"}
+              formikKeyboard={"numeric"}
+              formikMaxLength={5}
+            />
+            <DataModal
+              visible={weightModal}
+              backPress={tapBackground}
+              swipeComplete={() => setWeightModal(!weightModal)}
+              show={showAlert}
+              alertTitle={"Salir sin guardar?"}
+              alertCancel={"No, continuar"}
+              alertConfirm={"Si, sin guardar"}
+              cancelPressed={() => {
+                setShowAlert(false);
+              }}
+              confirmedPressed={() => {
+                setWeightModal(!weightModal);
+                setShowAlert(false);
+              }}
+              initialValues={{ weight: "" }}
+              submit={(values, actions) => {
+                const { weight } = values;
+
+                submitWeightInfo(weight);
+                actions.setSubmitting(false);
+              }}
+              schema={validationSchemaBase}
+              genderSelect={false}
+              formikLabel={"PESO"}
+              FormikKey={"weight"}
+              formikKeyboard={"numeric"}
+              formikMaxLength={5}
+            />
+
+            <DataModal
+              visible={genderModal}
+              backPress={tapBackground}
+              swipeComplete={() => setGenderModal(!genderModal)}
+              show={showAlert}
+              alertTitle={"Salir sin guardar?"}
+              alertCancel={"No, continuar"}
+              alertConfirm={"Si, sin guardar"}
+              genderSelect
+              cancelPressed={() => {
+                setShowAlert(false);
+              }}
+              confirmedPressed={() => {
+                setGenderModal(!genderModal);
+                setShowAlert(false);
+              }}
+              initialValues={{ gender: "" }}
+              submit={(values, actions) => {
+                const { gender } = values;
+
+                submitGenderInfo(gender);
+                actions.setSubmitting(false);
+              }}
+              schema={validationSchemaBase}
+              formikLabel={"GÉNERO"}
+              FormikKey={"gender"}
+              formikKeyboard={"numeric"}
+            />
+
+            <BasicInfoScroll
+              agePress={() => {
+                setAgeModal(true);
+              }}
+              heightPress={() => {
+                setHeightModal(true);
+              }}
+              weightPress={() => {
+                setWeightModal(true);
+              }}
+              genderPress={() => {
+                setGenderModal(true);
+              }}
+              age={age}
+              height={height}
+              weight={weight}
+              gender={gender}
+            />
 
             <Subtitle>Progreso</Subtitle>
 
@@ -882,7 +855,7 @@ const ProfileScreen = (props) => {
                   }}
                 >
                   <View style={styles.wheel}>
-                    <ProgressWheel
+                    <AnimatedSpring
                       composition={"IMC"}
                       current={parseInt(bmi)}
                       Meta={18}
@@ -907,111 +880,170 @@ const ProfileScreen = (props) => {
               </View>
 
               <View>
-                <View style={styles.wheel}>
-                  <ProgressWheel
-                    composition={"Grasa"}
-                    current={parseInt(fat)}
-                    Meta={10}
-                  />
-                </View>
-                <View
-                  style={{
-                    marginTop: 10,
+                <TouchableOpacity
+                  onPress={() => {
+                    setFatModal(true);
                   }}
                 >
-                  <View>
-                    <BaseEvalDT current={fat} metaTitle={"Meta"} Meta={10} />
+                  <View style={styles.wheel}>
+                    <ProgressWheel
+                      composition={"Grasa"}
+                      current={parseInt(fat)}
+                      Meta={10}
+                    />
                   </View>
-                </View>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => {
+                    setFatModal(true);
+                  }}
+                >
+                  <View
+                    style={{
+                      marginTop: 10,
+                    }}
+                  >
+                    <View>
+                      <BaseEvalDT current={fat} metaTitle={"Meta"} Meta={10} />
+                    </View>
+                  </View>
+                </TouchableOpacity>
               </View>
             </View>
             <View style={styles.wheelBlock}>
               <View>
-                <View style={styles.wheel}>
-                  <ProgressWheel
-                    composition={"Músculo"}
-                    current={parseInt(muscle)}
-                    Meta={48}
-                  />
-                </View>
-                <View
-                  style={{
-                    marginTop: 10,
+                <TouchableOpacity
+                  onPress={() => {
+                    setMuscleModal(true);
                   }}
                 >
-                  <View>
-                    <BaseEvalDT current={muscle} metaTitle={"Meta"} Meta={48} />
+                  <View style={styles.wheel}>
+                    <ProgressWheel
+                      composition={"Músculo"}
+                      current={parseInt(muscle)}
+                      Meta={48}
+                    />
                   </View>
-                </View>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => {
+                    setMuscleModal(true);
+                  }}
+                >
+                  <View
+                    style={{
+                      marginTop: 10,
+                    }}
+                  >
+                    <View>
+                      <BaseEvalDT
+                        current={muscle}
+                        metaTitle={"Meta"}
+                        Meta={48}
+                      />
+                    </View>
+                  </View>
+                </TouchableOpacity>
               </View>
 
               <View>
-                <View style={styles.wheel}>
-                  <ProgressWheel
-                    composition={"KCAL"}
-                    current={parseInt(kcal)}
-                    Meta={2000}
-                  />
-                </View>
-                <View
-                  style={{
-                    marginTop: 10,
+                <TouchableOpacity
+                  onPress={() => {
+                    setKcalModal(true);
                   }}
                 >
-                  <View>
-                    <BaseEvalDT current={kcal} metaTitle={"Meta"} Meta={2000} />
+                  <View style={styles.wheel}>
+                    <ProgressWheel
+                      composition={"KCAL"}
+                      current={parseInt(kcal)}
+                      Meta={2000}
+                    />
                   </View>
-                </View>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => {
+                    setKcalModal(true);
+                  }}
+                >
+                  <View
+                    style={{
+                      marginTop: 10,
+                    }}
+                  >
+                    <View>
+                      <BaseEvalDT
+                        current={kcal}
+                        metaTitle={"Meta"}
+                        Meta={2000}
+                      />
+                    </View>
+                  </View>
+                </TouchableOpacity>
               </View>
             </View>
             <View style={styles.wheelBlock}>
               <View>
-                <View style={styles.wheel}>
-                  <ProgressWheel
-                    composition={"Metabolica"}
-                    current={parseInt(meta)}
-                    Meta={15}
-                  />
-                </View>
-                <View
-                  style={{
-                    marginTop: 10,
+                <TouchableOpacity
+                  onPress={() => {
+                    setMetaModal(true);
                   }}
                 >
-                  <View>
-                    <BaseEvalDT current={meta} metaTitle={"Meta"} Meta={19} />
+                  <View style={styles.wheel}>
+                    <ProgressWheel
+                      composition={"Metabolica"}
+                      current={parseInt(meta)}
+                      Meta={15}
+                    />
                   </View>
-                </View>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => {
+                    setMetaModal(true);
+                  }}
+                >
+                  <View
+                    style={{
+                      marginTop: 10,
+                    }}
+                  >
+                    <View>
+                      <BaseEvalDT current={meta} metaTitle={"Meta"} Meta={19} />
+                    </View>
+                  </View>
+                </TouchableOpacity>
               </View>
 
               <View>
-                <View style={styles.wheel}>
-                  <ProgressWheel
-                    composition={"Viseral"}
-                    current={parseInt(vifat)}
-                    Meta={1}
-                  />
-                </View>
-                <View
-                  style={{
-                    marginTop: 10,
+                <TouchableOpacity
+                  onPress={() => {
+                    setVifatModal(true);
                   }}
                 >
-                  <View>
-                    <BaseEvalDT current={vifat} metaTitle={"Meta"} Meta={3} />
+                  <View style={styles.wheel}>
+                    <ProgressWheel
+                      composition={"Viseral"}
+                      current={parseInt(vifat)}
+                      Meta={1}
+                    />
                   </View>
-                </View>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => {
+                    setVifatModal(true);
+                  }}
+                >
+                  <View
+                    style={{
+                      marginTop: 10,
+                    }}
+                  >
+                    <View>
+                      <BaseEvalDT current={vifat} metaTitle={"Meta"} Meta={3} />
+                    </View>
+                  </View>
+                </TouchableOpacity>
               </View>
             </View>
-
-            <TouchableOpacity
-              style={styles.button}
-              onPress={() => {
-                setEvalInfoModal(true);
-              }}
-            >
-              <Text style={styles.buttonText}>Editar Eval</Text>
-            </TouchableOpacity>
           </ScrollView>
         </SafeAreaView>
       </Container>
@@ -1140,6 +1172,14 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontSize: 15,
   },
+  basicInfo: {
+    fontWeight: "bold",
+    textAlign: "center",
+    fontSize: 25,
+    color: "#6C6C6C",
+    fontFamily: "open-sans-bold",
+  },
+
   displayName: {
     flexDirection: "row",
     justifyContent: "center",
@@ -1246,14 +1286,6 @@ const Name = styled.Text`
   align-self: center;
   position: absolute;
 `;
-
-// const Text = styled.Text`
-//   font-size: 15px;
-//   font-weight: 400;
-//   position: absolute;
-//   align-items: center;
-//   justify-content: center;
-// `;
 
 const Background = styled.Image`
   position: absolute;

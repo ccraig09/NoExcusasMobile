@@ -7,6 +7,7 @@ import {
   Button,
   TextInput,
   ActivityIndicator,
+  Picker,
   StyleSheet,
   KeyboardAvoidingView,
 } from "react-native";
@@ -15,6 +16,7 @@ import { Formik } from "formik";
 import * as yup from "yup";
 import DropDownPicker from "react-native-dropdown-picker";
 import AwesomeAlert from "react-native-awesome-alerts";
+import Colors from "../constants/Colors";
 
 const DataModal = (props) => {
   const FieldWrapper = ({ children, label, formikProps, formikKey }) => (
@@ -61,47 +63,49 @@ const DataModal = (props) => {
   const validationSchema = yup.object().shape({
     name: yup.string().label("name").required(),
     last: yup.string().label("last").required(),
+    title: yup.string().label("title").required(),
   });
   const validationSchemaBase = yup.object().shape({
+    title: yup.string().label("title").required(),
     age: yup
       .number()
       .typeError("Debe ser un número")
-      .max(99, "Dos digitos por edad por favor")
+      .max(99, "Digitos validos por favor")
       .required(),
     height: yup
       .number()
       .typeError("Debe ser un número")
-      .max(123456, "Digitos validos por altura por favor"),
+      .max(123456, "Digitos validos por favor"),
+    weight: yup
+      .number()
+      .typeError("Debe ser un número")
+      .max(999999, "Digitos validos por favor"),
   });
   const validationSchemaEval = yup.object().shape({
     bmi: yup
       .number()
       .typeError("Debe ser un número")
-      .max(99, "Dos digitos por edad por favor"),
+      .max(99, "Digitos validos por favor"),
     fat: yup
       .number()
       .typeError("Debe ser un número")
-      .max(99, "Dos digitos por edad por favor"),
+      .max(99, "Digitos validos por favor"),
     muscle: yup
       .number()
       .typeError("Debe ser un número")
-      .max(99, "Dos digitos por edad por favor"),
+      .max(99, "Digitos validos por favor"),
     kcal: yup
       .number()
       .typeError("Debe ser un número")
-      .max(9999, "Dos digitos por edad por favor"),
+      .max(9999, "Digitos validos por favor"),
     metabolical: yup
       .number()
       .typeError("Debe ser un número")
-      .max(99, "Dos digitos por edad por favor"),
+      .max(99, "Digitos validos por favor"),
     visceral: yup
       .number()
       .typeError("Debe ser un número")
-      .max(99, "Dos digitos por edad por favor"),
-    weight: yup
-      .number()
-      .typeError("Debe ser un número")
-      .max(999999, "Dos digitos por edad por favor"),
+      .max(99, "Digitos validos por favor"),
   });
 
   return (
@@ -153,17 +157,33 @@ const DataModal = (props) => {
                   <React.Fragment>
                     {props.genderSelect ? (
                       <View style={styles.picker}>
-                        <DropDownPicker
-                          items={[
-                            { label: "Masculino", value: "M" },
-                            { label: "Femenino", value: "F" },
-                          ]}
-                          defaultIndex={0}
-                          containerStyle={{ height: 40 }}
-                          onChangeItem={(item) =>
-                            console.log(item.label, item.value)
+                        <Picker
+                          selectedValue={formikProps.values.gender}
+                          mode="dropdown"
+                          style={{
+                            height: 30,
+                            marginTop: 20,
+                            marginBottom: 30,
+                            width: 200,
+                            justifyContent: "center",
+                          }}
+                          itemStyle={{ fontSize: 16 }}
+                          onValueChange={(itemValue) =>
+                            formikProps.setFieldValue("gender", itemValue)
                           }
-                        />
+                        >
+                          <Picker.Item
+                            label="Elige un género"
+                            color="grey"
+                            value="N/A"
+                          />
+                          <Picker.Item
+                            label="Masculino"
+                            color="blue"
+                            value="M"
+                          />
+                          <Picker.Item label="Femenino" color="red" value="F" />
+                        </Picker>
                       </View>
                     ) : (
                       <View style={{ marginTop: 10 }}>
@@ -182,6 +202,7 @@ const DataModal = (props) => {
                     ) : (
                       <Button
                         title="Guardar"
+                        color={Colors.noExprimary}
                         onPress={formikProps.handleSubmit}
                       />
                     )}
@@ -223,9 +244,10 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   picker: {
-    marginBottom: 80,
+    marginTop: 40,
+    marginBottom: 30,
 
-    height: 60,
+    height: 70,
     width: 200,
   },
 });

@@ -9,6 +9,7 @@ import ReduxThunk from "redux-thunk";
 import { enableScreens } from "react-native-screens";
 import authReducer from "./store/reducers/auth";
 import memberReducer from "./store/reducers/membersDetails";
+import evalReducer from "./store/reducers/evals";
 
 import productsReducer from "./store/reducers/products";
 // import { encode, decode } from "react-native-base64";
@@ -29,6 +30,7 @@ const rootReducer = combineReducers({
   products: productsReducer,
   memberdeets: memberReducer,
   auth: authReducer,
+  evals: evalReducer,
 });
 
 const store = createStore(rootReducer, applyMiddleware(ReduxThunk));
@@ -37,6 +39,8 @@ const fetchFonts = () => {
   return Font.loadAsync({
     "open-sans": require("./assets/fonts/OpenSans-Regular.ttf"),
     "open-sans-bold": require("./assets/fonts/OpenSans-Bold.ttf"),
+    aliens: require("./assets/fonts/aliens.ttf"),
+    cursive: require("./assets/fonts/cursive.ttf"),
   });
 };
 

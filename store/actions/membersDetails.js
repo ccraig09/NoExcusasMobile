@@ -54,15 +54,6 @@ export const baseDetails = (name, last) => {
                 FirstName: name,
                 LastName: last,
                 Nametimestamp: firebase.firestore.FieldValue.serverTimestamp(),
-
-                // Height: height,
-                // Weight: weight,
-                // BMI: bmi,
-                // Fat: fat,
-                // Muscle: muscle,
-                // KCAL: kcal,
-                // Metabolical: meta,
-                // ViFat: vifat,
               },
               { merge: true }
             )
@@ -77,7 +68,7 @@ export const baseDetails = (name, last) => {
   };
 };
 
-export const baseInfo = (age) => {
+export const fatInfo = (fat) => {
   return async () => {
     firebase.auth().onAuthStateChanged(function (user) {
       if (user) {
@@ -86,9 +77,8 @@ export const baseInfo = (age) => {
           db.doc(userId)
             .set(
               {
-                Age: age,
-
-                basetimestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                Fat: fat,
+                fattimestamp: firebase.firestore.FieldValue.serverTimestamp(),
               },
               { merge: true }
             )
@@ -102,7 +92,103 @@ export const baseInfo = (age) => {
     });
   };
 };
-export const evalInfo = (bmi) => {
+export const muscleInfo = (muscle) => {
+  return async () => {
+    firebase.auth().onAuthStateChanged(function (user) {
+      if (user) {
+        var userId = user.uid.toString();
+        try {
+          db.doc(userId)
+            .set(
+              {
+                Muscle: muscle,
+                muscletimestamp: firebase.firestore.FieldValue.serverTimestamp(),
+              },
+              { merge: true }
+            )
+            .catch(function (error) {
+              console.log("Error getting document:", error);
+            });
+        } catch (err) {
+          setError(err.message);
+        }
+      }
+    });
+  };
+};
+export const kcalInfo = (kcal) => {
+  return async () => {
+    firebase.auth().onAuthStateChanged(function (user) {
+      if (user) {
+        var userId = user.uid.toString();
+        try {
+          db.doc(userId)
+            .set(
+              {
+                KCAL: kcal,
+                kcaltimestamp: firebase.firestore.FieldValue.serverTimestamp(),
+              },
+              { merge: true }
+            )
+            .catch(function (error) {
+              console.log("Error getting document:", error);
+            });
+        } catch (err) {
+          setError(err.message);
+        }
+      }
+    });
+  };
+};
+export const metaInfo = (metabolical) => {
+  return async () => {
+    firebase.auth().onAuthStateChanged(function (user) {
+      if (user) {
+        var userId = user.uid.toString();
+        try {
+          db.doc(userId)
+            .set(
+              {
+                Metabolical: metabolical,
+                Metatimestamp: firebase.firestore.FieldValue.serverTimestamp(),
+              },
+              { merge: true }
+            )
+            .catch(function (error) {
+              console.log("Error getting document:", error);
+            });
+        } catch (err) {
+          setError(err.message);
+        }
+      }
+    });
+  };
+};
+export const vifatInfo = (vifat) => {
+  return async () => {
+    firebase.auth().onAuthStateChanged(function (user) {
+      if (user) {
+        var userId = user.uid.toString();
+        try {
+          db.doc(userId)
+            .set(
+              {
+                ViFat: vifat,
+                Vifattimestamp: firebase.firestore.FieldValue.serverTimestamp(),
+              },
+              { merge: true }
+            )
+            .catch(function (error) {
+              console.log("Error getting document:", error);
+            });
+        } catch (err) {
+          setError(err.message);
+        }
+      }
+    });
+  };
+};
+export const bmiInfo = (bmi) => {
   return async () => {
     firebase.auth().onAuthStateChanged(function (user) {
       if (user) {
@@ -112,13 +198,103 @@ export const evalInfo = (bmi) => {
             .set(
               {
                 BMI: bmi,
-                // Fat: fat,
-                // Muscle: muscle,
-                // KCAL: kcal,
-                // Metabolical: metabolical,
-                // ViFat: visceral,
-
-                Evaltimestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                Bmitimestamp: firebase.firestore.FieldValue.serverTimestamp(),
+              },
+              { merge: true }
+            )
+            .catch(function (error) {
+              console.log("Error getting document:", error);
+            });
+        } catch (err) {
+          setError(err.message);
+        }
+      }
+    });
+  };
+};
+export const weightInfo = (weight) => {
+  return async () => {
+    firebase.auth().onAuthStateChanged(function (user) {
+      if (user) {
+        var userId = user.uid.toString();
+        try {
+          db.doc(userId)
+            .set(
+              {
+                Weight: weight,
+                Weighttimestamp: firebase.firestore.FieldValue.serverTimestamp(),
+              },
+              { merge: true }
+            )
+            .catch(function (error) {
+              console.log("Error getting document:", error);
+            });
+        } catch (err) {
+          setError(err.message);
+        }
+      }
+    });
+  };
+};
+export const genderInfo = (gender) => {
+  return async () => {
+    firebase.auth().onAuthStateChanged(function (user) {
+      if (user) {
+        var userId = user.uid.toString();
+        try {
+          db.doc(userId)
+            .set(
+              {
+                Gender: gender,
+                Gendertimestamp: firebase.firestore.FieldValue.serverTimestamp(),
+              },
+              { merge: true }
+            )
+            .catch(function (error) {
+              console.log("Error getting document:", error);
+            });
+        } catch (err) {
+          setError(err.message);
+        }
+      }
+    });
+  };
+};
+export const ageInfo = (age) => {
+  return async () => {
+    firebase.auth().onAuthStateChanged(function (user) {
+      if (user) {
+        var userId = user.uid.toString();
+        try {
+          db.doc(userId)
+            .set(
+              {
+                Age: age,
+                Agetimestamp: firebase.firestore.FieldValue.serverTimestamp(),
+              },
+              { merge: true }
+            )
+            .catch(function (error) {
+              console.log("Error getting document:", error);
+            });
+        } catch (err) {
+          setError(err.message);
+        }
+      }
+    });
+  };
+};
+export const heightInfo = (height) => {
+  return async () => {
+    firebase.auth().onAuthStateChanged(function (user) {
+      if (user) {
+        var userId = user.uid.toString();
+        try {
+          db.doc(userId)
+            .set(
+              {
+                Height: height,
+                heighttimestamp: firebase.firestore.FieldValue.serverTimestamp(),
               },
               { merge: true }
             )
