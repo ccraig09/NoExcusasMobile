@@ -1,0 +1,146 @@
+import Eval from "../../models/eval";
+
+export const DELETE_EVAL = "DELETE_EVAL";
+export const CREATE_EVAL = "CREATE_EVAL";
+export const SET_EVAL = "SET_EVAL";
+
+import firebase from "../../components/firebase";
+
+export const db = firebase.firestore().collection("Members");
+export const dbE = firebase.firestore();
+
+export default firebase;
+
+export const fetchMemberEvals = () => {
+  return async (dispatch, getState) => {
+    const userId = getState().auth.userId;
+    console.log("get state worked and userid is:", userId);
+    try {
+      await db
+        .doc(userId)
+        .get()
+        .then(function (doc) {
+          if (doc.exists) {
+            // console.log("doc data is: ", doc.data().FirstName);
+            const resData = doc.data().EvalInfo;
+            const loadedEvals = [];
+
+            for (const key in resData) {
+              loadedEvals.push(
+                new Eval(
+                  key,
+                  resData[key].ownerId,
+                  resData[key].title
+                  // resData[key].date,
+                  // resData[key].notes
+                )
+              );
+              dispatch({
+                type: SET_EVAL,
+                // userEvals: loadedEvals,
+                userEvals: loadedEvals.filter((eva) => eva.ownerId === userId),
+              });
+            }
+
+            console.log("resdata title should be:", resData);
+          } else {
+            // doc.data() will be undefined in this case
+            console.log("No such document!");
+          }
+        })
+        .catch(function (error) {
+          console.log("Error getting document:", error);
+        });
+    } catch (err) {
+      throw err;
+    }
+  };
+};
+
+export const deleteEval = (evalId) => {
+  return async (dispatch, getState) => {
+    const token = getState().auth.token;
+    await db
+      .doc(userId)
+      .get()
+      .then(function (doc) {
+        if (doc.exists) {
+          // console.log("doc data is: ", doc.data().FirstName);
+          resData = doc.data();
+
+          console.log("loadedEvals are:", loadedEvals);
+        } else {
+          // doc.data() will be undefined in this case
+          console.log("No such document!");
+        }
+      })
+      .catch(function (error) {
+        console.log("Error getting document:", error);
+      });
+    dispatch({ type: DELETE_EVAL, eid: evalId });
+  };
+};
+
+export const createEval = (title) => {
+  return async (dispatch, getState) => {
+    firebase.auth().onAuthStateChanged(function (user) {
+      if (user) {
+        // var userId = user.uid.toString();
+        const userId = getState().auth.userId;
+        const token = getState().auth.token;
+        try {
+          dbE
+            .collection(MemberEvals)
+            .doc(userId)
+            .set(
+              {
+                EvalInfo: {
+                  title: title,
+                  ownerId: userId,
+                  // Date: date,
+                  // Notes: notes,
+                  timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                },
+              },
+              { merge: true }
+            );
+
+          dbE
+            .collection(MemberEvals)
+            .doc(userId)
+            .get()
+            .then(function (doc) {
+              if (doc.exists) {
+                console.log(doc.data());
+                // if (doc.exists) {
+                const resData = doc.data();
+                dispatch({
+                  type: CREATE_EVAL,
+                  evalData: {
+                    id: resData.id,
+                    // id: Math.floor(Math.random() * 1000 + 1).toString(),
+                    title,
+
+                    ownerId: userId,
+                  },
+                });
+              } else {
+                // doc.data() will be undefined in this case
+                console.log("No such document!");
+              }
+              // console.log("resdata to find id should be:", resData);
+              // } else {
+              // doc.data() will be undefined in this case
+              //   console.log("No such document!");
+              // }
+            })
+            .catch(function (error) {
+              console.log("Error getting document:", error);
+            });
+        } catch (err) {
+          setError(err.message);
+        }
+      }
+    });
+  };
+};

@@ -11,7 +11,7 @@ export default firebase;
 export const fetchMemberDetails = () => {
   return async (dispatch, getState) => {
     const userId = getState().auth.userId;
-    console.log("get state worked and userid is:", userId);
+    // console.log("get state worked and userid is:", userId);
     try {
       let loadedDetails;
 
@@ -20,10 +20,10 @@ export const fetchMemberDetails = () => {
         .get()
         .then(function (doc) {
           if (doc.exists) {
-            console.log("doc data is: ", doc.data().FirstName);
+            // console.log("doc data is: ", doc.data().FirstName);
             loadedDetails = doc.data();
             dispatch({ type: SET_MEMBER, details: loadedDetails });
-            console.log("loadedDetails are:", loadedDetails);
+            // console.log("loadedDetails are:", loadedDetails);
           } else {
             // doc.data() will be undefined in this case
             console.log("No such document!");
@@ -32,10 +32,6 @@ export const fetchMemberDetails = () => {
         .catch(function (error) {
           console.log("Error getting document:", error);
         });
-
-      console.log("second check for detatils being loaded...:", loadedDetails);
-
-      console.log("thrid check for details...:", loadedDetails);
     } catch (err) {
       throw err;
     }

@@ -1,10 +1,8 @@
 class Eval {
-  constructor(id, ownerId, title, date, notes) {
+  constructor(id, title, ownerId) {
     this.id = id;
-    this.ownerId = ownerId;
     this.title = title;
-    this.date = date;
-    this.notes = notes;
+    this.ownerId = ownerId;
   }
 }
 

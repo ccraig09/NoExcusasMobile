@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import styled from "styled-components";
 
-export const EvalBlock = () => {
+export const EvalBlock = (props) => {
   return (
     <Item>
       <Text>{props.title}</Text>

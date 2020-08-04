@@ -14,10 +14,8 @@ export default (state = initalState, action) => {
     case CREATE_EVAL:
       const newEval = new Eval(
         action.evalData.id,
-        action.evalData.ownerId,
         action.evalData.title,
-        action.evalData.date,
-        action.evalData.notes
+        action.evalData.ownerId
       );
       return {
         ...state,

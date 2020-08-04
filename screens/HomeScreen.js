@@ -16,6 +16,8 @@ import { useSelector, useDispatch } from "react-redux";
 import ClassItem from "../components/ClassItem";
 import CardioBlock from "../components/CardioBlock";
 import Colors from "../constants/Colors";
+import * as addEvalAction from "../store/actions/evals";
+
 import * as detailsActions from "../store/actions/membersDetails";
 import NotificationButton from "../components/UI/NotificationButton";
 import { TouchableOpacity } from "react-native-gesture-handler";
@@ -34,6 +36,7 @@ const greetingMessage =
 const HomeScreen = (props) => {
   const classes = useSelector((state) => state.products.availableClasses);
   const loadedMemberDeets = useSelector((state) => state.memberdeets.details);
+  const userEvals = useSelector((state) => state.evals.userEvals);
   const [firstName, setFirstName] = useState();
   const [lastName, setLastName] = useState();
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -46,7 +49,8 @@ const HomeScreen = (props) => {
 
   useEffect(() => {
     setIsLoading(true);
-
+    dispatch(addEvalAction.fetchMemberEvals());
+    console.log("user eval title should be", userEvals);
     loadDetails().then(() => {
       setIsLoading(false);
     });

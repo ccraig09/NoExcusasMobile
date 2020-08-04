@@ -18,8 +18,8 @@ export const authenticate = (userId, token, expiryTime) => {
   };
 };
 
-export async function signInWithGoogleAsync() {
-  try {
+export function signInWithGoogleAsync() {
+  return async (dispatch) => {
     const result = await Google.logInAsync({
       androidClientId: `734413363397-tn9ofnqr47he7pib1g8nvio99eo5qqag.apps.googleusercontent.com`,
       iosClientId:
@@ -42,67 +42,98 @@ export async function signInWithGoogleAsync() {
         .catch((error) => {
           console.log("firebase cred err:", error);
         });
+      firebase.auth().onAuthStateChanged(function (user) {
+        if (user) {
+          console.log("this is authstatechange user  ", user);
+          const userRes = user.toJSON().stsTokenManager;
+          // user.getIdToken().then(function (idToken) {
+          var token = userRes.accessToken.toString();
+          var id = user.uid.toString();
+          var time = userRes.expirationTime.toString();
+          console.log("this is tkn", token);
+          console.log("this is id", id);
+          console.log("this is time", time);
+        }
+      });
+
+      // console.log(resData);
+      var user = firebase.auth().currentUser;
+      console.log("this is current user   ", user);
+
+      // const id = user.uid;
+      const resData = await user.toJSON().stsTokenManager;
+      const userId = user.uid.toString();
+      var token = resData.accessToken.toString();
+
+      dispatch(
+        authenticate(userId, token, parseInt(resData.expirationTime) * 1000)
+      );
+
+      const expirationDate = new Date(
+        new Date().getTime() + parseInt(resData.expirationTime) * 1000
+      );
+      saveDataToStorage(userId, token, expirationDate);
       return result.accessToken;
     } else {
       return { cancelled: true };
     }
-  } catch (e) {
-    return { error: true };
-  }
+  };
 }
 
 export async function loginWithFacebook() {
-  // this.setState({ isLoading: true });
-  await Facebook.initializeAsync("525920638107168");
+  return async (dispatch) => {
+    // this.setState({ isLoading: true });
+    await Facebook.initializeAsync("525920638107168");
 
-  const { type, token } = await Facebook.logInWithReadPermissionsAsync({
-    permissions: ["public_profile", "email"],
-  });
-
-  if (type === "success") {
-    // console.log(type);
-    // Build Firebase credential with the Facebook access token.
-    const credential = firebase.auth.FacebookAuthProvider.credential(token);
-    const response = await fetch(
-      // `https://graph.facebook.com/me?access_token=${token}`
-      `https://graph.facebook.com/v6.0/me?access_token=${token}&fields=id,name,email,picture.height(961) `
-    ).then((response) => {
-      response.json().then((json) => {
-        console.log(json.name);
-        console.log(json.picture.data.url);
-        console.log(json.id);
-        console.log(json.email);
-
-        // this.storeName(json.name);
-        // this.props.updateName(json.name);
-        // this.storeAvatar(json.picture.data.url);
-        // this.props.updateAvatar(json.picture.data.url);
-
-        // setTimeout(() => {
-        //   this.props.closeLogin();
-        //   // this.setState({ isSuccessful: false });
-        // }, 500);
-      });
+    const { type, token } = await Facebook.logInWithReadPermissionsAsync({
+      permissions: ["public_profile", "email"],
     });
 
-    // this.setState({ isLoading: false });
+    if (type === "success") {
+      // console.log(type);
+      // Build Firebase credential with the Facebook access token.
+      const credential = firebase.auth.FacebookAuthProvider.credential(token);
+      const response = await fetch(
+        // `https://graph.facebook.com/me?access_token=${token}`
+        `https://graph.facebook.com/v6.0/me?access_token=${token}&fields=id,name,email,picture.height(961) `
+      ).then((response) => {
+        response.json().then((json) => {
+          console.log(json.name);
+          console.log(json.picture.data.url);
+          console.log(json.id);
+          console.log(json.email);
 
-    if (response) {
-      Alert.alert("Logged in!", `Hi ${(await response.json()).name}!`);
-      // this.fetchUser();
-      // this.props.updateName(response.email);
-    }
-    // console.log(user);
+          // this.storeName(json.name);
+          // this.props.updateName(json.name);
+          // this.storeAvatar(json.picture.data.url);
+          // this.props.updateAvatar(json.picture.data.url);
 
-    // Sign in with credential from the Facebook user.
-    firebase
-      .auth()
-      .signInWithCredential(credential)
-      .catch((error) => {
-        // Handle Errors here.
-        alert(`Facebook Login Error: ${error}`);
+          // setTimeout(() => {
+          //   this.props.closeLogin();
+          //   // this.setState({ isSuccessful: false });
+          // }, 500);
+        });
       });
-  }
+
+      // this.setState({ isLoading: false });
+
+      // if (response) {
+      //   Alert.alert("Logged in!", `Hi ${(await response.json()).name}!`);
+      //   // this.fetchUser();
+      //   // this.props.updateName(response.email);
+      // }
+      // console.log(user);
+
+      // Sign in with credential from the Facebook user.
+      firebase
+        .auth()
+        .signInWithCredential(credential)
+        .catch((error) => {
+          // Handle Errors here.
+          alert(`Facebook Login Error: ${error}`);
+        });
+    }
+  };
 }
 
 export const signup = (email, password) => {
@@ -115,144 +146,105 @@ export const signup = (email, password) => {
         var errorCode = error.code;
         var errorMessage = error.message;
         let message = "Something went wrong!";
-        if (errorCode == "auth/email-already-in-use") {
-          message = "This email is already in use!";
+        if (errorCode === "auth/email-already-in-use") {
+          message = "This email exists already!";
         } else if (errorCode === "auth/weak-password") {
           message = "This password is not valid";
         } else if (errorCode === "auth/invalid-email") {
           message = "This email is not valid";
         }
         throw new Error(message);
+
+        // ...
       });
-    const resData = await user.toJSON().stsTokenManager;
-    console.log(resData);
     firebase.auth().onAuthStateChanged(function (user) {
       if (user) {
-        user.getIdToken().then(function (idToken) {
-          console.log(idToken);
-          // var expirationTime = user.toJSON().stsTokenManager.expirationTime;
-          console.log("expire time   " + expirationTime);
-          console.log("name retrieve test11" + user.email);
-          console.log("id retrieve test" + user.uid);
-          // User is signed in.
-        });
+        const userRes = user.toJSON().stsTokenManager;
+        console.log("this is userRes  ", userRes);
+        // user.getIdToken().then(function (idToken) {
+        var token = userRes.accessToken.toString();
+        var id = user.uid.toString();
+        var time = userRes.expirationTime.toString();
+        console.log("this is tkn", token);
+        console.log("this is id", id);
+        console.log("this is time", time);
       }
     });
+
+    var user = firebase.auth().currentUser;
+    console.log("this is ONLYuser  ", user);
+
+    const resData = await user.toJSON().stsTokenManager;
+    const userId = user.uid.toString();
+
+    var token = resData.accessToken.toString();
+
     dispatch(
-      authenticate(idToken, user.uid, parseInt(resData.expirationTime) * 1000)
+      authenticate(userId, token, parseInt(resData.expirationTime) * 1000)
     );
+
     const expirationDate = new Date(
       new Date().getTime() + parseInt(resData.expirationTime) * 1000
     );
-    saveDataToStorage(idToken, user.uid, expirationDate);
+    saveDataToStorage(userId, token, expirationDate);
   };
 };
 
-//   var user = firebase.auth().currentUser;
-
-//   if (user) {
-//     // User is signed in.
-//     firebase
-//       .auth()
-//       .currentUser.getIdToken()
-//       .then((token) => {
-//         // console.log("the token is", token);
-
-//         // console.log(user);
-//         console.log("name retrieve test222   " + user.email);
-//         console.log("token retrieve test22   " + token);
-//         console.log("id retrieve test22   " + user.uid);
-//         console.log("expire time   " + expirationTime);
-//       });
-//   } else {
-//     // No user is signed in.
-//   }
-//   dispatch(authenticate(token, user.uid));
-// };
-
-//   const response = await fetch(
-//     "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyC7T1dVJFpMAu8YT64sA1IjDduZc2dkV2M",
-//     {
-//       method: "POST",
-//       headers: {
-//         "Content-Type": "application/json",
-//       },
-//       body: JSON.stringify({
-//         email: email,
-//         password: password,
-//         returnSecureToken: true,
-//       }),
-//     }
-//   );
-
-//   if (!response.ok) {
-//     const errorResData = await response.json();
-//     const errorId = errorResData.error.message;
-//     let message = "Something went wrong!";
-//     if (errorId === "EMAIL_EXISTS") {
-//       message = "This email exists already!";
-//     }
-//     throw new Error(message);
-//   }
-
-//   const resData = await response.json();
-//   console.log(resData);
-dispatch(
-  authenticate(
-    resData.localId,
-    resData.idToken,
-    parseInt(resData.expiresIn) * 1000
-  )
-);
-//   const expirationDate = new Date(
-//     new Date().getTime() + parseInt(resData.expiresIn) * 1000
-//   );
-//   saveDataToStorage(resData.idToken, resData.localId, expirationDate);
-// };
-
 export const login = (email, password) => {
   return async (dispatch) => {
-    const response = await fetch(
-      "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyC7T1dVJFpMAu8YT64sA1IjDduZc2dkV2M",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: email,
-          password: password,
-          returnSecureToken: true,
-        }),
-      }
-    );
+    await firebase
+      .auth()
+      .signInWithEmailAndPassword(email, password)
+      .catch(function (error) {
+        // Handle Errors here.
+        var errorCode = error.code;
+        var errorMessage = error.message;
+        let message = "Something went wrong!";
+        if (errorCode === "auth/user-not-found") {
+          message = "No account found for this email!";
+        } else if (errorCode === "auth/wrong-password") {
+          message = "This password is not the correct password";
+        } else if (errorCode === "auth/invalid-email") {
+          message = "This email is not valid";
+        }
+        throw new Error(message);
 
-    if (!response.ok) {
-      const errorResData = await response.json();
-      const errorId = errorResData.error.message;
-      let message = "Something went wrong!";
-      if (errorId === "EMAIL_NOT_FOUND") {
-        message = "This email could not be found!";
-      } else if (errorId === "INVALID_PASSWORD") {
-        message = "This password is not valid";
+        // ...
+      });
+    firebase.auth().onAuthStateChanged(function (user) {
+      if (user) {
+        const userRes = user.toJSON().stsTokenManager;
+        console.log("this is userRes  ", userRes);
+        // user.getIdToken().then(function (idToken) {
+        var token = userRes.accessToken.toString();
+        var id = user.uid.toString();
+        var time = userRes.expirationTime.toString();
+        console.log("this is tkn", token);
+        console.log("this is id", id);
+        console.log("this is time", time);
       }
-      throw new Error(message);
-    }
+    });
 
-    const resData = await response.json();
-    console.log(resData);
+    // console.log(resData);
+    var user = firebase.auth().currentUser;
+    console.log("this is ONLYuser  ", user);
+
+    // const id = user.uid;
+    const resData = await user.toJSON().stsTokenManager;
+    const userId = user.uid.toString();
+
+    var token = resData.accessToken.toString();
+
+    console.log("user has signed in");
+
     dispatch(
-      authenticate(
-        resData.localId,
-        resData.idToken,
-        parseInt(resData.expiresIn) * 1000
-      )
+      authenticate(userId, token, parseInt(resData.expirationTime) * 1000)
     );
-    // const expirationDate = new Date(
-    //   new Date().getTime() + parseInt(resData.expiresIn) * 1000
-    // );
-    saveDataToStorage(resData.idToken, resData.localId);
-    // saveDataToStorage(resData.idToken, resData.localId, expirationDate);
+
+    const expirationDate = new Date(
+      new Date().getTime() + parseInt(resData.expirationTime) * 1000
+    );
+    saveDataToStorage(userId, token, expirationDate);
   };
 };
 
@@ -262,9 +254,11 @@ export const logout = () => {
     .auth()
     .signOut()
     .then(function () {
+      console.log("signed out sucessfully");
       // Sign-out successful.
     })
     .catch(function (error) {
+      console.log(error);
       // An error happened.
     });
 
@@ -286,14 +280,14 @@ export const logout = () => {
 //   };
 // };
 
-const saveDataToStorage = (token, userId) => {
+const saveDataToStorage = (token, userId, expirationDate) => {
   // const saveDataToStorage = (token, userId, expirationDate) => {
   AsyncStorage.setItem(
     "userData",
     JSON.stringify({
       token: token,
       userId: userId,
-      // expiryDate: expirationDate.toISOString(),
+      expiryDate: expirationDate.toISOString(),
     })
   );
 };

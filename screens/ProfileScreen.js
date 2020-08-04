@@ -97,13 +97,14 @@ const ProfileScreen = (props) => {
   const gender = loadedMemberDeets.Gender;
   const weight = loadedMemberDeets.Weight;
 
-  const loadDetails = useCallback(() => {
+  const loadDetails = useCallback(async () => {
     setError(null);
     setIsRefreshing(true);
 
     try {
-      dispatch(detailsActions.fetchMemberDetails());
-
+      await dispatch(detailsActions.fetchMemberDetails());
+      await dispatch(addEvalAction.fetchMemberEvals());
+      console.log("user eval title should be", userEvals);
       AsyncStorage.getItem("userData").then((value) => {
         const data = JSON.parse(value);
         setUserPhoto(data.avatar);
@@ -130,9 +131,10 @@ const ProfileScreen = (props) => {
 
   useEffect(() => {
     setIsLoading(true);
+
     loadDetails();
     setIsLoading(false);
-  }, [loadDetails]);
+  }, [dispatch, loadDetails]);
 
   const submitHandler = useCallback(async (name, last) => {
     try {
@@ -237,7 +239,7 @@ const ProfileScreen = (props) => {
   const addEvalSquareHandler = useCallback(async (title) => {
     console.log("submitting evals ");
     try {
-      dispatch(addEvalAction.createEval(title));
+      await dispatch(addEvalAction.createEval(title));
     } catch (err) {
       setError(err.message);
     }
@@ -255,7 +257,7 @@ const ProfileScreen = (props) => {
     title: yup.string().label("title").required(),
   });
   const validationSchemaBase = yup.object().shape({
-    title: yup.string().label("title").required(),
+    title: yup.string(),
     age: yup
       .number()
       .typeError("Debe ser un número")
@@ -428,14 +430,13 @@ const ProfileScreen = (props) => {
               <Text style={styles.hello}>{greetingMessage}, </Text>
               <Text style={styles.hello}>{firstName} </Text>
             </View>
-
             <View style={styles.edit}>
               <Subtitle>{"evaluación".toUpperCase()}</Subtitle>
               <TouchableOpacity
                 onPress={() => {
                   setEvalModal(true);
                 }}
-                style={{ marginRight: 20 }}
+                style={{ marginRight: 20, marginTop: 10 }}
               >
                 <Ionicons
                   name={Platform.OS === "android" ? "md-add" : "ios-add"}
@@ -444,15 +445,37 @@ const ProfileScreen = (props) => {
                 />
               </TouchableOpacity>
             </View>
-
-            {/* <FlatList
-              data={userEvals}
-              keyExtractor={(item) => item.id}
-              renderItem={(itemData) => (
-                <EvalBlock title={itemData.item.title} />
-              )}
-            /> */}
-
+            {userEvals.length === 0 ? (
+              <View
+                style={{
+                  flex: 1,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <Text
+                  style={{
+                    padding: 10,
+                    fontSize: 15,
+                    textAlign: "center",
+                    color: "#b8bece",
+                  }}
+                >
+                  Oprime el {<Text style={{ fontSize: 25 }}>'+'</Text>} para
+                  crear tu primer evaluación.
+                </Text>
+              </View>
+            ) : (
+              <FlatList
+                horizontal={true}
+                showsHorizontalScrollIndicator={false}
+                data={userEvals}
+                keyExtractor={(item) => item.id}
+                renderItem={(itemData) => (
+                  <EvalBlock title={itemData.item.title} />
+                )}
+              />
+            )}
             {/* <ScrollView
               style={{
                 flexDirection: "row",
@@ -466,7 +489,6 @@ const ProfileScreen = (props) => {
             >
               {/* {evals.map((evalinfo, index) => ( */}
             {/* key={index} text={evalinfo.text}  */}
-
             {/* <ItemContainer>
                 <TouchableOpacity
                   onPress={() => props.navigation.navigate("Eval1")}
@@ -503,7 +525,6 @@ const ProfileScreen = (props) => {
                 <Text style={styles.textStyle}>Edit Profile</Text>
               </TouchableOpacity>
             </View>
-
             <DataModal
               visible={evalModal}
               backPress={tapBackground}
@@ -530,10 +551,9 @@ const ProfileScreen = (props) => {
               genderSelect={false}
               formikLabel={"TITLE"}
               FormikKey={"title"}
-              formikKeyboard={"numeric"}
-              formikMaxLength={2}
+              // formikKeyboard={"numeric"}
+              // formikMaxLength={2}
             />
-
             <DataModal
               visible={imcModal}
               backPress={tapBackground}
@@ -708,7 +728,6 @@ const ProfileScreen = (props) => {
               formikKeyboard={"numeric"}
               formikMaxLength={4}
             />
-
             <DataModal
               visible={ageModal}
               backPress={tapBackground}
@@ -796,7 +815,6 @@ const ProfileScreen = (props) => {
               formikKeyboard={"numeric"}
               formikMaxLength={5}
             />
-
             <DataModal
               visible={genderModal}
               backPress={tapBackground}
@@ -825,7 +843,6 @@ const ProfileScreen = (props) => {
               FormikKey={"gender"}
               formikKeyboard={"numeric"}
             />
-
             <BasicInfoScroll
               agePress={() => {
                 setAgeModal(true);
@@ -844,9 +861,7 @@ const ProfileScreen = (props) => {
               weight={weight}
               gender={gender}
             />
-
             <Subtitle>Progreso</Subtitle>
-
             <View style={styles.wheelBlock}>
               <View>
                 <TouchableOpacity

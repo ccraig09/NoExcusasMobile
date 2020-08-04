@@ -21,7 +21,7 @@ const AnimatedSpring = (props, { value }) => {
   if (Math.abs(X) > 0.75) {
     result = "#00ff00";
   }
-  console.log("x is equal to", Math.abs(X));
+  // console.log("x is equal to", Math.abs(X));
   return (
     <View
       style={{

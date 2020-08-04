@@ -7,52 +7,105 @@ export const SET_EVAL = "SET_EVAL";
 import firebase from "../../components/firebase";
 
 export const db = firebase.firestore().collection("Members");
+export const dbE = firebase.firestore().collection("MemberEvals");
 
 export default firebase;
 
 export const fetchMemberEvals = () => {
   return async (dispatch, getState) => {
     const userId = getState().auth.userId;
+    const token = getState().auth.token;
     console.log("get state worked and userid is:", userId);
     try {
-      const loadedEvals = [];
+      // dbE;
+      const events = await dbE;
+      events.get().then((querySnapshot) => {
+        const collection = querySnapshot.docs.map((doc) => {
+          return { id: doc.id, ...doc.data() };
+        });
+        console.log("receiving data from collection in firebase:", collection);
+        // const snapshot = await dbE.get();
+        // snapshot.forEach((doc) => {
+        //   console.log(doc.id, "=>", doc.data());
+        //   console.log(
+        //     "going to load all DOC and look for single docs",
+        //     doc.data()
+        //   );
 
-      await db
-        .doc(userId)
+        // const resData = doc.data();
+        const loadedEvals = [];
+        // loadedEvals.push({ id: doc.id, ...doc.data() });
+        // console.log("resdata loaded from EVERYTHING should be:", resData);
+
+        for (const key in collection) {
+          loadedEvals.push(
+            new Eval(key, collection[key].title, collection[key].ownerId)
+          );
+          dispatch({
+            type: SET_EVAL,
+
+            userEvals: loadedEvals.filter((eva) => eva.ownerId === userId),
+          });
+        }
+      });
+      //   });
+      // })
+      // .catch(function (error) {
+      //   console.log("Error getting document:", error);
+      // });
+    } catch (err) {
+      throw err;
+    }
+  };
+};
+
+export const createEval = (title) => {
+  return async (dispatch, getState) => {
+    // firebase.auth().onAuthStateChanged(function (user) {
+    //   if (user) {
+    // var userId = user.uid.toString();
+    const userId = getState().auth.userId;
+    const token = getState().auth.token;
+    try {
+      await dbE.doc().set(
+        {
+          title,
+          ownerId: userId,
+          timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+        },
+        { merge: true }
+      );
+
+      const events = await dbE;
+      events
         .get()
-        .then(function (doc) {
-          if (doc.exists) {
-            // console.log("doc data is: ", doc.data().FirstName);
-            resData = doc.data().Title;
-
-            console.log("loadedEvals are:", loadedEvals);
-          } else {
-            // doc.data() will be undefined in this case
-            console.log("No such document!");
-          }
+        .then((querySnapshot) => {
+          const collection = querySnapshot.docs.map((doc) => {
+            return { id: doc.id, ...doc.data() };
+          });
+          // snapshot
+          //   .forEach((doc) => {
+          //     collection.push({ id: doc.id, ...doc.data() });
+          // console.log(doc.id, " => ", doc.data());
+          // const resData = doc;
+          console.log("on Create Collection Everything", collection[0].id);
+          dispatch({
+            type: CREATE_EVAL,
+            evalData: {
+              id: collection[0].id,
+              title,
+              ownerId: userId,
+            },
+          });
         })
         .catch(function (error) {
           console.log("Error getting document:", error);
         });
-
-      for (const key in resData) {
-        loadedEvals.push(
-          new Eval(
-            key,
-            resData[key].ownerId,
-            resData[key].title,
-            resData[key].date,
-            resData[key].notes
-          )
-        );
-      }
-      dispatch({
-        type: SET_EVAL,
-        userEvals: loadedEvals.filter((prod) => prod.ownerId === userId),
-      });
     } catch (err) {
-      throw err;
+      setError(err.message);
     }
+    //   }
+    // });
   };
 };
 
@@ -77,53 +130,5 @@ export const deleteEval = (evalId) => {
         console.log("Error getting document:", error);
       });
     dispatch({ type: DELETE_EVAL, eid: evalId });
-  };
-};
-
-export const createEval = (title) => {
-  return async () => {
-    firebase.auth().onAuthStateChanged(function (user) {
-      if (user) {
-        var userId = user.uid.toString();
-        try {
-          db.doc(userId).set(
-            {
-              Title: title,
-              // Date: date,
-              // Notes: notes,
-            },
-            { merge: true }
-          );
-          //     .get()
-          //     .then(function (doc) {
-          //       if (doc.exists) {
-          //         console.log("doc data is: ", doc.data().FirstName);
-          //         const resData = doc.data();
-          //         dispatch({
-          //           type: CREATE_EVAL,
-          //           evalData: {
-          //             // id: resData.name,
-          //             title,
-          //             // date,
-          //             // notes,
-          //             // ownerId: userId,
-          //           },
-          //         });
-          //       } else {
-          //         // doc.data() will be undefined in this case
-          //         console.log("No such document!");
-          //       }
-          //     })
-          //     .catch(function (error) {
-          //       console.log("Error getting document:", error);
-          //     })
-          //     .catch(function (error) {
-          //       console.log("Error getting document:", error);
-          //     });
-        } catch (err) {
-          setError(err.message);
-        }
-      }
-    });
   };
 };
