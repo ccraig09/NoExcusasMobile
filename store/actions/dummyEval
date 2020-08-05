@@ -144,3 +144,20 @@ export const createEval = (title) => {
     });
   };
 };
+
+
+
+
+
+const userEvals = useSelector((state) => {
+    const transformedEvals = [];
+    for (const key in state.evals.userEvals) {
+      transformedEvals.push({
+        evalId: key,
+        evalTitle: state.evals.userEvals[key].title,
+        evalOwner: state.evals.userEvals[key].ownerId,
+        evalTime: state.evals.userEvals[key].time,
+      });
+    }
+    return transformedEvals.sort((a, b) => (a.evalTime > b.evalTime ? 1 : -1));
+  });

@@ -14,7 +14,6 @@ import {
 import Modal from "react-native-modal";
 import { Formik } from "formik";
 import * as yup from "yup";
-import DropDownPicker from "react-native-dropdown-picker";
 import AwesomeAlert from "react-native-awesome-alerts";
 import Colors from "../constants/Colors";
 

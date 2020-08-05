@@ -29,7 +29,6 @@ import styled, { useTheme } from "styled-components";
 import { useSelector, useDispatch } from "react-redux";
 import { Avatar } from "react-native-elements";
 import HeaderButton from "../components/UI/HeaderButton";
-import AnimatedSpring from "../components/UI/ProgressWheel";
 import EvalBlock from "../components/EvalBlock";
 
 import { AsyncStorage } from "react-native";
@@ -63,7 +62,19 @@ export const db = firebase.firestore().collection("Members");
 
 const ProfileScreen = (props) => {
   const loadedMemberDeets = useSelector((state) => state.memberdeets.details);
-  const userEvals = useSelector((state) => state.evals.userEvals);
+  const userEvals = useSelector((state) => {
+    const transformedEvals = [];
+    for (const key in state.evals.userEvals) {
+      transformedEvals.push({
+        evalId: key,
+        evalTitle: state.evals.userEvals[key].title,
+        evalOwner: state.evals.userEvals[key].ownerId,
+        evalTime: state.evals.userEvals[key].time,
+      });
+    }
+    return transformedEvals.sort((a, b) => (a.evalTime > b.evalTime ? 1 : -1));
+  });
+
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState();
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -135,6 +146,13 @@ const ProfileScreen = (props) => {
     loadDetails();
     setIsLoading(false);
   }, [dispatch, loadDetails]);
+
+  const selectEvalHandler = (id, title) => {
+    props.navigation.navigate("Eval", {
+      evalId: id,
+      evalTitle: title,
+    });
+  };
 
   const submitHandler = useCallback(async (name, last) => {
     try {
@@ -445,7 +463,12 @@ const ProfileScreen = (props) => {
                 />
               </TouchableOpacity>
             </View>
-            {userEvals.length === 0 ? (
+
+            {isRefreshing ? (
+              <View style={{ justifyContent: "center", alignItems: "center" }}>
+                <ActivityIndicator size="large" color={Colors.noExprimary} />
+              </View>
+            ) : userEvals.length === 0 ? (
               <View
                 style={{
                   flex: 1,
@@ -470,9 +493,17 @@ const ProfileScreen = (props) => {
                 horizontal={true}
                 showsHorizontalScrollIndicator={false}
                 data={userEvals}
-                keyExtractor={(item) => item.id}
+                keyExtractor={(item) => item.evalId}
                 renderItem={(itemData) => (
-                  <EvalBlock title={itemData.item.title} />
+                  <EvalBlock
+                    title={itemData.item.evalTitle}
+                    onSelect={() => {
+                      selectEvalHandler(
+                        itemData.item.evalId,
+                        itemData.item.evalTitle
+                      );
+                    }}
+                  />
                 )}
               />
             )}
@@ -519,7 +550,7 @@ const ProfileScreen = (props) => {
               <Subtitle>{"datos basicos".toUpperCase()}</Subtitle>
               <TouchableOpacity
                 onPress={() => {
-                  setModalVisible(true);
+                  // setModalVisible(true);
                 }}
               >
                 <Text style={styles.textStyle}>Edit Profile</Text>
@@ -870,7 +901,7 @@ const ProfileScreen = (props) => {
                   }}
                 >
                   <View style={styles.wheel}>
-                    <AnimatedSpring
+                    <ProgressWheel
                       composition={"IMC"}
                       current={parseInt(bmi)}
                       Meta={18}

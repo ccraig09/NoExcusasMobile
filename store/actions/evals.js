@@ -39,7 +39,12 @@ export const fetchMemberEvals = () => {
 
         for (const key in collection) {
           loadedEvals.push(
-            new Eval(key, collection[key].title, collection[key].ownerId)
+            new Eval(
+              key,
+              collection[key].title,
+              collection[key].ownerId,
+              collection[key].time
+            )
           );
           dispatch({
             type: SET_EVAL,
@@ -71,7 +76,7 @@ export const createEval = (title) => {
         {
           title,
           ownerId: userId,
-          timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+          time: firebase.firestore.FieldValue.serverTimestamp(),
         },
         { merge: true }
       );
@@ -95,6 +100,7 @@ export const createEval = (title) => {
               id: collection[0].id,
               title,
               ownerId: userId,
+              time: timestamp,
             },
           });
         })

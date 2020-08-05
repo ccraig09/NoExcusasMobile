@@ -1,64 +1,29 @@
 import React from "react";
 import {
-  ScrollView,
   TouchableOpacity,
-  View,
-  // Text,
-  StyleSheet,
+  TouchableNativeFeedback,
   Platform,
 } from "react-native";
 import styled from "styled-components";
 
 export const EvalBlock = (props) => {
-  return (
-    <Item>
-      <Text>{props.title}</Text>
-    </Item>
-    // <ScrollView
-    //   style={{
-    //     flexDirection: "row",
-    //     padding: 20,
-    //     paddingLeft: 12,
-    //     paddingTop: 30,
-    //     marginTop: 40,
-    //   }}
-    //   horizontal={true}
-    //   showsHorizontalScrollIndicator={false}
-    // >
-    //   {/* {evals.map((evalinfo, index) => ( */}
-    //   {/* key={index} text={evalinfo.text}  */}
-    //   <ItemContainer>
-    //     <TouchableOpacity onPress={() => navigate("Eval1")}>
-    //       <Item>
-    //         <Text>Eval 1</Text>
-    //       </Item>
-    //     </TouchableOpacity>
+  let TouchableCmp = TouchableOpacity;
 
-    //     <Item>
-    //       <Text>Eval 2</Text>
-    //     </Item>
-    //     <Item>
-    //       <Text>Eval 3</Text>
-    //     </Item>
-    //     <Item>
-    //       <Text>Eval 4</Text>
-    //     </Item>
-    //     <Item>
-    //       <Text>Eval 5</Text>
-    //     </Item>
-    //     <Item>
-    //       <Text>Eval 6</Text>
-    //     </Item>
-    //   </ItemContainer>
-    // </ScrollView>
+  if (Platform.OS === "android" && Platform.Version >= 21) {
+    TouchableCmp = TouchableNativeFeedback;
+  }
+  return (
+    <TouchableCmp onPress={props.onSelect}>
+      <Item>
+        <Text>{props.title}</Text>
+      </Item>
+    </TouchableCmp>
   );
 };
 
 export default EvalBlock;
 
-const ItemContainer = styled.View`
-  flex-direction: row;
-`;
+co;
 const Item = styled.View`
   background: #ffc733;
   height: 60px;

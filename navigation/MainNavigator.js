@@ -65,7 +65,7 @@ const ProfileStack = createStackNavigator(
   {
     Profile: ProfileScreen,
     // Eval: Evals,
-    Eval1: EvalScreen,
+    Eval: EvalScreen,
     // Eval2: Eval2Screen,
   },
   {

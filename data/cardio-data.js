@@ -11,7 +11,7 @@ const CARDIOCATEGORY = [
     "../assets/icon-noexlogo.png",
     29.99,
     "Class about Cardio to improve stamina",
-    "https://drive.google.com/uc?export=download&id=1reEi64_HUvCXjCxsviqfrpZnmF4e6Fr0"
+    "https://www.googleapis.com/drive/v3/files/1eqhEWxabUTSuKJ_kGYuT-wlWyPkv80wk?alt=media&key=AIzaSyCAOrqiYxKUcbPhLJuGknCBOGDnw_S2DKw"
   ),
   new cardioCategory(
     "c2",

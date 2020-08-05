@@ -15,7 +15,8 @@ export default (state = initalState, action) => {
       const newEval = new Eval(
         action.evalData.id,
         action.evalData.title,
-        action.evalData.ownerId
+        action.evalData.ownerId,
+        action.evalData.time
       );
       return {
         ...state,
