@@ -50,7 +50,8 @@ const HomeScreen = (props) => {
   useEffect(() => {
     setIsLoading(true);
     dispatch(addEvalAction.fetchMemberEvals());
-    console.log("user eval title should be", userEvals);
+    // dispatch(updateActions.fetchUpdates());
+    // console.log("user eval title should be", userEvals);
     loadDetails().then(() => {
       setIsLoading(false);
     });

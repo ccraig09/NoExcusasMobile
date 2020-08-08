@@ -74,7 +74,12 @@ export const fatInfo = (fat) => {
             .set(
               {
                 Fat: fat,
+                FatEval: {
+                  firstEval: "1test",
+                },
                 fattimestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                Muscle: "",
+                muscletimestamp: firebase.firestore.FieldValue.serverTimestamp(),
               },
               { merge: true }
             )
@@ -88,6 +93,32 @@ export const fatInfo = (fat) => {
     });
   };
 };
+// export const evalUpdate = (kcal) => {
+//   return async () => {
+//     firebase.auth().onAuthStateChanged(function (user) {
+//       if (user) {
+//         var userId = user.uid.toString();
+//         try {
+//           db.doc(userId)
+//             .collection(Evals)
+//             .doc()
+//             .set(
+//               {
+//                 KCAL: kcal,
+//               },
+//               { merge: true }
+//             )
+//             .catch(function (error) {
+//               console.log("Error getting document:", error);
+//             });
+//         } catch (err) {
+//           setError(err.message);
+//         }
+//       }
+//     });
+//   };
+// };
+
 export const muscleInfo = (muscle) => {
   return async () => {
     firebase.auth().onAuthStateChanged(function (user) {
@@ -131,6 +162,32 @@ export const kcalInfo = (kcal) => {
             });
         } catch (err) {
           setError(err.message);
+        }
+      }
+    });
+  };
+};
+
+export const evalUpdate = (bmi) => {
+  return async () => {
+    firebase.auth().onAuthStateChanged(function (user) {
+      if (user) {
+        var userId = user.uid.toString();
+        try {
+          db.doc(userId)
+            .collection("Evals")
+            .doc()
+            .set(
+              {
+                bmi,
+              },
+              { merge: true }
+            )
+            .catch(function (error) {
+              console.log("Error getting document:", error);
+            });
+        } catch (err) {
+          throw new Error(err.message);
         }
       }
     });

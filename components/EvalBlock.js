@@ -23,7 +23,6 @@ export const EvalBlock = (props) => {
 
 export default EvalBlock;
 
-co;
 const Item = styled.View`
   background: #ffc733;
   height: 60px;

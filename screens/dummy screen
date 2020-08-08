@@ -6,18 +6,15 @@ import {
   TouchableOpacity,
   Platform,
   StyleSheet,
-  RefreshControl,
   View,
   Text,
 } from "react-native";
-import { useSelector, useDispatch } from "react-redux";
 import styled from "styled-components";
 import { Ionicons } from "@expo/vector-icons";
-import * as updateActions from "../store/actions/evalUpdate";
-import * as yup from "yup";
+import * as detailsActions from "../store/actions/membersDetails";
 
 import ProgressWheel from "../components/UI/ProgressWheel";
-import UpdateDT from "../components/UpdateTable";
+import BaseEvalDT from "../components/BaseEvalDataTable";
 import DataModal from "../components/DataModal";
 
 let screenWidth = Dimensions.get("window").width;
@@ -26,14 +23,8 @@ const screenHeight = Dimensions.get("window").height;
 StatusBar.setHidden(true);
 
 const EvalScreen = (props) => {
-  const loadedMemberDeets = useSelector((state) => state.memberdeets.details);
-  const loadedUpdates = useSelector((state) => state.updates.updates);
   const evalId = props.navigation.getParam("evalId");
-  const EId = evalId;
   const EvalTitle = props.navigation.getParam("evalTitle");
-  const [showAlert, setShowAlert] = useState(false);
-  const [error, setError] = useState();
-  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const [imcModal, setImcModal] = useState(false);
   const [vifatModal, setVifatModal] = useState(false);
@@ -43,104 +34,62 @@ const EvalScreen = (props) => {
   const [metaModal, setMetaModal] = useState(false);
 
   const dispatch = useDispatch();
-  const updatedBmi = loadedUpdates[0].bmi;
-  const updatedId = loadedUpdates[0].id;
+
   const bmi = loadedMemberDeets.BMI;
   const fat = loadedMemberDeets.Fat;
   const muscle = loadedMemberDeets.Muscle;
   const kcal = loadedMemberDeets.KCAL;
   const meta = loadedMemberDeets.Metabolical;
   const vifat = loadedMemberDeets.ViFat;
-  const Eid = EId;
-  const UpId = updatedId;
 
-  const loadDetails = useCallback(async () => {
-    setError(null);
-    setIsRefreshing(true);
-    dispatch(updateActions.fetchUpdates(Eid));
-    console.log("eid will =", Eid);
-
+  const submitMetaInfo = useCallback(async (meta) => {
     try {
-      await dispatch(detailsActions.fetchMemberDetails());
-    } catch (err) {
-      setError(err.message);
-    }
-    setIsRefreshing(false);
-  }, [dispatch, setIsRefreshing, setError]);
-
-  useEffect(() => {
-    const willFocusSub = props.navigation.addListener("willFocus", loadDetails);
-    return () => {
-      willFocusSub.remove();
-    };
-  }, [loadDetails]);
-
-  useEffect(() => {
-    setIsRefreshing(true);
-
-    loadDetails();
-    setIsRefreshing(false);
-  }, [dispatch, loadDetails]);
-
-  const updateMetaInfo = useCallback(async (meta) => {
-    try {
-      dispatch(updateActions.metaInfo(meta));
+      dispatch(detailsActions.metaInfo(meta));
     } catch (err) {
       setError(err.message);
     }
     loadDetails();
     setMetaModal(!metaModal);
   });
-  const updateBmiInfo = useCallback(async (bmi, UpId, Eid) => {
-    console.log("this is the updated id", UpId);
-    const UpdId = UpId.UpId;
+  const submitBmiInfo = useCallback(async (bmi) => {
     try {
-      dispatch(updateActions.bmiEdit(bmi, UpdId, Eid));
+      dispatch(detailsActions.bmiInfo(bmi));
     } catch (err) {
       setError(err.message);
     }
     loadDetails();
     setImcModal(!imcModal);
   });
-  // const updateBmiInfo = useCallback(async (bmi, Eid) => {
-  //   try {
-  //     dispatch(updateActions.bmiInfo(bmi, Eid));
-  //   } catch (err) {
-  //     setError(err.message);
-  //   }
-  //   loadDetails();
-  //   setImcModal(!imcModal);
-  // });
-  const updateVifat = useCallback(async (vifat) => {
+  const submitVifat = useCallback(async (vifat) => {
     try {
-      dispatch(updateActions.vifatInfo(vifat));
+      dispatch(detailsActions.vifatInfo(vifat));
     } catch (err) {
       setError(err.message);
     }
     loadDetails();
     setVifatModal(!vifatModal);
   });
-  const updateKcalInfo = useCallback(async (kcal) => {
+  const submitKcalInfo = useCallback(async (kcal) => {
     try {
-      dispatch(updateActions.kcalInfo(kcal));
+      dispatch(detailsActions.kcalInfo(kcal));
     } catch (err) {
       setError(err.message);
     }
     loadDetails();
     setKcalModal(!kcalModal);
   });
-  const updateMuscleInfo = useCallback(async (muscle) => {
+  const submitMuscleInfo = useCallback(async (muscle) => {
     try {
-      dispatch(updateActions.muscleInfo(muscle));
+      dispatch(detailsActions.muscleInfo(muscle));
     } catch (err) {
       setError(err.message);
     }
     loadDetails();
     setMuscleModal(!muscleModal);
   });
-  const updateFatInfo = useCallback(async (fat) => {
+  const submitFatInfo = useCallback(async (fat) => {
     try {
-      dispatch(updateActions.fatInfo(fat));
+      dispatch(detailsActions.fatInfo(fat));
     } catch (err) {
       setError(err.message);
     }
@@ -148,46 +97,10 @@ const EvalScreen = (props) => {
     setFatModal(!fatModal);
   });
 
-  const tapBackground = () => {
-    setShowAlert(true);
-  };
-
-  const validationSchemaEval = yup.object().shape({
-    bmi: yup
-      .number()
-      .typeError("Debe ser un número")
-      .max(99, "Digitos validos por favor"),
-    fat: yup
-      .number()
-      .typeError("Debe ser un número")
-      .max(99, "Digitos validos por favor"),
-    muscle: yup
-      .number()
-      .typeError("Debe ser un número")
-      .max(99, "Digitos validos por favor"),
-    kcal: yup
-      .number()
-      .typeError("Debe ser un número")
-      .max(9999, "Digitos validos por favor"),
-    metabolical: yup
-      .number()
-      .typeError("Debe ser un número")
-      .max(99, "Digitos validos por favor"),
-    visceral: yup
-      .number()
-      .typeError("Debe ser un número")
-      .max(99, "Digitos validos por favor"),
-  });
-
   return (
     <RootView>
       <Container>
-        <ScrollView
-          showsHorizontalScrollIndicator={false}
-          refreshControl={
-            <RefreshControl refreshing={isRefreshing} onRefresh={loadDetails} />
-          }
-        >
+        <ScrollView>
           <View style={styles.titleBar}>
             <Text style={styles.evalTitle}>{EvalTitle}</Text>
             <Text>"Date Picker"</Text>
@@ -211,7 +124,7 @@ const EvalScreen = (props) => {
             submit={(values, actions) => {
               const { bmi } = values;
 
-              updateBmiInfo(bmi, { UpId }, { Eid });
+              submitBmiInfo(bmi);
               actions.setSubmitting(false);
             }}
             schema={validationSchemaEval}
@@ -221,35 +134,6 @@ const EvalScreen = (props) => {
             formikKeyboard={"numeric"}
             formikMaxLength={4}
           />
-          {/* <DataModal
-            visible={imcModal}
-            backPress={tapBackground}
-            swipeComplete={() => setImcModal(!imcModal)}
-            show={showAlert}
-            alertTitle={"Salir sin guardar?"}
-            alertCancel={"No, continuar"}
-            alertConfirm={"Si, sin guardar"}
-            cancelPressed={() => {
-              setShowAlert(false);
-            }}
-            confirmedPressed={() => {
-              setImcModal(!imcModal);
-              setShowAlert(false);
-            }}
-            initialValues={{ bmi: "" }}
-            submit={(values, actions) => {
-              const { bmi } = values;
-
-              updateBmiInfo(bmi, { Eid });
-              actions.setSubmitting(false);
-            }}
-            schema={validationSchemaEval}
-            genderSelect={false}
-            formikLabel={"IMC"}
-            FormikKey={"bmi"}
-            formikKeyboard={"numeric"}
-            formikMaxLength={4}
-          /> */}
           <DataModal
             visible={metaModal}
             backPress={tapBackground}
@@ -269,7 +153,7 @@ const EvalScreen = (props) => {
             submit={(values, actions) => {
               const { meta } = values;
 
-              updateMetaInfo(meta);
+              submitMetaInfo(meta);
               actions.setSubmitting(false);
             }}
             schema={validationSchemaEval}
@@ -298,7 +182,7 @@ const EvalScreen = (props) => {
             submit={(values, actions) => {
               const { vifat } = values;
 
-              updateVifat(vifat);
+              submitVifat(vifat);
               actions.setSubmitting(false);
             }}
             schema={validationSchemaEval}
@@ -327,7 +211,7 @@ const EvalScreen = (props) => {
             submit={(values, actions) => {
               const { kcal } = values;
 
-              updateKcalInfo(kcal);
+              submitKcalInfo(kcal);
               actions.setSubmitting(false);
             }}
             schema={validationSchemaEval}
@@ -356,7 +240,7 @@ const EvalScreen = (props) => {
             submit={(values, actions) => {
               const { muscle } = values;
 
-              updateMuscleInfo(muscle);
+              submitMuscleInfo(muscle);
               actions.setSubmitting(false);
             }}
             schema={validationSchemaEval}
@@ -385,7 +269,7 @@ const EvalScreen = (props) => {
             submit={(values, actions) => {
               const { fat } = values;
 
-              updateFatInfo(fat);
+              submitFatInfo(fat);
               actions.setSubmitting(false);
             }}
             schema={validationSchemaEval}
@@ -408,7 +292,6 @@ const EvalScreen = (props) => {
                     composition={"IMC"}
                     current={parseInt(bmi)}
                     Meta={18}
-                    update={bmi - updatedBmi}
                   />
                 </View>
               </TouchableOpacity>
@@ -423,14 +306,7 @@ const EvalScreen = (props) => {
                   }}
                 >
                   <View>
-                    <UpdateDT
-                      title1="Eval"
-                      title2="logro"
-                      metaTitle={"Meta"}
-                      Meta={18}
-                      update={updatedBmi}
-                      difference={bmi - updatedBmi}
-                    />
+                    <BaseEvalDT current={bmi} metaTitle={"Meta"} Meta={18} />
                   </View>
                 </View>
               </TouchableOpacity>
@@ -461,7 +337,7 @@ const EvalScreen = (props) => {
                   }}
                 >
                   <View>
-                    <UpdateDT current={fat} metaTitle={"Meta"} Meta={10} />
+                    <BaseEvalDT current={fat} metaTitle={"Meta"} Meta={10} />
                   </View>
                 </View>
               </TouchableOpacity>
@@ -493,7 +369,7 @@ const EvalScreen = (props) => {
                   }}
                 >
                   <View>
-                    <UpdateDT current={muscle} metaTitle={"Meta"} Meta={48} />
+                    <BaseEvalDT current={muscle} metaTitle={"Meta"} Meta={48} />
                   </View>
                 </View>
               </TouchableOpacity>
@@ -524,7 +400,7 @@ const EvalScreen = (props) => {
                   }}
                 >
                   <View>
-                    <UpdateDT current={kcal} metaTitle={"Meta"} Meta={2000} />
+                    <BaseEvalDT current={kcal} metaTitle={"Meta"} Meta={2000} />
                   </View>
                 </View>
               </TouchableOpacity>
@@ -556,7 +432,7 @@ const EvalScreen = (props) => {
                   }}
                 >
                   <View>
-                    <UpdateDT current={meta} metaTitle={"Meta"} Meta={19} />
+                    <BaseEvalDT current={meta} metaTitle={"Meta"} Meta={19} />
                   </View>
                 </View>
               </TouchableOpacity>
@@ -587,7 +463,7 @@ const EvalScreen = (props) => {
                   }}
                 >
                   <View>
-                    <UpdateDT current={vifat} metaTitle={"Meta"} Meta={3} />
+                    <BaseEvalDT current={vifat} metaTitle={"Meta"} Meta={3} />
                   </View>
                 </View>
               </TouchableOpacity>
@@ -643,15 +519,6 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     paddingBottom: 20,
     width: 150,
-  },
-  wheelBlock: {
-    justifyContent: "space-between",
-    flexDirection: "row",
-    marginLeft: 30,
-    marginRight: 30,
-    borderRadius: 10,
-    paddingTop: 20,
-    paddingBottom: 20,
   },
 });
 

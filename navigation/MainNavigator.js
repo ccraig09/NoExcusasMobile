@@ -64,9 +64,7 @@ HomeStack.navigationOptions = ({ navigation }) => {
 const ProfileStack = createStackNavigator(
   {
     Profile: ProfileScreen,
-    // Eval: Evals,
     Eval: EvalScreen,
-    // Eval2: Eval2Screen,
   },
   {
     // mode: "modal",

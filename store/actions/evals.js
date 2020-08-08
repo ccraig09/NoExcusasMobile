@@ -15,7 +15,7 @@ export const fetchMemberEvals = () => {
   return async (dispatch, getState) => {
     const userId = getState().auth.userId;
     const token = getState().auth.token;
-    console.log("get state worked and userid is:", userId);
+    // console.log("get state worked and userid is:", userId);
     try {
       // dbE;
       const events = await dbE;
@@ -23,7 +23,7 @@ export const fetchMemberEvals = () => {
         const collection = querySnapshot.docs.map((doc) => {
           return { id: doc.id, ...doc.data() };
         });
-        console.log("receiving data from collection in firebase:", collection);
+        // console.log("receiving data from collection in firebase:", collection);
         // const snapshot = await dbE.get();
         // snapshot.forEach((doc) => {
         //   console.log(doc.id, "=>", doc.data());
@@ -66,11 +66,7 @@ export const fetchMemberEvals = () => {
 
 export const createEval = (title) => {
   return async (dispatch, getState) => {
-    // firebase.auth().onAuthStateChanged(function (user) {
-    //   if (user) {
-    // var userId = user.uid.toString();
     const userId = getState().auth.userId;
-    const token = getState().auth.token;
     try {
       await dbE.doc().set(
         {
@@ -88,11 +84,7 @@ export const createEval = (title) => {
           const collection = querySnapshot.docs.map((doc) => {
             return { id: doc.id, ...doc.data() };
           });
-          // snapshot
-          //   .forEach((doc) => {
-          //     collection.push({ id: doc.id, ...doc.data() });
-          // console.log(doc.id, " => ", doc.data());
-          // const resData = doc;
+
           console.log("on Create Collection Everything", collection[0].id);
           dispatch({
             type: CREATE_EVAL,
@@ -110,8 +102,6 @@ export const createEval = (title) => {
     } catch (err) {
       setError(err.message);
     }
-    //   }
-    // });
   };
 };
 

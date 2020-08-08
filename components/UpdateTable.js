@@ -6,16 +6,18 @@ import { Dimensions } from "react-native";
 let screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
 
-const BaseEvalDT = (props) => {
+const UpdateDT = (props) => {
   return (
     <DataContainer>
       <DataTable>
         <DataTable.Header>
-          <DataTable.Title>Ahora</DataTable.Title>
+          <DataTable.Title>{props.title1}</DataTable.Title>
+          <DataTable.Title>{props.title2}</DataTable.Title>
           <DataTable.Title numeric>{props.metaTitle}</DataTable.Title>
         </DataTable.Header>
         <DataTable.Row>
-          <DataTable.Cell>{props.current}</DataTable.Cell>
+          <DataTable.Cell>{props.update}</DataTable.Cell>
+          <DataTable.Cell>{props.difference}</DataTable.Cell>
           <DataTable.Cell numeric>{props.Meta}</DataTable.Cell>
         </DataTable.Row>
       </DataTable>
@@ -23,7 +25,7 @@ const BaseEvalDT = (props) => {
   );
 };
 
-export default BaseEvalDT;
+export default UpdateDT;
 
 const DataContainer = styled.View`
   background: #ffc733;

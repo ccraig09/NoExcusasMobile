@@ -111,15 +111,16 @@ const ProfileScreen = (props) => {
   const loadDetails = useCallback(async () => {
     setError(null);
     setIsRefreshing(true);
+    AsyncStorage.getItem("userData").then((value) => {
+      const data = JSON.parse(value);
+      setUserPhoto(data.avatar);
+    });
 
     try {
       await dispatch(detailsActions.fetchMemberDetails());
       await dispatch(addEvalAction.fetchMemberEvals());
-      console.log("user eval title should be", userEvals);
-      AsyncStorage.getItem("userData").then((value) => {
-        const data = JSON.parse(value);
-        setUserPhoto(data.avatar);
-      });
+      // dispatch(updateActions.fetchUpdates());
+      // console.log("user eval title should be", userEvals);
     } catch (err) {
       setError(err.message);
     }

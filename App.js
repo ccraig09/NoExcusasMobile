@@ -10,6 +10,7 @@ import { enableScreens } from "react-native-screens";
 import authReducer from "./store/reducers/auth";
 import memberReducer from "./store/reducers/membersDetails";
 import evalReducer from "./store/reducers/evals";
+import updateReducer from "./store/reducers/evalUpdate";
 
 import productsReducer from "./store/reducers/products";
 // import { encode, decode } from "react-native-base64";
@@ -31,6 +32,7 @@ const rootReducer = combineReducers({
   memberdeets: memberReducer,
   auth: authReducer,
   evals: evalReducer,
+  updates: updateReducer,
 });
 
 const store = createStore(rootReducer, applyMiddleware(ReduxThunk));

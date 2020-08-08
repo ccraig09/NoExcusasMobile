@@ -3,17 +3,22 @@ import { View, Text, Platform } from "react-native";
 import AnimatedProgressWheel from "react-native-progress-wheel";
 import ProgressCircle from "./ProgressCircle";
 
-const AnimatedSpring = (props, { value }) => {
+const ProgressWheel = (props, { value }) => {
   // value = 20;
-  var progress = 10;
+
   const A = props.current;
   const B = props.Meta;
+  const P = props.update;
   const C = A - B;
-  const D = 2 / C;
+  const D = P / C;
   const X = D.toFixed(2);
+  // console.log(A);
+  // console.log(B);
+  // console.log(P);
+  // console.log(X);
   let result;
   if (Math.abs(X) < 0.25) {
-    result = "#ff0000";
+    result = "red";
   }
   if (Math.abs(X) >= 0.25 && Math.abs(X) <= 0.75) {
     result = "yellow";
@@ -32,19 +37,33 @@ const AnimatedSpring = (props, { value }) => {
         borderRadius: 10,
       }}
     >
-      <Text style={{ fontSize: 18, marginBottom: 10, fontWeight: "bold" }}>
+      {/* <Text style={{ fontSize: 18, marginBottom: 10, fontWeight: "bold" }}>
         {props.composition}
-      </Text>
+      </Text> */}
       <ProgressCircle
-        value={0.23}
-        size={100}
+        value={0.35}
+        size={140}
         thickness={17}
         color={result}
         animationMethod="spring"
         animationConfig={{ delay: 2000, stiffness: 30 }}
         unfilledColor="grey"
         shouldAnimateFirstValue={true}
-      ></ProgressCircle>
+      >
+        <Text style={{ fontSize: 18, fontWeight: "bold" }}>
+          {props.composition}
+        </Text>
+        <Text
+          style={{
+            color: result,
+            fontSize: 15,
+            fontFamily: "aliens",
+            fontWeight: "bold",
+          }}
+        >
+          {X} %
+        </Text>
+      </ProgressCircle>
       {/* <AnimatedProgressWheel
         size={79}
         width={16}
@@ -54,9 +73,9 @@ const AnimatedSpring = (props, { value }) => {
         progress={Math.abs(X)}
         fullColor={Platform.OS === "ios" ? "#00ff00" : null}
       /> */}
-      <Text style={{ fontSize: 18 }}>{props.current / 100}</Text>
+      {/* <Text style={{ fontSize: 18 }}>{props.current / 100}</Text> */}
     </View>
   );
 };
 
-export default AnimatedSpring;
+export default ProgressWheel;
