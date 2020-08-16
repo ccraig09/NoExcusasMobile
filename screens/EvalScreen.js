@@ -6,9 +6,11 @@ import {
   TouchableOpacity,
   Platform,
   StyleSheet,
+  ActivityIndicator,
   RefreshControl,
   View,
   Text,
+  Button,
 } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
 import styled from "styled-components";
@@ -19,6 +21,7 @@ import * as yup from "yup";
 import ProgressWheel from "../components/UI/ProgressWheel";
 import UpdateDT from "../components/UpdateTable";
 import DataModal from "../components/DataModal";
+import Colors from "../constants/Colors";
 
 let screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
@@ -26,6 +29,7 @@ const screenHeight = Dimensions.get("window").height;
 StatusBar.setHidden(true);
 
 const EvalScreen = (props) => {
+  const dispatch = useDispatch();
   const loadedMemberDeets = useSelector((state) => state.memberdeets.details);
   const loadedUpdates = useSelector((state) => state.updates.updates);
   const evalId = props.navigation.getParam("evalId");
@@ -34,6 +38,7 @@ const EvalScreen = (props) => {
   const [showAlert, setShowAlert] = useState(false);
   const [error, setError] = useState();
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const [imcModal, setImcModal] = useState(false);
   const [vifatModal, setVifatModal] = useState(false);
@@ -42,9 +47,8 @@ const EvalScreen = (props) => {
   const [fatModal, setFatModal] = useState(false);
   const [metaModal, setMetaModal] = useState(false);
 
-  const dispatch = useDispatch();
-  const updatedBmi = loadedUpdates[0].bmi;
-  const updatedId = loadedUpdates[0].id;
+  // const updatedBmi = loadedUpdates;
+  // const updatedId = loadedUpdates;
   const bmi = loadedMemberDeets.BMI;
   const fat = loadedMemberDeets.Fat;
   const muscle = loadedMemberDeets.Muscle;
@@ -52,11 +56,15 @@ const EvalScreen = (props) => {
   const meta = loadedMemberDeets.Metabolical;
   const vifat = loadedMemberDeets.ViFat;
   const Eid = EId;
-  const UpId = updatedId;
+  // const UpId = updatedId;
+
+  const updatedBmi = loadedUpdates.length === 0 ? "" : loadedUpdates[0].bmi;
+
+  const UpId = loadedUpdates.length === 0 ? "" : loadedUpdates[0].id;
 
   const loadDetails = useCallback(async () => {
     setError(null);
-    setIsRefreshing(true);
+    setIsLoading(true);
     dispatch(updateActions.fetchUpdates(Eid));
     console.log("eid will =", Eid);
 
@@ -65,8 +73,9 @@ const EvalScreen = (props) => {
     } catch (err) {
       setError(err.message);
     }
-    setIsRefreshing(false);
-  }, [dispatch, setIsRefreshing, setError]);
+
+    setIsLoading(false);
+  }, [dispatch, setIsLoading, setError]);
 
   useEffect(() => {
     const willFocusSub = props.navigation.addListener("willFocus", loadDetails);
@@ -76,11 +85,19 @@ const EvalScreen = (props) => {
   }, [loadDetails]);
 
   useEffect(() => {
-    setIsRefreshing(true);
+    let isMounted = true;
 
-    loadDetails();
-    setIsRefreshing(false);
-  }, [dispatch, loadDetails]);
+    if (isMounted) {
+      setIsLoading(true);
+
+      loadDetails();
+      setIsLoading(false);
+    }
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const updateMetaInfo = useCallback(async (meta) => {
     try {
@@ -91,7 +108,7 @@ const EvalScreen = (props) => {
     loadDetails();
     setMetaModal(!metaModal);
   });
-  const updateBmiInfo = useCallback(async (bmi, UpId, Eid) => {
+  const editBmiInfo = useCallback(async (bmi, UpId, Eid) => {
     console.log("this is the updated id", UpId);
     const UpdId = UpId.UpId;
     try {
@@ -102,15 +119,15 @@ const EvalScreen = (props) => {
     loadDetails();
     setImcModal(!imcModal);
   });
-  // const updateBmiInfo = useCallback(async (bmi, Eid) => {
-  //   try {
-  //     dispatch(updateActions.bmiInfo(bmi, Eid));
-  //   } catch (err) {
-  //     setError(err.message);
-  //   }
-  //   loadDetails();
-  //   setImcModal(!imcModal);
-  // });
+  const updateBmiInfo = useCallback(async (bmi, Eid) => {
+    try {
+      dispatch(updateActions.bmiInfo(bmi, Eid));
+    } catch (err) {
+      setError(err.message);
+    }
+    setImcModal(!imcModal);
+    loadDetails();
+  });
   const updateVifat = useCallback(async (vifat) => {
     try {
       dispatch(updateActions.vifatInfo(vifat));
@@ -148,6 +165,19 @@ const EvalScreen = (props) => {
     setFatModal(!fatModal);
   });
 
+  const deleteHandler = (Eid) => {
+    Alert.alert("¿Usted esta seguro?", "Quiere borrar este ítem?", [
+      { text: "No", style: "default" },
+      {
+        text: "Si",
+        style: "destructive",
+        onPress: () => {
+          dispatch(updateActions.deleteEval(Eid));
+        },
+      },
+    ]);
+  };
+
   const tapBackground = () => {
     setShowAlert(true);
   };
@@ -179,6 +209,23 @@ const EvalScreen = (props) => {
       .max(99, "Digitos validos por favor"),
   });
 
+  if (isLoading) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" color={Colors.noExprimary} />
+        <Text>Cargando detalles del usuario</Text>
+      </View>
+    );
+  }
+
+  // if (loadedUpdates.length === 0) {
+  //   return (
+  //     <View style={styles.centered}>
+  //       <Text>No products found. Maybe start adding some!</Text>
+  //     </View>
+  //   );
+  // }
+
   return (
     <RootView>
       <Container>
@@ -189,67 +236,80 @@ const EvalScreen = (props) => {
           }
         >
           <View style={styles.titleBar}>
-            <Text style={styles.evalTitle}>{EvalTitle}</Text>
-            <Text>"Date Picker"</Text>
+            <View>
+              <Text style={styles.evalTitle}>{EvalTitle}</Text>
+              <Text style={{ marginLeft: 20 }}>"Date Picker"</Text>
+            </View>
+            <View style={{ marginRight: 20 }}>
+              <Button
+                title="Borrar"
+                color="red"
+                onPress={deleteHandler.bind(this, Eid)}
+              />
+            </View>
           </View>
-          <DataModal
-            visible={imcModal}
-            backPress={tapBackground}
-            swipeComplete={() => setImcModal(!imcModal)}
-            show={showAlert}
-            alertTitle={"Salir sin guardar?"}
-            alertCancel={"No, continuar"}
-            alertConfirm={"Si, sin guardar"}
-            cancelPressed={() => {
-              setShowAlert(false);
-            }}
-            confirmedPressed={() => {
-              setImcModal(!imcModal);
-              setShowAlert(false);
-            }}
-            initialValues={{ bmi: "" }}
-            submit={(values, actions) => {
-              const { bmi } = values;
 
-              updateBmiInfo(bmi, { UpId }, { Eid });
-              actions.setSubmitting(false);
-            }}
-            schema={validationSchemaEval}
-            genderSelect={false}
-            formikLabel={"IMC"}
-            FormikKey={"bmi"}
-            formikKeyboard={"numeric"}
-            formikMaxLength={4}
-          />
-          {/* <DataModal
-            visible={imcModal}
-            backPress={tapBackground}
-            swipeComplete={() => setImcModal(!imcModal)}
-            show={showAlert}
-            alertTitle={"Salir sin guardar?"}
-            alertCancel={"No, continuar"}
-            alertConfirm={"Si, sin guardar"}
-            cancelPressed={() => {
-              setShowAlert(false);
-            }}
-            confirmedPressed={() => {
-              setImcModal(!imcModal);
-              setShowAlert(false);
-            }}
-            initialValues={{ bmi: "" }}
-            submit={(values, actions) => {
-              const { bmi } = values;
+          {updatedBmi ? (
+            <DataModal
+              visible={imcModal}
+              backPress={tapBackground}
+              swipeComplete={() => setImcModal(!imcModal)}
+              show={showAlert}
+              alertTitle={"Salir sin guardar?"}
+              alertCancel={"No, continuar"}
+              alertConfirm={"Si, sin guardar"}
+              cancelPressed={() => {
+                setShowAlert(false);
+              }}
+              confirmedPressed={() => {
+                setImcModal(!imcModal);
+                setShowAlert(false);
+              }}
+              initialValues={{ bmi: "" }}
+              submit={(values, actions) => {
+                const { bmi } = values;
 
-              updateBmiInfo(bmi, { Eid });
-              actions.setSubmitting(false);
-            }}
-            schema={validationSchemaEval}
-            genderSelect={false}
-            formikLabel={"IMC"}
-            FormikKey={"bmi"}
-            formikKeyboard={"numeric"}
-            formikMaxLength={4}
-          /> */}
+                actions.setSubmitting(false);
+                editBmiInfo(bmi, { UpId }, { Eid });
+              }}
+              schema={validationSchemaEval}
+              genderSelect={false}
+              formikLabel={"IMC"}
+              FormikKey={"bmi"}
+              formikKeyboard={"numeric"}
+              formikMaxLength={4}
+            />
+          ) : (
+            <DataModal
+              visible={imcModal}
+              backPress={tapBackground}
+              swipeComplete={() => setImcModal(!imcModal)}
+              show={showAlert}
+              alertTitle={"Salir sin guardar?"}
+              alertCancel={"No, continuar"}
+              alertConfirm={"Si, sin guardar"}
+              cancelPressed={() => {
+                setShowAlert(false);
+              }}
+              confirmedPressed={() => {
+                setImcModal(!imcModal);
+                setShowAlert(false);
+              }}
+              initialValues={{ bmi: "" }}
+              submit={(values, actions) => {
+                const { bmi } = values;
+
+                updateBmiInfo(bmi, { Eid });
+                actions.setSubmitting(false);
+              }}
+              schema={validationSchemaEval}
+              genderSelect={false}
+              formikLabel={"IMC"}
+              FormikKey={"bmi"}
+              formikKeyboard={"numeric"}
+              formikMaxLength={4}
+            />
+          )}
           <DataModal
             visible={metaModal}
             backPress={tapBackground}
@@ -395,7 +455,21 @@ const EvalScreen = (props) => {
             formikKeyboard={"numeric"}
             formikMaxLength={4}
           />
+
           <Subtitle>Progreso</Subtitle>
+          <View>
+            {loadedUpdates.length === 0 ? (
+              <View style={styles.centered}>
+                <Text>
+                  Oprime una composición para actualizar primer evaluación
+                </Text>
+              </View>
+            ) : (
+              <View style={styles.centered}>
+                <Text>Oprime una composición para actualizar evaluación</Text>
+              </View>
+            )}
+          </View>
           <View style={styles.wheelBlock}>
             <View>
               <TouchableOpacity
@@ -653,6 +727,7 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     paddingBottom: 20,
   },
+  centered: { justifyContent: "center", alignItems: "center" },
 });
 
 const RootView = styled.View`

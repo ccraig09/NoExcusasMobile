@@ -1,5 +1,4 @@
 import { UPDATE_MEMBER, SET_MEMBER } from "../actions/membersDetails";
-import MemberDetails from "../../models/memberDetail";
 
 const initialState = {
   details: {},

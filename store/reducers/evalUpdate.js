@@ -1,7 +1,7 @@
 import { SET_UPDATES } from "../actions/evalUpdate";
 
 const initialState = {
-  updates: {},
+  updates: [],
 };
 
 export default (state = initialState, action) => {

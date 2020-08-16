@@ -16,16 +16,16 @@ export const fetchUpdates = (Eid) => {
         const collection = querySnapshot.docs.map((doc) => {
           return { id: doc.id, ...doc.data() };
         });
-        // const loadedUpdates = {};
+        // let loadedUpdates = {};
         const loadedUpdates = collection;
         console.log(
-          "these will be filterd loadedUpdates",
-          loadedUpdates.filter((per) => per.Eid.Eid === Eid)[0].id
+          "these will be filterd loadedUpdates"
+          // loadedUpdates.filter((per) => per.Eid.Eid === Eid)[0].bmi
         );
-        console.log(
-          "these are the evalupdates:",
-          collection.filter((sumn) => sumn.Eid)
-        );
+        // console.log(
+        //   "these are the evalupdates:",
+        //   collection.filter((sumn) => sumn.Eid)
+        // );
         dispatch({
           type: SET_UPDATES,
           updates: loadedUpdates.filter((per) => per.Eid.Eid === Eid),
@@ -35,6 +35,10 @@ export const fetchUpdates = (Eid) => {
       throw err;
     }
   };
+};
+
+export const deleteEval = (Eid) => {
+  return async (dispatch, getState) => {};
 };
 
 export const bmiInfo = (bmi, Eid) => {
