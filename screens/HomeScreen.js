@@ -37,11 +37,15 @@ const HomeScreen = (props) => {
   const classes = useSelector((state) => state.products.availableClasses);
   const loadedMemberDeets = useSelector((state) => state.memberdeets.details);
   const userEvals = useSelector((state) => state.evals.userEvals);
-  const [firstName, setFirstName] = useState();
+  // const [firstName, setFirstName] = useState();
   const [lastName, setLastName] = useState();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [userPhoto, setUserPhoto] = useState();
+  const firstName =
+    typeof loadedMemberDeets === "undefined"
+      ? "caros"
+      : loadedMemberDeets.FirstName;
 
   // const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
@@ -61,7 +65,7 @@ const HomeScreen = (props) => {
     setError(null);
     setIsRefreshing(true);
     try {
-      await dispatch(detailsActions.fetchMemberDetails());
+      // await dispatch(detailsActions.fetchMemberDetails());
       AsyncStorage.getItem("userData").then((value) => {
         const data = JSON.parse(value);
         setUserPhoto(data.avatar);
@@ -129,7 +133,7 @@ const HomeScreen = (props) => {
               <View style={styles.displayName}>
                 <Text style={styles.subtitle}>{greetingMessage}, </Text>
                 {/* <View style={{ flexDirection: "row" }}> */}
-                <Text style={styles.hello}>{loadedMemberDeets.FirstName}</Text>
+                <Text style={styles.hello}>{firstName}</Text>
               </View>
             </View>
             <View style={{ alignItems: "flex-end" }}>

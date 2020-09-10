@@ -11,19 +11,16 @@ const ProgressWheel = (props, { value }) => {
   const P = props.update;
   const C = A - B;
   const D = P / C;
-  const X = D.toFixed(2);
-  // console.log(A);
-  // console.log(B);
-  // console.log(P);
-  // console.log(X);
+  const X = isNaN(D) ? 0 : D.toFixed(2);
+
   let result;
-  if (Math.abs(X) < 0.25) {
+  if (X * 100 < 25) {
     result = "red";
   }
-  if (Math.abs(X) >= 0.25 && Math.abs(X) <= 0.75) {
+  if (X * 100 >= 25 && X * 100 <= 75) {
     result = "yellow";
   }
-  if (Math.abs(X) > 0.75) {
+  if (X * 100 > 75) {
     result = "#00ff00";
   }
   // console.log("x is equal to", Math.abs(X));
@@ -37,11 +34,8 @@ const ProgressWheel = (props, { value }) => {
         borderRadius: 10,
       }}
     >
-      {/* <Text style={{ fontSize: 18, marginBottom: 10, fontWeight: "bold" }}>
-        {props.composition}
-      </Text> */}
       <ProgressCircle
-        value={0.35}
+        value={Math.abs(X)}
         size={140}
         thickness={17}
         color={result}
@@ -61,19 +55,9 @@ const ProgressWheel = (props, { value }) => {
             fontWeight: "bold",
           }}
         >
-          {X} %
+          {(Math.abs(X) * 100).toFixed(2)} %
         </Text>
       </ProgressCircle>
-      {/* <AnimatedProgressWheel
-        size={79}
-        width={16}
-        color={result}
-        animateFromValue={0}
-        duration={5000}
-        progress={Math.abs(X)}
-        fullColor={Platform.OS === "ios" ? "#00ff00" : null}
-      /> */}
-      {/* <Text style={{ fontSize: 18 }}>{props.current / 100}</Text> */}
     </View>
   );
 };

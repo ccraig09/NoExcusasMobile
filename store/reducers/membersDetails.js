@@ -1,7 +1,14 @@
-import { UPDATE_MEMBER, SET_MEMBER } from "../actions/membersDetails";
+import {
+  UPDATE_MEMBER,
+  SET_MEMBER,
+  SET_FRONT,
+  SET_SIDE,
+} from "../actions/membersDetails";
 
 const initialState = {
   details: {},
+  // frontImage: "",
+  // sideImage: "",
 };
 
 export default (state = initialState, action) => {
@@ -10,36 +17,18 @@ export default (state = initialState, action) => {
       return {
         details: action.details,
       };
-    // return Object.assign({}, state, {
-    //   details: action.details,
-    // });
-
-    // case UPDATE_MEMBER:
-    //   const updateMember = new MemberDetails(
-    //     // action.detailsData.id,
-    //     action.memberData.fName,
-    //     action.memberData.lName,
-    //     action.memberData.age,
-    //     action.memberData.weight,
-    //     action.memberData.height,
-    //     action.memberData.medHistory,
-    //     action.memberData.occupation,
-    //     action.memberData.bmi,
-    //     action.memberData.fat,
-    //     action.memberData.muscle,
-    //     action.memberData.kcal,
-    //     action.memberData.meta,
-    //     action.memberData.vis,
-    //     action.memberData.startDate,
-    //     action.memberData.endDate,
-    //     action.memberData.daysLeft,
-    //     action.memberData.basePic,
-    //     action.memberData.newPic
-    //   );
+    // case SET_FRONT:
     //   return {
-    //     ...state,
-    //     details: state.details.concat(updateMember),
+    //     frontImage: action.frontImage,
+    //   };
+    // case SET_SIDE:
+    //   return {
+    //     sideImage: action.sideImage,
     //   };
   }
   return state;
 };
+
+// return Object.assign({}, state, {
+//   details: action.details,
+// });

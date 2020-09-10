@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   RefreshControl,
   View,
+  Alert,
   Text,
   Button,
 } from "react-native";
@@ -16,6 +17,12 @@ import { useSelector, useDispatch } from "react-redux";
 import styled from "styled-components";
 import { Ionicons } from "@expo/vector-icons";
 import * as updateActions from "../store/actions/evalUpdate";
+import * as addEvalAction from "../store/actions/evals";
+import ImagePicker from "../components/ImagePicker";
+import firebase from "../components/firebase";
+import * as detailsActions from "../store/actions/membersDetails";
+import Toast from "react-native-tiny-toast";
+
 import * as yup from "yup";
 
 import ProgressWheel from "../components/UI/ProgressWheel";
@@ -33,6 +40,8 @@ const EvalScreen = (props) => {
   const loadedMemberDeets = useSelector((state) => state.memberdeets.details);
   const loadedUpdates = useSelector((state) => state.updates.updates);
   const evalId = props.navigation.getParam("evalId");
+  const docId = props.navigation.getParam("docTitle");
+
   const EId = evalId;
   const EvalTitle = props.navigation.getParam("evalTitle");
   const [showAlert, setShowAlert] = useState(false);
@@ -57,25 +66,26 @@ const EvalScreen = (props) => {
   const vifat = loadedMemberDeets.ViFat;
   const Eid = EId;
   // const UpId = updatedId;
-
+  const [FImage, setFImage] = useState(null);
+  const [SImage, setSImage] = useState(null);
   const updatedBmi = loadedUpdates.length === 0 ? "" : loadedUpdates[0].bmi;
 
   const UpId = loadedUpdates.length === 0 ? "" : loadedUpdates[0].id;
 
   const loadDetails = useCallback(async () => {
     setError(null);
-    setIsLoading(true);
+    setIsRefreshing(true);
     dispatch(updateActions.fetchUpdates(Eid));
-    console.log("eid will =", Eid);
 
     try {
       await dispatch(detailsActions.fetchMemberDetails());
     } catch (err) {
       setError(err.message);
     }
-
-    setIsLoading(false);
-  }, [dispatch, setIsLoading, setError]);
+    await frontImageLoad();
+    await sideImageLoad();
+    setIsRefreshing(false);
+  }, [dispatch, setIsRefreshing, setError]);
 
   useEffect(() => {
     const willFocusSub = props.navigation.addListener("willFocus", loadDetails);
@@ -99,6 +109,68 @@ const EvalScreen = (props) => {
     };
   }, []);
 
+  const frontImageLoad = useCallback(async () => {
+    firebase.auth().onAuthStateChanged(function (user) {
+      if (user) {
+        var userId = user.uid.toString();
+        var storage = firebase.storage().ref();
+        storage
+          .child(`UserBaseImages/${userId}/${Eid}/FrontImage`)
+          .getDownloadURL()
+          .then(function (url) {
+            setFImage(url);
+          })
+          .catch(function (error) {
+            switch (error.code) {
+              case "storage/object-not-found":
+                // console.log(error);
+                break;
+              case "storage/unauthorized":
+                // User doesn't have permission to access the object
+                break;
+
+              case "storage/canceled":
+                // User canceled the upload
+                break;
+            }
+          });
+      }
+    });
+  });
+
+  const sideImageLoad = useCallback(async () => {
+    firebase.auth().onAuthStateChanged(function (user) {
+      if (user) {
+        var userId = user.uid.toString();
+        var storage = firebase.storage().ref();
+        storage
+          .child(`UserBaseImages/${userId}/${Eid}/SideImage`)
+          .getDownloadURL()
+          .then(function (url) {
+            setSImage(url);
+          })
+          .catch(function (error) {
+            switch (error.code) {
+              case "storage/object-not-found":
+                // console.log(error);
+                break;
+              case "storage/unauthorized":
+                // User doesn't have permission to access the object
+                // console.log(error);
+
+                break;
+
+              case "storage/canceled":
+                // User canceled the upload
+                // console.log(error);
+
+                break;
+            }
+          });
+      }
+    });
+  });
+
   const updateMetaInfo = useCallback(async (meta) => {
     try {
       dispatch(updateActions.metaInfo(meta));
@@ -116,8 +188,8 @@ const EvalScreen = (props) => {
     } catch (err) {
       setError(err.message);
     }
-    loadDetails();
     setImcModal(!imcModal);
+    loadDetails();
   });
   const updateBmiInfo = useCallback(async (bmi, Eid) => {
     try {
@@ -165,17 +237,96 @@ const EvalScreen = (props) => {
     setFatModal(!fatModal);
   });
 
-  const deleteHandler = (Eid) => {
-    Alert.alert("¿Usted esta seguro?", "Quiere borrar este ítem?", [
+  const deleteHandler = (docId, UpId, Eid) => {
+    // const UpdId = UpId.UpId;
+    // console.log("this is the deleted docId=", docId);
+    // console.log("this is the deleted subdocid=", UpId);
+    // console.log("this is the deleted eid=", Eid);
+
+    Alert.alert("¿Usted esta seguro?", "Quiere borrar este evaluación?", [
       { text: "No", style: "default" },
       {
         text: "Si",
         style: "destructive",
         onPress: () => {
-          dispatch(updateActions.deleteEval(Eid));
+          if (UpId === "") {
+            // dispatch(updateActions.deleteSub(UpId));
+            // dispatch(updateActions.deleteImages(Eid));
+            dispatch(addEvalAction.deleteEval(docId));
+            props.navigation.goBack();
+          } else {
+            dispatch(updateActions.deleteSub(UpId));
+            dispatch(updateActions.deleteImages(Eid));
+            dispatch(addEvalAction.deleteEval(docId));
+            props.navigation.goBack();
+          }
         },
       },
     ]);
+  };
+
+  const frontImageTakenHandler = useCallback(async (uri) => {
+    console.log("sending out command");
+    const response = await fetch(uri);
+    const blob = await response.blob();
+    try {
+      await dispatch(updateActions.frontImage(blob, Eid));
+    } catch (err) {
+      setError(err.message);
+    }
+    const toast = Toast.showLoading("Subiendo Foto...");
+    setTimeout(() => {
+      // Recommend
+      Toast.hide(toast);
+
+      // or Toast.hide()
+      // If you don't pass toast，it will hide the last toast by default.
+    }, 3000);
+    setTimeout(() => loadDetails(), 4000);
+    setTimeout(() => frontImageLoad(), 4500);
+  });
+  const frontImageDeleteHandler = async () => {
+    const toast = Toast.showLoading("Borrando Foto");
+    setTimeout(() => {
+      // Recommend
+      Toast.hide(toast);
+
+      // or Toast.hide()
+      // If you don't pass toast，it will hide the last toast by default.
+    }, 1000);
+    setFImage("");
+    setTimeout(() => loadDetails(), 3000);
+  };
+  const sideImageTakenHandler = useCallback(async (uri) => {
+    const response = await fetch(uri);
+    const blobS = await response.blob();
+    try {
+      await dispatch(updateActions.sideImage(blobS, Eid));
+    } catch (err) {
+      setError(err.message);
+    }
+    const toast = Toast.showLoading("Subiendo Foto...");
+    setTimeout(() => {
+      // Recommend
+      Toast.hide(toast);
+
+      // or Toast.hide()
+      // If you don't pass toast，it will hide the last toast by default.
+    }, 3000);
+    setTimeout(() => loadDetails(), 4000);
+    setTimeout(() => sideImageLoad(), 4500);
+  });
+  const sideImageDeleteHandler = () => {
+    const toast = Toast.showLoading("Borrando Foto");
+    setTimeout(() => {
+      // Recommend
+      Toast.hide(toast);
+
+      // or Toast.hide()
+      // If you don't pass toast，it will hide the last toast by default.
+    }, 1000);
+    setSImage("");
+    setTimeout(() => loadDetails(), 3000);
   };
 
   const tapBackground = () => {
@@ -244,7 +395,7 @@ const EvalScreen = (props) => {
               <Button
                 title="Borrar"
                 color="red"
-                onPress={deleteHandler.bind(this, Eid)}
+                onPress={deleteHandler.bind(this, docId, UpId, Eid)}
               />
             </View>
           </View>
@@ -667,6 +818,36 @@ const EvalScreen = (props) => {
               </TouchableOpacity>
             </View>
           </View>
+          <View>
+            <Subtitle>{"progress imagen".toUpperCase()}</Subtitle>
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                marginLeft: 30,
+                marginRight: 30,
+              }}
+            >
+              <ImagePicker
+                onImageTaken={frontImageTakenHandler}
+                title="Frontal"
+                source={FImage}
+                docId={docId}
+                UpId={UpId}
+                Eid={Eid}
+                onDelete={frontImageDeleteHandler}
+              />
+              <ImagePicker
+                onImageTaken={sideImageTakenHandler}
+                title="Lateral"
+                source={SImage}
+                docId={docId}
+                UpId={UpId}
+                Eid={Eid}
+                onDelete={sideImageDeleteHandler}
+              />
+            </View>
+          </View>
         </ScrollView>
       </Container>
       <TouchableOpacity
@@ -727,7 +908,7 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     paddingBottom: 20,
   },
-  centered: { justifyContent: "center", alignItems: "center" },
+  centered: { flex: 1, justifyContent: "center", alignItems: "center" },
 });
 
 const RootView = styled.View`
@@ -748,7 +929,7 @@ const Subtitle = styled.Text`
   font-size: 25px;
   margin-left: 20px;
   margin-top: 55px;
-  margin-bottom: 20px;
+  margin-bottom: 30px;
   text-transform: uppercase;
 `;
 

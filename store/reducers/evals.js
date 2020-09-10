@@ -16,6 +16,7 @@ export default (state = initalState, action) => {
         action.evalData.id,
         action.evalData.title,
         action.evalData.ownerId,
+        action.evalData.docTitle,
         action.evalData.time
       );
       return {
@@ -23,12 +24,11 @@ export default (state = initalState, action) => {
         userEvals: state.userEvals.concat(newEval),
       };
     case DELETE_EVAL:
-      return {
-        ...state,
-        userEvals: state.userEvals.filter(
-          (product) => product.id !== action.pid
-        ),
-      };
+      return initalState;
+    // {
+    //   ...state,
+    //   userEvals: state.userEvals.filter((eva) => eva.id !== action.eid),
+    // };
   }
   return state;
 };

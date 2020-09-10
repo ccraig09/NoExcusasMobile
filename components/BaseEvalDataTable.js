@@ -11,7 +11,7 @@ const BaseEvalDT = (props) => {
     <DataContainer>
       <DataTable>
         <DataTable.Header>
-          <DataTable.Title>Ahora</DataTable.Title>
+          <DataTable.Title>Base</DataTable.Title>
           <DataTable.Title numeric>{props.metaTitle}</DataTable.Title>
         </DataTable.Header>
         <DataTable.Row>

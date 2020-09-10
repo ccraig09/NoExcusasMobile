@@ -13,7 +13,7 @@ export const EvalBlock = (props) => {
     TouchableCmp = TouchableNativeFeedback;
   }
   return (
-    <TouchableCmp onPress={props.onSelect}>
+    <TouchableCmp onPress={props.onSelect} onLongPress={props.longPress}>
       <Item>
         <Text>{props.title}</Text>
       </Item>

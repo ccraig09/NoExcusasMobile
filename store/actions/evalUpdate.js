@@ -18,10 +18,10 @@ export const fetchUpdates = (Eid) => {
         });
         // let loadedUpdates = {};
         const loadedUpdates = collection;
-        console.log(
-          "these will be filterd loadedUpdates"
+        console
+          .log
           // loadedUpdates.filter((per) => per.Eid.Eid === Eid)[0].bmi
-        );
+          ();
         // console.log(
         //   "these are the evalupdates:",
         //   collection.filter((sumn) => sumn.Eid)
@@ -37,8 +37,79 @@ export const fetchUpdates = (Eid) => {
   };
 };
 
-export const deleteEval = (Eid) => {
-  return async (dispatch, getState) => {};
+export const deleteSub = (UpId) => {
+  return () => {
+    firebase.auth().onAuthStateChanged(function (user) {
+      if (user) {
+        var userId = user.uid.toString();
+        db.doc(userId).collection("Evals").doc(UpId).delete();
+      }
+    });
+  };
+};
+
+export const deleteImages = (Eid) => {
+  console.log("this is eid to be deleted", Eid);
+  return () => {
+    firebase.auth().onAuthStateChanged(function (user) {
+      if (user) {
+        var userId = user.uid.toString();
+        var storage = firebase.storage().ref();
+        storage.child(`UserBaseImages/${userId}/${Eid}/SideImage`).delete();
+        storage.child(`UserBaseImages/${userId}/${Eid}/FrontImage`).delete();
+      }
+    });
+  };
+};
+export const deleteFrontal = (Eid) => {
+  console.log("this is eid to be deleted", Eid);
+  return () => {
+    firebase.auth().onAuthStateChanged(function (user) {
+      if (user) {
+        var userId = user.uid.toString();
+        var storage = firebase.storage().ref();
+        storage.child(`UserBaseImages/${userId}/${Eid}/FrontImage`).delete();
+      }
+    });
+  };
+};
+export const deleteLateral = (Eid) => {
+  console.log("this is eid to be deleted", Eid);
+  return () => {
+    firebase.auth().onAuthStateChanged(function (user) {
+      if (user) {
+        var userId = user.uid.toString();
+        var storage = firebase.storage().ref();
+        storage.child(`UserBaseImages/${userId}/${Eid}/SideImage`).delete();
+      }
+    });
+  };
+};
+
+export const frontImage = async (blob, Eid) => {
+  console.log("reaching firebase storage");
+  firebase.auth().onAuthStateChanged(function (user) {
+    if (user) {
+      var userId = user.uid.toString();
+      var ref = firebase
+        .storage()
+        .ref()
+        .child("UserBaseImages/" + `${userId}/` + `${Eid}/` + "FrontImage");
+      return ref.put(blob);
+    }
+  });
+};
+export const sideImage = async (blobs, Eid) => {
+  firebase.auth().onAuthStateChanged(function (user) {
+    if (user) {
+      var userId = user.uid.toString();
+      var ref = firebase
+        .storage()
+        .ref()
+        .child("UserBaseImages/" + `${userId}/` + `${Eid}/` + "SideImage");
+      return ref.put(blobs);
+    }
+  });
 };
 
 export const bmiInfo = (bmi, Eid) => {

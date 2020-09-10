@@ -24,6 +24,7 @@ import AwesomeAlert from "react-native-awesome-alerts";
 import { Formik } from "formik";
 import * as yup from "yup";
 import { Ionicons } from "@expo/vector-icons";
+import Toast from "react-native-tiny-toast";
 
 import styled, { useTheme } from "styled-components";
 import { useSelector, useDispatch } from "react-redux";
@@ -35,10 +36,12 @@ import { AsyncStorage } from "react-native";
 import Colors from "../constants/Colors";
 import * as detailsActions from "../store/actions/membersDetails";
 import * as addEvalAction from "../store/actions/evals";
+import ImagePicker from "../components/ImagePicker";
 import firebase from "../components/firebase";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import BaseEvalDT from "../components/BaseEvalDataTable";
+import * as Description from "../components/UI/descriptions";
 import ProgressWheel from "../components/UI/ProgressWheel";
 import DataModal from "../components/DataModal";
 import BasicInfoScroll from "../components/BasicInfoScrollview";
@@ -62,6 +65,8 @@ export const db = firebase.firestore().collection("Members");
 
 const ProfileScreen = (props) => {
   const loadedMemberDeets = useSelector((state) => state.memberdeets.details);
+  const loadedUpdates = useSelector((state) => state.updates.updates);
+
   const userEvals = useSelector((state) => {
     const transformedEvals = [];
     for (const key in state.evals.userEvals) {
@@ -69,9 +74,11 @@ const ProfileScreen = (props) => {
         evalId: key,
         evalTitle: state.evals.userEvals[key].title,
         evalOwner: state.evals.userEvals[key].ownerId,
+        docTitle: state.evals.userEvals[key].docTitle,
         evalTime: state.evals.userEvals[key].time,
       });
     }
+
     return transformedEvals.sort((a, b) => (a.evalTime > b.evalTime ? 1 : -1));
   });
 
@@ -92,33 +99,73 @@ const ProfileScreen = (props) => {
   const [fatModal, setFatModal] = useState(false);
   const [metaModal, setMetaModal] = useState(false);
   const [evalModal, setEvalModal] = useState(false);
-
+  const [FImage, setFImage] = useState("");
+  const [SImage, setSImage] = useState("");
+  const updatedBmi = loadedUpdates.length === 0 ? "" : loadedUpdates[0].bmi;
+  console.log("this is updatedBmi=", updatedBmi);
   const [userPhoto, setUserPhoto] = useState();
+  const [selectedImage, setSelectedImage] = useState();
   const dispatch = useDispatch();
-  const firstName = loadedMemberDeets.FirstName;
-  const lastName = loadedMemberDeets.LastName;
-  const age = loadedMemberDeets.Age;
-  const height = loadedMemberDeets.Height;
-  const bmi = loadedMemberDeets.BMI;
-  const fat = loadedMemberDeets.Fat;
-  const muscle = loadedMemberDeets.Muscle;
-  const kcal = loadedMemberDeets.KCAL;
-  const meta = loadedMemberDeets.Metabolical;
-  const vifat = loadedMemberDeets.ViFat;
-  const gender = loadedMemberDeets.Gender;
-  const weight = loadedMemberDeets.Weight;
+  const firstName =
+    typeof loadedMemberDeets.FirstName === "undefined"
+      ? "__"
+      : loadedMemberDeets.FirstName;
+  const lastName =
+    typeof loadedMemberDeets.LastName === "undefined"
+      ? ""
+      : loadedMemberDeets.LastName;
+  const age =
+    typeof loadedMemberDeets.Age === "undefined" ? "" : loadedMemberDeets.Age;
+  const height =
+    typeof loadedMemberDeets.Height === "undefined"
+      ? ""
+      : loadedMemberDeets.Height;
+  const bmi =
+    typeof loadedMemberDeets.BMI === "undefined" ? "" : loadedMemberDeets.BMI;
+  const fat =
+    typeof loadedMemberDeets.Fat === "undefined" ? "" : loadedMemberDeets.Fat;
+  const muscle =
+    typeof loadedMemberDeets.Muscle === "undefined"
+      ? ""
+      : loadedMemberDeets.Muscle;
+  const kcal =
+    typeof loadedMemberDeets.KCAL === "undefined" ? "" : loadedMemberDeets.KCAL;
+  const meta =
+    typeof loadedMemberDeets.Metabolical === "undefined"
+      ? ""
+      : loadedMemberDeets.Metabolical;
+  const vifat =
+    typeof loadedMemberDeets.ViFat === "undefined"
+      ? ""
+      : loadedMemberDeets.ViFat;
+  const gender =
+    typeof loadedMemberDeets.Gender === "undefined"
+      ? ""
+      : loadedMemberDeets.Gender;
+  const weight =
+    typeof loadedMemberDeets.Weight === "undefined"
+      ? ""
+      : loadedMemberDeets.Weight;
+
+  const [showEval, setShowEval] = useState(true);
+  const [showDatos, setShowDatos] = useState(true);
+  const [showProgreso, setShowProgreso] = useState(true);
+  const [showImagen, setShowImagen] = useState(true);
+  const [showAll, setShowAll] = useState(true);
 
   const loadDetails = useCallback(async () => {
     setError(null);
     setIsRefreshing(true);
+    dispatch(addEvalAction.fetchMemberEvals());
 
     try {
       await dispatch(detailsActions.fetchMemberDetails());
-      await dispatch(addEvalAction.fetchMemberEvals());
       await AsyncStorage.getItem("userData").then((value) => {
         const data = JSON.parse(value);
         setUserPhoto(data.avatar);
       });
+      baseFrontImageLoad();
+      baseSideImageLoad();
     } catch (err) {
       setError(err.message);
     }
@@ -132,13 +179,6 @@ const ProfileScreen = (props) => {
     };
   }, [loadDetails]);
 
-  // useEffect(() => {
-  //   const willFocusSub = props.navigation.addListener("willFocus", assign);
-  //   return () => {
-  //     willFocusSub.remove();
-  //   };
-  // }, [assign]);
-
   useEffect(() => {
     setIsLoading(true);
 
@@ -146,12 +186,82 @@ const ProfileScreen = (props) => {
     setIsLoading(false);
   }, [dispatch, loadDetails]);
 
-  const selectEvalHandler = (id, title) => {
+  const selectEvalHandler = (id, title, docTitle) => {
     props.navigation.navigate("Eval", {
       evalId: id,
       evalTitle: title,
+      docTitle: docTitle,
     });
   };
+
+  const baseFrontImageLoad = useCallback(async () => {
+    await firebase.auth().onAuthStateChanged(function (user) {
+      if (user) {
+        var userId = user.uid.toString();
+        var storage = firebase.storage().ref();
+        console.log("loading image");
+        storage
+          .child(`UserBaseImages/${userId}/FrontImage`)
+          .getDownloadURL()
+          .then(function (url) {
+            // console.log("this will be image/s url:", url);
+            setFImage(url);
+          })
+          .catch(function (error) {
+            switch (error.code) {
+              case "storage/object-not-found":
+                // console.log(error);
+                break;
+              case "storage/unauthorized":
+                // User doesn't have permission to access the object
+                // console.log(error);
+                break;
+
+              case "storage/canceled":
+                // User canceled the upload
+                // console.log(error);
+
+                break;
+            }
+          });
+        // console.log(FImage);
+      }
+    });
+  });
+
+  const baseSideImageLoad = useCallback(async () => {
+    await firebase.auth().onAuthStateChanged(function (user) {
+      if (user) {
+        var userId = user.uid.toString();
+        var storage = firebase.storage().ref();
+        storage
+          .child(`UserBaseImages/${userId}/SideImage`)
+          .getDownloadURL()
+          .then(function (url) {
+            // console.log("this will be image/s url:", url);
+            setSImage(url);
+          })
+          .catch(function (error) {
+            switch (error.code) {
+              case "storage/object-not-found":
+                // console.log(error);
+                break;
+              case "storage/unauthorized":
+                // User doesn't have permission to access the object
+                // console.log(error);
+
+                break;
+
+              case "storage/canceled":
+                // User canceled the upload
+                // console.log(error);
+
+                break;
+            }
+          });
+      }
+    });
+  });
 
   const submitHandler = useCallback(async (name, last) => {
     try {
@@ -263,6 +373,102 @@ const ProfileScreen = (props) => {
     loadDetails();
     setEvalModal(!evalModal);
   });
+
+  const deleteHandler = (docId) => {
+    // console.log("this is the deleted docId=", docId);
+    Alert.alert("¿Usted esta seguro?", "Quiere borrar este evaluación?", [
+      { text: "No", style: "default" },
+      {
+        text: "Si",
+        style: "destructive",
+        onPress: () => {
+          dispatch(addEvalAction.deleteEval(docId));
+          loadDetails();
+        },
+      },
+    ]);
+  };
+
+  const frontImageTakenHandler = useCallback(async (uri) => {
+    const response = await fetch(uri);
+    const blob = await response.blob();
+    try {
+      await dispatch(detailsActions.frontImage(blob));
+    } catch (err) {
+      setError(err.message);
+    }
+    const toast = Toast.showLoading("Subiendo Foto");
+    setTimeout(() => {
+      // Recommend
+      Toast.hide(toast);
+
+      // or Toast.hide()
+      // If you don't pass toast，it will hide the last toast by default.
+    }, 3000);
+    setTimeout(() => loadDetails(), 4000);
+    setTimeout(() => baseFrontImageLoad(), 4500);
+  });
+
+  const frontImageDeleteHandler = async () => {
+    const toast = Toast.showLoading("Borrando Foto");
+    setTimeout(() => {
+      // Recommend
+      Toast.hide(toast);
+
+      // or Toast.hide()
+      // If you don't pass toast，it will hide the last toast by default.
+    }, 1000);
+    setFImage("");
+    setTimeout(() => loadDetails(), 3000);
+  };
+
+  const sideImageTakenHandler = useCallback(async (uri) => {
+    const response = await fetch(uri);
+    const blobS = await response.blob();
+    try {
+      await dispatch(detailsActions.sideImage(blobS));
+    } catch (err) {
+      setError(err.message);
+    }
+    const toast = Toast.showLoading("Subiendo Foto...");
+    setTimeout(() => {
+      // Recommend
+      Toast.hide(toast);
+
+      // or Toast.hide()
+      // If you don't pass toast，it will hide the last toast by default.
+    }, 3000);
+    setTimeout(() => loadDetails(), 4000);
+    setTimeout(() => baseSideImageLoad(), 4500);
+  });
+
+  const sideImageDeleteHandler = () => {
+    const toast = Toast.showLoading("Borrando Foto");
+    setTimeout(() => {
+      // Recommend
+      Toast.hide(toast);
+
+      // or Toast.hide()
+      // If you don't pass toast，it will hide the last toast by default.
+    }, 1000);
+    setSImage("");
+    setTimeout(() => loadDetails(), 3000);
+  };
+
+  const showHandler = () => {
+    setShowEval(false);
+    setShowDatos(false);
+    setShowProgreso(false);
+    setShowImagen(false);
+    setShowAll(false);
+  };
+  const hideHandler = () => {
+    setShowEval(true);
+    setShowDatos(true);
+    setShowProgreso(true);
+    setShowImagen(true);
+    setShowAll(true);
+  };
 
   const tapBackground = () => {
     setShowAlert(true);
@@ -447,65 +653,140 @@ const ProfileScreen = (props) => {
               <Text style={styles.hello}>{greetingMessage}, </Text>
               <Text style={styles.hello}>{firstName} </Text>
             </View>
+            <TouchableOpacity
+              onPress={() => {
+                showAll ? showHandler() : hideHandler();
+              }}
+            >
+              <View
+                style={{
+                  flexDirection: "row",
+                  marginLeft: 20,
+                }}
+              >
+                <View>
+                  <Text style={{ color: "grey", marginTop: 20 }}>
+                    {!showAll ? "Mostrar todo" : "Ocultar todo"}
+                  </Text>
+                </View>
+                <View style={{ marginTop: 20, marginLeft: 15 }}>
+                  <Ionicons
+                    name={
+                      showAll
+                        ? "ios-arrow-dropdown-circle"
+                        : "ios-arrow-dropup-circle"
+                    }
+                    size={20}
+                    color={Colors.noExprimary}
+                  />
+                </View>
+              </View>
+            </TouchableOpacity>
             <View style={styles.edit}>
-              <Subtitle>{"evaluación".toUpperCase()}</Subtitle>
+              <TouchableOpacity
+                onPress={() => {
+                  setShowEval((prevState) => !prevState);
+                }}
+              >
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  <View>
+                    <Subtitle>{"evaluación".toUpperCase()}</Subtitle>
+                  </View>
+                  <View style={{ marginTop: 20, marginLeft: 15 }}>
+                    <Ionicons
+                      name={
+                        showEval
+                          ? "ios-arrow-dropdown-circle"
+                          : "ios-arrow-dropup-circle"
+                      }
+                      size={25}
+                      color={Colors.noExprimary}
+                    />
+                  </View>
+                </View>
+              </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => {
                   setEvalModal(true);
                 }}
                 style={{ marginRight: 20, marginTop: 10 }}
               >
-                <Ionicons
-                  name={Platform.OS === "android" ? "md-add" : "ios-add"}
-                  size={35}
-                  color={Colors.noExprimary}
-                />
+                {showEval && (
+                  <View
+                    style={{
+                      width: 35,
+                      height: 30,
+                      borderColor: Colors.noExprimary,
+                      borderRadius: 10,
+                      justifyContent: "center",
+                      alignItems: "center",
+                      borderWidth: 2,
+                    }}
+                  >
+                    <Ionicons
+                      name={Platform.OS === "android" ? "md-add" : "ios-add"}
+                      size={25}
+                      color={Colors.noExprimary}
+                    />
+                  </View>
+                )}
               </TouchableOpacity>
             </View>
-
-            {isRefreshing ? (
-              <View style={{ justifyContent: "center", alignItems: "center" }}>
-                <ActivityIndicator size="large" color={Colors.noExprimary} />
-              </View>
-            ) : userEvals.length === 0 ? (
-              <View
-                style={{
-                  flex: 1,
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <Text
+            {showEval &&
+              // {isRefreshing ? (
+              //   <View style={{ justifyContent: "center", alignItems: "center" }}>
+              //     <ActivityIndicator size="large" color={Colors.noExprimary} />
+              //   </View>
+              // ) :
+              (userEvals.length === 0 ? (
+                <View
                   style={{
-                    padding: 10,
-                    fontSize: 15,
-                    textAlign: "center",
-                    color: "#b8bece",
+                    flex: 1,
+                    justifyContent: "center",
+                    alignItems: "center",
                   }}
                 >
-                  Oprime el {<Text style={{ fontSize: 25 }}>'+'</Text>} para
-                  crear tu primer evaluación.
-                </Text>
-              </View>
-            ) : (
-              <FlatList
-                horizontal={true}
-                showsHorizontalScrollIndicator={false}
-                data={userEvals}
-                keyExtractor={(item) => item.evalId}
-                renderItem={(itemData) => (
-                  <EvalBlock
-                    title={itemData.item.evalTitle}
-                    onSelect={() => {
-                      selectEvalHandler(
-                        itemData.item.evalId,
-                        itemData.item.evalTitle
-                      );
+                  <Text
+                    style={{
+                      padding: 10,
+                      fontSize: 15,
+                      textAlign: "center",
+                      color: "#b8bece",
                     }}
-                  />
-                )}
-              />
-            )}
+                  >
+                    Oprime el {<Text style={{ fontSize: 25 }}>'+'</Text>} para
+                    crear tu primer evaluación.
+                  </Text>
+                </View>
+              ) : (
+                <FlatList
+                  horizontal={true}
+                  showsHorizontalScrollIndicator={false}
+                  data={userEvals}
+                  keyExtractor={(item) => item.evalId}
+                  renderItem={(itemData) => (
+                    <EvalBlock
+                      title={itemData.item.evalTitle}
+                      onSelect={() => {
+                        selectEvalHandler(
+                          itemData.item.evalId,
+                          itemData.item.evalTitle,
+                          itemData.item.docTitle
+                        );
+                      }}
+                      longPress={() => {
+                        deleteHandler(itemData.item.docTitle);
+                      }}
+                    />
+                  )}
+                />
+              ))}
             {/* <ScrollView
               style={{
                 flexDirection: "row",
@@ -546,13 +827,33 @@ const ProfileScreen = (props) => {
               </ItemContainer>
             </ScrollView> */}
             <View style={styles.edit}>
-              <Subtitle>{"datos basicos".toUpperCase()}</Subtitle>
               <TouchableOpacity
                 onPress={() => {
-                  // setModalVisible(true);
+                  setShowDatos((prevState) => !prevState);
                 }}
               >
-                <Text style={styles.textStyle}>Edit Profile</Text>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  <View>
+                    <Subtitle>{"datos basicos".toUpperCase()}</Subtitle>
+                  </View>
+                  <View style={{ marginTop: 20, marginLeft: 15 }}>
+                    <Ionicons
+                      name={
+                        showDatos
+                          ? "ios-arrow-dropdown-circle"
+                          : "ios-arrow-dropup-circle"
+                      }
+                      size={25}
+                      color={Colors.noExprimary}
+                    />
+                  </View>
+                </View>
               </TouchableOpacity>
             </View>
             <DataModal
@@ -612,6 +913,13 @@ const ProfileScreen = (props) => {
               FormikKey={"bmi"}
               formikKeyboard={"numeric"}
               formikMaxLength={4}
+              formikPlaceholder="Agrega tu IMC"
+              bodyIcon={require("../assets/BMI.png")}
+              description="El índice de masa corporal (IMC) es un número que se calcula utilizando el peso y la estatura de una
+              persona. El IMC es un indicador confiable de la grasa corporal en las personas. Este índice no mide la
+              grasa corporal directamente, pero hay estudios que han comprobado que el IMC está correlacionado con
+              mediciones directas de la grasa corporal. El IMC se utiliza como una herramienta de detección para
+              identificar posibles problemas de peso en los adultos"
             />
             <DataModal
               visible={metaModal}
@@ -641,6 +949,11 @@ const ProfileScreen = (props) => {
               FormikKey={"meta"}
               formikKeyboard={"numeric"}
               formikMaxLength={2}
+              formikPlaceholder="Agrega tu Edad Metabolica"
+              bodyIcon={require("../assets/metaage.png")}
+              description="La edad corporal se basa en su metabolismo basal. El peso, el porcentaje de grasa corporal y el
+              porcentaje de músculo esquelético se tienen en cuenta para calcular un valor de referencia que permite
+              determinar si su edad corporal se encuentra por encima o por debajo a su edad real."
             />
             <DataModal
               visible={vifatModal}
@@ -670,6 +983,12 @@ const ProfileScreen = (props) => {
               FormikKey={"vifat"}
               formikKeyboard={"numeric"}
               formikMaxLength={2}
+              formikPlaceholder="Agrega tu Grasa Viseral"
+              bodyIcon={require("../assets/VisceralFat.png")}
+              description="La grasa visceral se acumula en el abdomen y en los órganos vitales que lo rodean. Es diferente a la grasa
+              que se encuentra directamente bajo la piel, la cual se conoce como grasa subcutánea. La grasa visceral
+              puede pasar desapercibida ya que no es visible a simple vista. Una manera de ver la grasa visceral es por
+              medio de imágenes de resonancia magnética (IRM)."
             />
             <DataModal
               visible={kcalModal}
@@ -699,6 +1018,11 @@ const ProfileScreen = (props) => {
               FormikKey={"kcal"}
               formikKeyboard={"numeric"}
               formikMaxLength={4}
+              formikPlaceholder="Agrega tu KCAL"
+              bodyIcon={require("../assets/metabolicage.png")}
+              description="Independientemente de su nivel de actividad, se necesita un consumo calórico mínimo para permitir las
+              funciones corporales diarias. El metabolismo basal indica la cantidad de calorías que debe ingerir para
+              darle a su cuerpo suficiente energía para funcionar"
             />
             <DataModal
               visible={muscleModal}
@@ -728,6 +1052,15 @@ const ProfileScreen = (props) => {
               FormikKey={"muscle"}
               formikKeyboard={"numeric"}
               formikMaxLength={4}
+              formikPlaceholder="Agrega tu Músculo"
+              bodyIcon={require("../assets/musclemass.png")}
+              description="El músculo esquelético es el tipo de músculo que se puede ver y sentir. Cuando hace ejercicios para
+              aumentar su masa muscular, está ejercitando los músculos esqueléticos. Los músculos esqueléticos están
+              unidos al esqueleto y vienen en pares; un músculo para mover el hueso en una dirección y el otro para
+              moverlo en la dirección opuesta. El aumento de los músculos esqueléticos aumentará la necesidad de
+              energía de su cuerpo. Cuanto más músculo tenga, más calorías quemará su cuerpo. El aumento de los
+              músculos esqueléticos puede ayudar a prevenir un nuevo aumento de peso. El mantenimiento y aumento
+              de los músculos esqueléticos está íntimamente relacionado con la tasa de metabolismo basal."
             />
             <DataModal
               visible={fatModal}
@@ -757,6 +1090,14 @@ const ProfileScreen = (props) => {
               FormikKey={"fat"}
               formikKeyboard={"numeric"}
               formikMaxLength={4}
+              formikPlaceholder="Agrega tu Grasa Corporal"
+              bodyIcon={require("../assets/Bodyfpercentage.png")}
+              description="La grasa corporal juega un importante papel en el almacenamiento de energía y en la protección de órganos
+              internos. En nuestro cuerpo se almacenan dos tipos de grasas: 1) grasa esencial, la cual se aloja en pequeñas
+              cantidades para proteger el cuerpo y 2) grasa almacenada, la cual el organismo guarda para obtener energía
+              durante la actividad física. Si bien tener demasiada grasa corporal es poco saludable, también lo es tener
+              muy poca. Además, la distribución de la grasa corporal es diferente en hombres y mujeres, por lo que las
+              bases para la clasificación del porcentaje de grasa corporal son diferentes para ambos sexos."
             />
             <DataModal
               visible={ageModal}
@@ -873,221 +1214,332 @@ const ProfileScreen = (props) => {
               FormikKey={"gender"}
               formikKeyboard={"numeric"}
             />
-            <BasicInfoScroll
-              agePress={() => {
-                setAgeModal(true);
-              }}
-              heightPress={() => {
-                setHeightModal(true);
-              }}
-              weightPress={() => {
-                setWeightModal(true);
-              }}
-              genderPress={() => {
-                setGenderModal(true);
-              }}
-              age={age}
-              height={height}
-              weight={weight}
-              gender={gender}
-            />
-            <Subtitle>Progreso</Subtitle>
-            <View style={styles.wheelBlock}>
-              <View>
-                <TouchableOpacity
-                  onPress={() => {
-                    setImcModal(true);
+            {showDatos && (
+              <BasicInfoScroll
+                agePress={() => {
+                  setAgeModal(true);
+                }}
+                heightPress={() => {
+                  setHeightModal(true);
+                }}
+                weightPress={() => {
+                  setWeightModal(true);
+                }}
+                genderPress={() => {
+                  setGenderModal(true);
+                }}
+                age={age}
+                height={height}
+                weight={weight}
+                gender={gender}
+              />
+            )}
+            <View style={styles.edit}>
+              <TouchableOpacity
+                onPress={() => {
+                  setShowProgreso((prevState) => !prevState);
+                }}
+              >
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "center",
+                    alignItems: "center",
                   }}
                 >
-                  <View style={styles.wheel}>
-                    <ProgressWheel
-                      composition={"IMC"}
-                      current={parseInt(bmi)}
-                      Meta={18}
+                  <View>
+                    <Subtitle>{"Progreso".toUpperCase()}</Subtitle>
+                  </View>
+                  <View style={{ marginTop: 20, marginLeft: 15 }}>
+                    <Ionicons
+                      name={
+                        showProgreso
+                          ? "ios-arrow-dropdown-circle"
+                          : "ios-arrow-dropup-circle"
+                      }
+                      size={25}
+                      color={Colors.noExprimary}
                     />
                   </View>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => {
-                    setImcModal(true);
-                  }}
-                >
-                  <View
-                    style={{
-                      marginTop: 10,
-                    }}
-                  >
-                    <View>
-                      <BaseEvalDT current={bmi} metaTitle={"Meta"} Meta={18} />
-                    </View>
-                  </View>
-                </TouchableOpacity>
-              </View>
-
-              <View>
-                <TouchableOpacity
-                  onPress={() => {
-                    setFatModal(true);
-                  }}
-                >
-                  <View style={styles.wheel}>
-                    <ProgressWheel
-                      composition={"Grasa"}
-                      current={parseInt(fat)}
-                      Meta={10}
-                    />
-                  </View>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => {
-                    setFatModal(true);
-                  }}
-                >
-                  <View
-                    style={{
-                      marginTop: 10,
-                    }}
-                  >
-                    <View>
-                      <BaseEvalDT current={fat} metaTitle={"Meta"} Meta={10} />
-                    </View>
-                  </View>
-                </TouchableOpacity>
-              </View>
+                </View>
+              </TouchableOpacity>
             </View>
-            <View style={styles.wheelBlock}>
-              <View>
-                <TouchableOpacity
-                  onPress={() => {
-                    setMuscleModal(true);
-                  }}
-                >
-                  <View style={styles.wheel}>
-                    <ProgressWheel
-                      composition={"Músculo"}
-                      current={parseInt(muscle)}
-                      Meta={48}
-                    />
-                  </View>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => {
-                    setMuscleModal(true);
-                  }}
-                >
-                  <View
-                    style={{
-                      marginTop: 10,
+            {showProgreso && (
+              <View style={styles.wheelBlock}>
+                <View>
+                  <TouchableOpacity
+                    onPress={() => {
+                      setImcModal(true);
                     }}
                   >
-                    <View>
-                      <BaseEvalDT
-                        current={muscle}
-                        metaTitle={"Meta"}
+                    <View style={styles.wheel}>
+                      <ProgressWheel
+                        composition={"IMC"}
+                        current={parseInt(bmi)}
+                        Meta={18}
+                        update={updatedBmi}
+                      />
+                    </View>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => {
+                      setImcModal(true);
+                    }}
+                  >
+                    <View
+                      style={{
+                        marginTop: 10,
+                      }}
+                    >
+                      <View>
+                        <BaseEvalDT
+                          current={bmi}
+                          metaTitle={"Meta"}
+                          Meta={18}
+                        />
+                      </View>
+                    </View>
+                  </TouchableOpacity>
+                </View>
+
+                <View>
+                  <TouchableOpacity
+                    onPress={() => {
+                      setFatModal(true);
+                    }}
+                  >
+                    <View style={styles.wheel}>
+                      <ProgressWheel
+                        composition={"Grasa"}
+                        current={parseInt(fat)}
+                        Meta={10}
+                      />
+                    </View>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => {
+                      setFatModal(true);
+                    }}
+                  >
+                    <View
+                      style={{
+                        marginTop: 10,
+                      }}
+                    >
+                      <View>
+                        <BaseEvalDT
+                          current={fat}
+                          metaTitle={"Meta"}
+                          Meta={10}
+                        />
+                      </View>
+                    </View>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            )}
+            {showProgreso && (
+              <View style={styles.wheelBlock}>
+                <View>
+                  <TouchableOpacity
+                    onPress={() => {
+                      setMuscleModal(true);
+                    }}
+                  >
+                    <View style={styles.wheel}>
+                      <ProgressWheel
+                        composition={"Músculo"}
+                        current={parseInt(muscle)}
                         Meta={48}
                       />
                     </View>
-                  </View>
-                </TouchableOpacity>
-              </View>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => {
+                      setMuscleModal(true);
+                    }}
+                  >
+                    <View
+                      style={{
+                        marginTop: 10,
+                      }}
+                    >
+                      <View>
+                        <BaseEvalDT
+                          current={muscle}
+                          metaTitle={"Meta"}
+                          Meta={48}
+                        />
+                      </View>
+                    </View>
+                  </TouchableOpacity>
+                </View>
 
-              <View>
+                <View>
+                  <TouchableOpacity
+                    onPress={() => {
+                      setKcalModal(true);
+                    }}
+                  >
+                    <View style={styles.wheel}>
+                      <ProgressWheel
+                        composition={"KCAL"}
+                        current={parseInt(kcal)}
+                        Meta={2000}
+                      />
+                    </View>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => {
+                      setKcalModal(true);
+                    }}
+                  >
+                    <View
+                      style={{
+                        marginTop: 10,
+                      }}
+                    >
+                      <View>
+                        <BaseEvalDT
+                          current={kcal}
+                          metaTitle={"Meta"}
+                          Meta={2000}
+                        />
+                      </View>
+                    </View>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            )}
+
+            {showProgreso && (
+              <View style={styles.wheelBlock}>
+                <View>
+                  <TouchableOpacity
+                    onPress={() => {
+                      setMetaModal(true);
+                    }}
+                  >
+                    <View style={styles.wheel}>
+                      <ProgressWheel
+                        composition={"Metabolica"}
+                        current={parseInt(meta)}
+                        Meta={15}
+                      />
+                    </View>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => {
+                      setMetaModal(true);
+                    }}
+                  >
+                    <View
+                      style={{
+                        marginTop: 10,
+                      }}
+                    >
+                      <View>
+                        <BaseEvalDT
+                          current={meta}
+                          metaTitle={"Meta"}
+                          Meta={19}
+                        />
+                      </View>
+                    </View>
+                  </TouchableOpacity>
+                </View>
+
+                <View>
+                  <TouchableOpacity
+                    onPress={() => {
+                      setVifatModal(true);
+                    }}
+                  >
+                    <View style={styles.wheel}>
+                      <ProgressWheel
+                        composition={"Viseral"}
+                        current={parseInt(vifat)}
+                        Meta={1}
+                      />
+                    </View>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => {
+                      setVifatModal(true);
+                    }}
+                  >
+                    <View
+                      style={{
+                        marginTop: 10,
+                      }}
+                    >
+                      <View>
+                        <BaseEvalDT
+                          current={vifat}
+                          metaTitle={"Meta"}
+                          Meta={3}
+                        />
+                      </View>
+                    </View>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            )}
+            <View>
+              <View style={styles.edit}>
                 <TouchableOpacity
                   onPress={() => {
-                    setKcalModal(true);
-                  }}
-                >
-                  <View style={styles.wheel}>
-                    <ProgressWheel
-                      composition={"KCAL"}
-                      current={parseInt(kcal)}
-                      Meta={2000}
-                    />
-                  </View>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => {
-                    setKcalModal(true);
+                    setShowImagen((prevState) => !prevState);
                   }}
                 >
                   <View
                     style={{
-                      marginTop: 10,
+                      flexDirection: "row",
+                      justifyContent: "center",
+                      alignItems: "center",
                     }}
                   >
                     <View>
-                      <BaseEvalDT
-                        current={kcal}
-                        metaTitle={"Meta"}
-                        Meta={2000}
+                      <Subtitle>{"progress imagen".toUpperCase()}</Subtitle>
+                    </View>
+                    <View style={{ marginTop: 20, marginLeft: 15 }}>
+                      <Ionicons
+                        name={
+                          showImagen
+                            ? "ios-arrow-dropdown-circle"
+                            : "ios-arrow-dropup-circle"
+                        }
+                        size={25}
+                        color={Colors.noExprimary}
                       />
                     </View>
                   </View>
                 </TouchableOpacity>
               </View>
-            </View>
-            <View style={styles.wheelBlock}>
-              <View>
-                <TouchableOpacity
-                  onPress={() => {
-                    setMetaModal(true);
-                  }}
-                >
-                  <View style={styles.wheel}>
-                    <ProgressWheel
-                      composition={"Metabolica"}
-                      current={parseInt(meta)}
-                      Meta={15}
-                    />
-                  </View>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => {
-                    setMetaModal(true);
-                  }}
-                >
-                  <View
-                    style={{
-                      marginTop: 10,
-                    }}
-                  >
-                    <View>
-                      <BaseEvalDT current={meta} metaTitle={"Meta"} Meta={19} />
-                    </View>
-                  </View>
-                </TouchableOpacity>
-              </View>
 
-              <View>
-                <TouchableOpacity
-                  onPress={() => {
-                    setVifatModal(true);
+              {showImagen && (
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    marginLeft: 30,
+                    marginRight: 30,
                   }}
                 >
-                  <View style={styles.wheel}>
-                    <ProgressWheel
-                      composition={"Viseral"}
-                      current={parseInt(vifat)}
-                      Meta={1}
-                    />
-                  </View>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => {
-                    setVifatModal(true);
-                  }}
-                >
-                  <View
-                    style={{
-                      marginTop: 10,
-                    }}
-                  >
-                    <View>
-                      <BaseEvalDT current={vifat} metaTitle={"Meta"} Meta={3} />
-                    </View>
-                  </View>
-                </TouchableOpacity>
-              </View>
+                  <ImagePicker
+                    onImageTaken={frontImageTakenHandler}
+                    title="Base Frontal"
+                    source={FImage}
+                    onDelete={frontImageDeleteHandler}
+                  />
+                  <ImagePicker
+                    onImageTaken={sideImageTakenHandler}
+                    title="Base Lateral"
+                    source={SImage}
+                    onDelete={sideImageDeleteHandler}
+                  />
+                </View>
+              )}
             </View>
           </ScrollView>
         </SafeAreaView>

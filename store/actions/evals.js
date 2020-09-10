@@ -43,9 +43,11 @@ export const fetchMemberEvals = () => {
               key,
               collection[key].title,
               collection[key].ownerId,
-              collection[key].time
+              collection[key].id,
+              collection[key].timestamp
             )
           );
+          // console.log("testing doctitle new", collection[key].timestamp);
           dispatch({
             type: SET_EVAL,
 
@@ -72,7 +74,7 @@ export const createEval = (title) => {
         {
           title,
           ownerId: userId,
-          time: firebase.firestore.FieldValue.serverTimestamp(),
+          timestamp: firebase.firestore.FieldValue.serverTimestamp(),
         },
         { merge: true }
       );
@@ -85,14 +87,18 @@ export const createEval = (title) => {
             return { id: doc.id, ...doc.data() };
           });
 
-          console.log("on Create Collection Everything", collection[0].id);
+          console.log(
+            "on Create Collection Everything",
+            collection[0].timestamp
+          );
           dispatch({
             type: CREATE_EVAL,
             evalData: {
               id: collection[0].id,
               title,
               ownerId: userId,
-              time: timestamp,
+              docTitle: collection[0].id,
+              time: collection[0].timestamp,
             },
           });
         })
@@ -105,26 +111,33 @@ export const createEval = (title) => {
   };
 };
 
-export const deleteEval = (evalId) => {
+export const deleteEval = (docId) => {
   return async (dispatch, getState) => {
-    const token = getState().auth.token;
-    await db
-      .doc(userId)
-      .get()
-      .then(function (doc) {
-        if (doc.exists) {
-          // console.log("doc data is: ", doc.data().FirstName);
-          resData = doc.data();
-
-          console.log("loadedEvals are:", loadedEvals);
-        } else {
-          // doc.data() will be undefined in this case
-          console.log("No such document!");
-        }
-      })
-      .catch(function (error) {
-        console.log("Error getting document:", error);
-      });
-    dispatch({ type: DELETE_EVAL, eid: evalId });
+    await dbE.doc(docId).delete();
+    dispatch({ type: DELETE_EVAL, eid: docId });
   };
 };
+
+// export const deleteEval = (evalId) => {
+//   return async (dispatch, getState) => {
+//     const token = getState().auth.token;
+//     await db
+//       .doc(userId)
+//       .get()
+//       .then(function (doc) {
+//         if (doc.exists) {
+//           // console.log("doc data is: ", doc.data().FirstName);
+//           resData = doc.data();
+
+//           console.log("loadedEvals are:", loadedEvals);
+//         } else {
+//           // doc.data() will be undefined in this case
+//           console.log("No such document!");
+//         }
+//       })
+//       .catch(function (error) {
+//         console.log("Error getting document:", error);
+//       });
+//     dispatch({ type: DELETE_EVAL, eid: evalId });
+//   };
+// };

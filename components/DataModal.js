@@ -8,6 +8,7 @@ import {
   TextInput,
   ActivityIndicator,
   Picker,
+  Image,
   StyleSheet,
   KeyboardAvoidingView,
 } from "react-native";
@@ -145,7 +146,7 @@ const DataModal = (props) => {
           />
           <View style={styles.modalView}>
             <View style={styles.form}>
-              <Text style={styles.modalText}>Editar Informacion</Text>
+              <Text style={styles.modalText}>Editar {props.formikLabel}</Text>
 
               <Formik
                 initialValues={props.initialValues}
@@ -186,14 +187,25 @@ const DataModal = (props) => {
                       </View>
                     ) : (
                       <View style={{ marginTop: 10 }}>
-                        <StyledInput
-                          label={props.formikLabel}
-                          formikProps={formikProps}
-                          formikKey={props.FormikKey}
-                          keyboardType={props.formikKeyboard}
-                          maxLength={props.formikMaxLength}
-                          placeholder={props.formikPlaceholder}
-                        />
+                        <Image style={styles.image} source={props.bodyIcon} />
+                        <Text style={{ marginBottom: 10 }}>
+                          {props.description}
+                        </Text>
+                        <View
+                          style={{
+                            justifyContent: "center",
+                            alignItems: "center",
+                          }}
+                        >
+                          <StyledInput
+                            label={props.formikLabel}
+                            formikProps={formikProps}
+                            formikKey={props.FormikKey}
+                            keyboardType={props.formikKeyboard}
+                            maxLength={props.formikMaxLength}
+                            placeholder={props.formikPlaceholder}
+                          />
+                        </View>
                       </View>
                     )}
                     {formikProps.isSubmitting ? (
@@ -223,7 +235,7 @@ const styles = StyleSheet.create({
     marginTop: 22,
   },
   modalView: {
-    width: "80%",
+    width: "100%",
     margin: 20,
     backgroundColor: "#E8E8E8",
     borderRadius: 20,
@@ -248,6 +260,12 @@ const styles = StyleSheet.create({
 
     height: 70,
     width: 200,
+  },
+  image: {
+    height: 100,
+    width: 100,
+    alignSelf: "center",
+    marginBottom: 5,
   },
 });
 
