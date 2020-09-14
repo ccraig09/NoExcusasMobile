@@ -31,6 +31,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { Avatar } from "react-native-elements";
 import HeaderButton from "../components/UI/HeaderButton";
 import EvalBlock from "../components/EvalBlock";
+import Carouselcom from "../components/Carousel";
 
 import { AsyncStorage } from "react-native";
 import Colors from "../constants/Colors";
@@ -1266,78 +1267,79 @@ const ProfileScreen = (props) => {
               </TouchableOpacity>
             </View>
             {showProgreso && (
-              <View style={styles.wheelBlock}>
-                <View>
-                  <TouchableOpacity
-                    onPress={() => {
-                      setImcModal(true);
-                    }}
-                  >
-                    <View style={styles.wheel}>
-                      <ProgressWheel
-                        composition={"IMC"}
-                        current={parseInt(bmi)}
-                        Meta={18}
-                        update={updatedBmi}
-                      />
-                    </View>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() => {
-                      setImcModal(true);
-                    }}
-                  >
-                    <View
-                      style={{
-                        marginTop: 10,
-                      }}
-                    >
-                      <View>
-                        <BaseEvalDT
-                          current={bmi}
-                          metaTitle={"Meta"}
-                          Meta={18}
-                        />
-                      </View>
-                    </View>
-                  </TouchableOpacity>
-                </View>
+              <Carouselcom />
+              // <View style={styles.wheelBlock}>
+              //   <View>
+              //     <TouchableOpacity
+              //       onPress={() => {
+              //         setImcModal(true);
+              //       }}
+              //     >
+              //       <View style={styles.wheel}>
+              //         <ProgressWheel
+              //           composition={"IMC"}
+              //           current={parseInt(bmi)}
+              //           Meta={18}
+              //           update={updatedBmi}
+              //         />
+              //       </View>
+              //     </TouchableOpacity>
+              //     <TouchableOpacity
+              //       onPress={() => {
+              //         setImcModal(true);
+              //       }}
+              //     >
+              //       <View
+              //         style={{
+              //           marginTop: 10,
+              //         }}
+              //       >
+              //         <View>
+              //           <BaseEvalDT
+              //             current={bmi}
+              //             metaTitle={"Meta"}
+              //             Meta={18}
+              //           />
+              //         </View>
+              //       </View>
+              //     </TouchableOpacity>
+              //   </View>
 
-                <View>
-                  <TouchableOpacity
-                    onPress={() => {
-                      setFatModal(true);
-                    }}
-                  >
-                    <View style={styles.wheel}>
-                      <ProgressWheel
-                        composition={"Grasa"}
-                        current={parseInt(fat)}
-                        Meta={10}
-                      />
-                    </View>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() => {
-                      setFatModal(true);
-                    }}
-                  >
-                    <View
-                      style={{
-                        marginTop: 10,
-                      }}
-                    >
-                      <View>
-                        <BaseEvalDT
-                          current={fat}
-                          metaTitle={"Meta"}
-                          Meta={10}
-                        />
-                      </View>
-                    </View>
-                  </TouchableOpacity>
-                </View>
-              </View>
+              //   <View>
+              //     <TouchableOpacity
+              //       onPress={() => {
+              //         setFatModal(true);
+              //       }}
+              //     >
+              //       <View style={styles.wheel}>
+              //         <ProgressWheel
+              //           composition={"Grasa"}
+              //           current={parseInt(fat)}
+              //           Meta={10}
+              //         />
+              //       </View>
+              //     </TouchableOpacity>
+              //     <TouchableOpacity
+              //       onPress={() => {
+              //         setFatModal(true);
+              //       }}
+              //     >
+              //       <View
+              //         style={{
+              //           marginTop: 10,
+              //         }}
+              //       >
+              //         <View>
+              //           <BaseEvalDT
+              //             current={fat}
+              //             metaTitle={"Meta"}
+              //             Meta={10}
+              //           />
+              //         </View>
+              //       </View>
+              //     </TouchableOpacity>
+              //   </View>
+              // </View>
             )}
             {showProgreso && (
               <View style={styles.wheelBlock}>
