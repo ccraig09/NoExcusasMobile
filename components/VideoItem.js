@@ -4,7 +4,13 @@ import { Video } from "expo-av";
 import { Ionicons } from "@expo/vector-icons";
 import { useSelector } from "react-redux";
 
-import { TouchableOpacity, Dimensions } from "react-native";
+import {
+  TouchableOpacity,
+  Dimensions,
+  View,
+  Text,
+  StyleSheet,
+} from "react-native";
 
 let screenWidth = Dimensions.get("window").width;
 let screenHeight = Dimensions.get("window").height;
@@ -12,35 +18,47 @@ let logoimg = "../assets/icon-noexlogo.png";
 
 const VideoItem = (props) => {
   return (
-    <Container>
-      <Video
-        source={{
-          uri: props.video,
-        }}
-        posterSource={require("../assets/icon-noexlogo.png")}
-        shouldPlay
-        useNativeControls={true}
-        resizeMode="contain"
-        style={{ width: screenWidth, height: 375 }}
-      />
-      <CloseView>
-        <TouchableOpacity
-          onPress={props.onBackClick}
-          // props.navigation.goBack();
+    <View style={{ flex: 1 }}>
+      <Container>
+        <Video
+          source={{
+            uri: props.video,
+          }}
+          posterSource={require("../assets/icon-noexlogo.png")}
+          shouldPlay
+          useNativeControls={true}
+          resizeMode="contain"
+          style={{ width: screenWidth, height: 545 }}
+        />
+        <CloseView>
+          <TouchableOpacity
+            onPress={props.onBackClick}
+            // props.navigation.goBack();
 
-          style={{ padding: 20 }}
-        >
-          <Ionicons name="ios-close" size={44} color="white" />
-        </TouchableOpacity>
-      </CloseView>
-    </Container>
+            style={{ padding: 20 }}
+          >
+            <Ionicons name="ios-close" size={44} color="white" />
+          </TouchableOpacity>
+        </CloseView>
+      </Container>
+      <View style={styles.bottom}>
+        <Text>Here are the list</Text>
+        <Text>exercise 2</Text>
+      </View>
+    </View>
   );
 };
 
 export default VideoItem;
 
+const styles = StyleSheet.create({
+  bottom: {
+    marginTop: 10,
+  },
+});
+
 const Container = styled.View`
-  height: 375px;
+  height: 550px;
   background: black;
   align-items: center;
   justify-content: center;

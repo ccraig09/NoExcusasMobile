@@ -192,6 +192,16 @@ const EvalScreen = (props) => {
     loadDetails();
   });
   const updateBmiInfo = useCallback(async (bmi, Eid) => {
+    console.log("testsubmit bmi");
+
+    const toast = Toast.showLoading("Subiendo Foto");
+    setTimeout(() => {
+      // Recommend
+      Toast.hide(toast);
+
+      // or Toast.hide()
+      // If you don't pass toast，it will hide the last toast by default.
+    }, 3000);
     try {
       dispatch(updateActions.bmiInfo(bmi, Eid));
     } catch (err) {
@@ -199,6 +209,7 @@ const EvalScreen = (props) => {
     }
     setImcModal(!imcModal);
     loadDetails();
+    // setTimeout(() => loadDetails(), 3000);
   });
   const updateVifat = useCallback(async (vifat) => {
     try {
@@ -248,15 +259,18 @@ const EvalScreen = (props) => {
       {
         text: "Si",
         style: "destructive",
-        onPress: () => {
+        onPress: async () => {
           if (UpId === "") {
             // dispatch(updateActions.deleteSub(UpId));
             // dispatch(updateActions.deleteImages(Eid));
+            if (SImage) await dispatch(updateActions.deleteLateral(Eid));
+            if (FImage) await dispatch(updateActions.deleteFrontal(Eid));
             dispatch(addEvalAction.deleteEval(docId));
             props.navigation.goBack();
           } else {
             dispatch(updateActions.deleteSub(UpId));
-            dispatch(updateActions.deleteImages(Eid));
+            if (SImage) await dispatch(updateActions.deleteLateral(Eid));
+            if (FImage) await dispatch(updateActions.deleteFrontal(Eid));
             dispatch(addEvalAction.deleteEval(docId));
             props.navigation.goBack();
           }
@@ -422,6 +436,7 @@ const EvalScreen = (props) => {
 
                 actions.setSubmitting(false);
                 editBmiInfo(bmi, { UpId }, { Eid });
+                setTimeout(() => loadDetails(), 2000);
               }}
               schema={validationSchemaEval}
               genderSelect={false}
@@ -634,6 +649,7 @@ const EvalScreen = (props) => {
                     current={parseInt(bmi)}
                     Meta={18}
                     update={bmi - updatedBmi}
+                    // onChange={() => loadDetails()}
                   />
                 </View>
               </TouchableOpacity>
@@ -654,7 +670,7 @@ const EvalScreen = (props) => {
                       metaTitle={"Meta"}
                       Meta={18}
                       update={updatedBmi}
-                      difference={bmi - updatedBmi}
+                      difference={updatedBmi === "" ? "" : bmi - updatedBmi}
                     />
                   </View>
                 </View>
@@ -836,6 +852,7 @@ const EvalScreen = (props) => {
                 UpId={UpId}
                 Eid={Eid}
                 onDelete={frontImageDeleteHandler}
+                refresh={() => loadDetails()}
               />
               <ImagePicker
                 onImageTaken={sideImageTakenHandler}
@@ -845,6 +862,7 @@ const EvalScreen = (props) => {
                 UpId={UpId}
                 Eid={Eid}
                 onDelete={sideImageDeleteHandler}
+                refresh={() => loadDetails()}
               />
             </View>
           </View>

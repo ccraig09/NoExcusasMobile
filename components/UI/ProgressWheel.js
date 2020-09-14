@@ -35,14 +35,15 @@ const ProgressWheel = (props, { value }) => {
       }}
     >
       <ProgressCircle
-        value={Math.abs(X)}
+        value={X}
         size={140}
         thickness={17}
         color={result}
         animationMethod="spring"
-        animationConfig={{ delay: 2000, stiffness: 30 }}
+        animationConfig={{ delay: 1000, stiffness: 30 }}
         unfilledColor="grey"
         shouldAnimateFirstValue={true}
+        onChange={props.onChange}
       >
         <Text style={{ fontSize: 18, fontWeight: "bold" }}>
           {props.composition}
@@ -55,7 +56,7 @@ const ProgressWheel = (props, { value }) => {
             fontWeight: "bold",
           }}
         >
-          {(Math.abs(X) * 100).toFixed(2)} %
+          {(X * 100).toFixed(2)} %
         </Text>
       </ProgressCircle>
     </View>

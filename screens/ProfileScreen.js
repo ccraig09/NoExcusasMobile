@@ -79,7 +79,8 @@ const ProfileScreen = (props) => {
       });
     }
 
-    return transformedEvals.sort((a, b) => (a.evalTime > b.evalTime ? 1 : -1));
+    return transformedEvals;
+    // .sort((a, b) => (a.evalTime > b./evalTime ? 1 : -1));
   });
 
   const [isLoading, setIsLoading] = useState(false);
@@ -1531,12 +1532,14 @@ const ProfileScreen = (props) => {
                     title="Base Frontal"
                     source={FImage}
                     onDelete={frontImageDeleteHandler}
+                    refresh={() => loadDetails()}
                   />
                   <ImagePicker
                     onImageTaken={sideImageTakenHandler}
                     title="Base Lateral"
                     source={SImage}
                     onDelete={sideImageDeleteHandler}
+                    refresh={() => loadDetails()}
                   />
                 </View>
               )}

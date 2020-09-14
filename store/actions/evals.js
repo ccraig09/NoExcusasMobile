@@ -47,6 +47,9 @@ export const fetchMemberEvals = () => {
               collection[key].timestamp
             )
           );
+          const time = collection[key].timestamp;
+          loadedEvals.sort((a, b) => (a.time > b.time ? 1 : -1));
+
           // console.log("testing doctitle new", collection[key].timestamp);
           dispatch({
             type: SET_EVAL,
@@ -79,8 +82,8 @@ export const createEval = (title) => {
         { merge: true }
       );
 
-      const events = await dbE;
-      events
+      const events = dbE;
+      await events
         .get()
         .then((querySnapshot) => {
           const collection = querySnapshot.docs.map((doc) => {

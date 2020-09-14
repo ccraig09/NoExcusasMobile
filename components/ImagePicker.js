@@ -15,6 +15,7 @@ import * as updateActions from "../store/actions/evalUpdate";
 import * as detailsActions from "../store/actions/membersDetails";
 
 import Colors from "../constants/Colors";
+import { TouchableOpacity } from "react-native-gesture-handler";
 
 const ImgPicker = (props) => {
   const dispatch = useDispatch();
@@ -107,6 +108,20 @@ const ImgPicker = (props) => {
             source={props.source ? { uri: props.source } : null}
           />
         )}
+      </View>
+      <View
+        style={{
+          borderColor: Colors.noExprimary,
+          borderRadius: 5,
+          borderWidth: 2,
+          padding: 2,
+          marginBottom: 5,
+        }}
+      >
+        <Text style={{ fontSize: 13 }}>No Carga la foto?</Text>
+        <TouchableOpacity onPress={props.refresh}>
+          <Text style={{ fontSize: 17, color: "blue" }}>Refrescar</Text>
+        </TouchableOpacity>
       </View>
       <Text style={{ fontSize: 20 }}>{props.title}</Text>
       <Button
