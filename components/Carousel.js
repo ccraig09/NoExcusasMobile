@@ -1,10 +1,17 @@
 import * as React from "react";
 import { Text, View, SafeAreaView } from "react-native";
+import { useSelector, useDispatch } from "react-redux";
+import { connect } from "react-redux";
 
 import Carousel from "react-native-snap-carousel";
 import Colors from "../constants/Colors";
 
-export default class Carouselcom extends React.Component {
+function mapStateToProps(state) {
+  return {
+    loadedMemberDeets: state.memberdeets.details,
+  };
+}
+class Carouselcom extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -12,23 +19,27 @@ export default class Carouselcom extends React.Component {
       carouselItems: [
         {
           title: "IMC",
-          text: "Gorda",
+          text: this.props.loadedMemberDeets.BMI,
         },
         {
-          title: "GRasa",
-          text: "Dio mio",
+          title: "Grasa",
+          text: this.props.loadedMemberDeets.Fat,
         },
         {
-          title: "Item 3",
-          text: "Text 3",
+          title: "Músculo",
+          text: this.props.loadedMemberDeets.Muscle,
         },
         {
-          title: "Item 4",
-          text: "Text 4",
+          title: "KCAL",
+          text: this.props.loadedMemberDeets.KCAL,
         },
         {
-          title: "Item 5",
-          text: "Text 5",
+          title: "Metabolica",
+          text: this.props.loadedMemberDeets.Metabolical,
+        },
+        {
+          title: "Viseral",
+          text: this.props.loadedMemberDeets.ViFat,
         },
       ],
     };
@@ -73,3 +84,4 @@ export default class Carouselcom extends React.Component {
     );
   }
 }
+export default connect(mapStateToProps)(Carouselcom);
