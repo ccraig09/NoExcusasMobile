@@ -31,7 +31,8 @@ import { useSelector, useDispatch } from "react-redux";
 import { Avatar } from "react-native-elements";
 import HeaderButton from "../components/UI/HeaderButton";
 import EvalBlock from "../components/EvalBlock";
-import Carouselcom from "../components/Carousel";
+import Carousel from "../components/Carousel";
+// import Carousel from './Carousel';
 
 import { AsyncStorage } from "react-native";
 import Colors from "../constants/Colors";
@@ -1267,7 +1268,21 @@ const ProfileScreen = (props) => {
               </TouchableOpacity>
             </View>
             {showProgreso && (
-              <Carouselcom />
+              <Carousel
+                style="slides"
+                itemsPerInterval={1}
+                items={[
+                  {
+                    title: "Welcome, swipe to continue.",
+                  },
+                  {
+                    title: "About feature X.",
+                  },
+                  {
+                    title: "About feature Y.",
+                  },
+                ]}
+              />
               // <View style={styles.wheelBlock}>
               //   <View>
               //     <TouchableOpacity
