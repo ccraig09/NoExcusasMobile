@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { Video } from "expo-av";
 import { Ionicons } from "@expo/vector-icons";
 import { useSelector } from "react-redux";
+import { Camera } from "expo-camera";
 
 import {
   TouchableOpacity,
@@ -17,6 +18,23 @@ let screenHeight = Dimensions.get("window").height;
 let logoimg = "../assets/icon-noexlogo.png";
 
 const VideoItem = (props) => {
+  const [hasPermission, setHasPermission] = useState(null);
+  const [type, setType] = useState(Camera.Constants.Type.front);
+
+  useEffect(() => {
+    (async () => {
+      const { status } = await Camera.requestPermissionsAsync();
+      setHasPermission(status === "granted");
+    })();
+  }, []);
+
+  if (hasPermission === null) {
+    return <View />;
+  }
+  if (hasPermission === false) {
+    return <Text>No access to camera</Text>;
+  }
+
   return (
     <View style={{ flex: 1 }}>
       <Container>
@@ -41,10 +59,35 @@ const VideoItem = (props) => {
           </TouchableOpacity>
         </CloseView>
       </Container>
-      <View style={styles.bottom}>
-        <Text>Here are the list</Text>
-        <Text>exercise 2</Text>
-      </View>
+      <Camera style={{ flex: 1 }} type={type}>
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "transparent",
+            flexDirection: "row",
+          }}
+        >
+          <TouchableOpacity
+            style={{
+              flex: 0.1,
+              alignSelf: "flex-end",
+              alignItems: "center",
+            }}
+            onPress={() => {
+              setType(
+                type === Camera.Constants.Type.back
+                  ? Camera.Constants.Type.front
+                  : Camera.Constants.Type.back
+              );
+            }}
+          >
+            <Text style={{ fontSize: 18, marginBottom: 10, color: "white" }}>
+              {" "}
+              Flip{" "}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </Camera>
     </View>
   );
 };
@@ -58,7 +101,7 @@ const styles = StyleSheet.create({
 });
 
 const Container = styled.View`
-  height: 550px;
+  height: 45%;
   background: black;
   align-items: center;
   justify-content: center;

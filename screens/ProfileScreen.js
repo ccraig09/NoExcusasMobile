@@ -47,6 +47,8 @@ import * as Description from "../components/UI/descriptions";
 import ProgressWheel from "../components/UI/ProgressWheel";
 import DataModal from "../components/DataModal";
 import BasicInfoScroll from "../components/BasicInfoScrollview";
+import Forumula from "../components/Formula";
+import Formula from "../components/Formula";
 
 let screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
@@ -472,6 +474,10 @@ const ProfileScreen = (props) => {
     setShowImagen(true);
     setShowAll(true);
   };
+
+  const compPress = useCallback(() => {
+    console.log("pressed the button");
+  });
 
   const tapBackground = () => {
     setShowAlert(true);
@@ -1273,16 +1279,59 @@ const ProfileScreen = (props) => {
                 itemsPerInterval={1}
                 items={[
                   {
-                    title: "Welcome, swipe to continue.",
+                    title: "BMI",
+                    result: bmi,
+                    edit: () => {
+                      setImcModal(true);
+                    },
+                    button: "Editar IMC",
+                    gender: gender,
+                    age: age,
+                    bmi: bmi,
                   },
                   {
-                    title: "About feature X.",
+                    title: "Grasa.",
+                    result: fat,
+                    edit: () => {
+                      setFatModal(true);
+                    },
+                    button: "Editar Grasa",
                   },
                   {
-                    title: "About feature Y.",
+                    title: "Músculo",
+                    result: muscle,
+                    edit: () => {
+                      setMuscleModal(true);
+                    },
+                    button: "Editar Músculo",
+                  },
+                  {
+                    title: "KCAL",
+                    result: kcal,
+                    edit: () => {
+                      setKcalModal(true);
+                    },
+                    button: "Editar KCAL",
+                  },
+                  {
+                    title: "Edad Metabolica",
+                    result: meta,
+                    edit: () => {
+                      setMetaModal(true);
+                    },
+                    button: "Editar Edad Metabolica",
+                  },
+                  {
+                    title: "Grasa Viseral",
+                    result: vifat,
+                    edit: () => {
+                      setVifatModal(true);
+                    },
+                    button: "Editar Grasa Viseral",
                   },
                 ]}
               />
+
               // <View style={styles.wheelBlock}>
               //   <View>
               //     <TouchableOpacity
@@ -1356,7 +1405,8 @@ const ProfileScreen = (props) => {
               //   </View>
               // </View>
             )}
-            {showProgreso && (
+
+            {/* {showProgreso && (
               <View style={styles.wheelBlock}>
                 <View>
                   <TouchableOpacity
@@ -1502,7 +1552,7 @@ const ProfileScreen = (props) => {
                   </TouchableOpacity>
                 </View>
               </View>
-            )}
+            )} */}
             <View>
               <View style={styles.edit}>
                 <TouchableOpacity

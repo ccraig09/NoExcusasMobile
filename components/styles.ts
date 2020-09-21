@@ -1,4 +1,5 @@
 import { StyleSheet } from "react-native";
+import Colors from "../constants/Colors";
 
 export const styles = StyleSheet.create({
   statsHead: {
@@ -9,11 +10,13 @@ export const styles = StyleSheet.create({
     width: "100%",
     backgroundColor: "#fbfbfb",
     borderColor: "#ebebeb",
-    borderWidth: 1,
+    // borderWidth: 1,
+    marginRight: 15,
     borderRadius: 8,
     shadowColor: "#fcfcfc",
     shadowOpacity: 1,
     marginTop: 10,
+    marginLeft: 7,
     shadowOffset: {
       width: 0,
       height: 5,
@@ -23,6 +26,11 @@ export const styles = StyleSheet.create({
     display: "flex",
     flexDirection: "row",
     overflow: "hidden",
+    backgroundColor: "#ffc733",
+    borderRadius: 7,
+  },
+  view: {
+    marginRight: 15,
   },
   bullets: {
     position: "absolute",
@@ -36,7 +44,7 @@ export const styles = StyleSheet.create({
   },
   bullet: {
     paddingHorizontal: 5,
-    fontSize: 20,
+    fontSize: 25,
   },
 });
 

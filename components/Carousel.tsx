@@ -49,32 +49,47 @@ export const Carousel = (props: any) => {
 
   return (
     <View style={styles.container}>
-      <ScrollView
-        horizontal={true}
-        contentContainerStyle={{
-          ...styles.scrollView,
-          width: `${100 * intervals}%`,
-        }}
-        showsHorizontalScrollIndicator={false}
-        onContentSizeChange={(w, h) => init(w)}
-        onScroll={(data) => {
-          setWidth(data.nativeEvent.contentSize.width);
-          setInterval(getInterval(data.nativeEvent.contentOffset.x));
-        }}
-        scrollEventThrottle={200}
-        pagingEnabled
-        decelerationRate="fast"
-      >
-        {items.map((item: any, index: number) => {
-          switch (style) {
-            case "stats":
-              return <Stat key={index} label={item.label} value={item.value} />;
-            default:
-              return <Slide key={index} title={item.title} />;
-          }
-        })}
-      </ScrollView>
-      <View style={styles.bullets}>{bullets}</View>
+      <View style={styles.view}>
+        <ScrollView
+          horizontal={true}
+          contentContainerStyle={{
+            ...styles.scrollView,
+            width: `${100 * intervals}%`,
+          }}
+          showsHorizontalScrollIndicator={false}
+          onContentSizeChange={(w, h) => init(w)}
+          onScroll={(data) => {
+            setWidth(data.nativeEvent.contentSize.width);
+            setInterval(getInterval(data.nativeEvent.contentOffset.x));
+          }}
+          scrollEventThrottle={200}
+          pagingEnabled
+          decelerationRate="fast"
+        >
+          {items.map((item: any, index: number) => {
+            switch (style) {
+              case "stats":
+                return (
+                  <Stat key={index} label={item.label} value={item.value} />
+                );
+              default:
+                return (
+                  <Slide
+                    key={index}
+                    title={item.title}
+                    result={item.result}
+                    edit={item.edit}
+                    button={item.button}
+                    age={item.age}
+                    gender={item.gender}
+                    bmi={item.bmi}
+                  />
+                );
+            }
+          })}
+        </ScrollView>
+        <View style={styles.bullets}>{bullets}</View>
+      </View>
     </View>
   );
 };
