@@ -11,6 +11,7 @@ import {
   View,
   Text,
   StyleSheet,
+  Image,
 } from "react-native";
 
 let screenWidth = Dimensions.get("window").width;
@@ -46,7 +47,7 @@ const VideoItem = (props) => {
           shouldPlay
           useNativeControls={true}
           resizeMode="contain"
-          style={{ width: screenWidth, height: 545 }}
+          style={{ width: screenWidth, height: 345 }}
         />
         <CloseView>
           <TouchableOpacity
@@ -64,14 +65,28 @@ const VideoItem = (props) => {
           style={{
             flex: 1,
             backgroundColor: "transparent",
-            flexDirection: "row",
+            alignItems: "center",
+            alignSelf: "center",
+            justifyContent: "center",
+            // flexDirection: "row",
           }}
         >
-          <TouchableOpacity
+          <Image
+            style={{
+              width: 200,
+              height: 200,
+            }}
+            source={{
+              uri: "https://media.giphy.com/media/3o7TKKlj7BTQGna32o/giphy.gif",
+            }}
+          />
+
+          {/* <TouchableOpacity
             style={{
               flex: 0.1,
               alignSelf: "flex-end",
               alignItems: "center",
+              marginLeft: 9,
             }}
             onPress={() => {
               setType(
@@ -81,11 +96,11 @@ const VideoItem = (props) => {
               );
             }}
           >
-            <Text style={{ fontSize: 18, marginBottom: 10, color: "white" }}>
+            <Text style={{ fontSize: 18, marginBottom: 19, color: "white" }}>
               {" "}
               Flip{" "}
             </Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
       </Camera>
     </View>

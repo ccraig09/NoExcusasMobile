@@ -1285,17 +1285,18 @@ const ProfileScreen = (props) => {
                       setImcModal(true);
                     },
                     button: "Editar IMC",
-                    gender: gender,
-                    age: age,
                     bmi: bmi,
                   },
                   {
-                    title: "Grasa.",
+                    title: "Grasa",
                     result: fat,
                     edit: () => {
                       setFatModal(true);
                     },
                     button: "Editar Grasa",
+                    gender: gender,
+                    age: age,
+                    fat: fat,
                   },
                   {
                     title: "Músculo",

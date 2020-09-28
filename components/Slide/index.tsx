@@ -8,13 +8,20 @@ export const Slide = (props: any) => {
 
   return (
     <View style={styles.slide}>
-      <Formula gender={props.gender} age={props.age} bmi={props.bmi} />
-
-      <Text style={{ ...styles.title }}>{title}</Text>
+      <View>
+        <TouchableOpacity onPress={props.edit}>
+          <Text style={{ ...styles.title }}>{title}</Text>
+          <Text>{props.button}</Text>
+        </TouchableOpacity>
+      </View>
       <Text style={{ ...styles.slideText }}>{result}</Text>
-      <TouchableOpacity onPress={props.edit}>
-        <Text>{props.button}</Text>
-      </TouchableOpacity>
+      <Formula
+        gender={props.gender}
+        age={props.age}
+        bmi={props.bmi}
+        fat={props.fat}
+        title={props.title}
+      />
     </View>
   );
 };
