@@ -1305,6 +1305,9 @@ const ProfileScreen = (props) => {
                       setMuscleModal(true);
                     },
                     button: "Editar Músculo",
+                    muscle: muscle,
+                    age: age,
+                    gender: gender,
                   },
                   {
                     title: "KCAL",
@@ -1329,6 +1332,7 @@ const ProfileScreen = (props) => {
                       setVifatModal(true);
                     },
                     button: "Editar Grasa Viseral",
+                    vifat: vifat,
                   },
                 ]}
               />

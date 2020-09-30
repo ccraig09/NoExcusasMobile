@@ -21,6 +21,8 @@ export const Slide = (props: any) => {
         bmi={props.bmi}
         fat={props.fat}
         title={props.title}
+        vifat={props.vifat}
+        muscle={props.muscle}
       />
     </View>
   );

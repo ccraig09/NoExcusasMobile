@@ -77,7 +77,7 @@ const VideoItem = (props) => {
               height: 200,
             }}
             source={{
-              uri: "https://media.giphy.com/media/3o7TKKlj7BTQGna32o/giphy.gif",
+              uri: "https://media.giphy.com/media/WOUNY23l02q9DQFuZF/giphy.gif",
             }}
           />
 

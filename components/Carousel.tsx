@@ -84,6 +84,8 @@ export const Carousel = (props: any) => {
                     gender={item.gender}
                     bmi={item.bmi}
                     fat={item.fat}
+                    vifat={item.vifat}
+                    muscle={item.muscle}
                   />
                 );
             }
