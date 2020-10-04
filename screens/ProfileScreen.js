@@ -796,45 +796,7 @@ const ProfileScreen = (props) => {
                   )}
                 />
               ))}
-            {/* <ScrollView
-              style={{
-                flexDirection: "row",
-                padding: 20,
-                paddingLeft: 12,
-                paddingTop: 30,
-                marginTop: 10,
-              }}
-              horizontal={true}
-              showsHorizontalScrollIndicator={false}
-            >
-              {/* {evals.map((evalinfo, index) => ( */}
-            {/* key={index} text={evalinfo.text}  */}
-            {/* <ItemContainer>
-                <TouchableOpacity
-                  onPress={() => props.navigation.navigate("Eval1")}
-                >
-                  <Item>
-                    <Text>Eval 1</Text>
-                  </Item>
-                </TouchableOpacity>
 
-                <Item>
-                  <Text>Eval 2</Text>
-                </Item>
-                <Item>
-                  <Text>Eval 3</Text>
-                </Item>
-                <Item>
-                  <Text>Eval 4</Text>
-                </Item>
-                <Item>
-                  <Text>Eval 5</Text>
-                </Item>
-                <Item>
-                  <Text>Eval 6</Text>
-                </Item>
-              </ItemContainer>
-            </ScrollView> */}
             <View style={styles.edit}>
               <TouchableOpacity
                 onPress={() => {
