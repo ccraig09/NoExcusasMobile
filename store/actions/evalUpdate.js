@@ -164,7 +164,7 @@ export const bmiEdit = (bmi, UpdId, Eid) => {
     });
   };
 };
-export const metaInfo = (meta) => {
+export const metaEdit = (meta, UpdId, Eid) => {
   return async () => {
     firebase.auth().onAuthStateChanged(function (user) {
       if (user) {
@@ -172,10 +172,37 @@ export const metaInfo = (meta) => {
         try {
           db.doc(userId)
             .collection("Evals")
-            .doc()
+            .doc(UpdId)
             .set(
               {
                 meta,
+                Eid,
+              },
+              { merge: true }
+            )
+            .catch(function (error) {
+              console.log("Error getting document:", error);
+            });
+        } catch (err) {
+          throw new Error(err.message);
+        }
+      }
+    });
+  };
+};
+export const metaInfo = (meta, Eid, UpdId) => {
+  return async () => {
+    firebase.auth().onAuthStateChanged(function (user) {
+      if (user) {
+        var userId = user.uid.toString();
+        try {
+          db.doc(userId)
+            .collection("Evals")
+            .doc(UpdId)
+            .set(
+              {
+                meta,
+                Eid,
               },
               { merge: true }
             )

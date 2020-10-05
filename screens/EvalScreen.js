@@ -69,6 +69,12 @@ const EvalScreen = (props) => {
   const [FImage, setFImage] = useState(null);
   const [SImage, setSImage] = useState(null);
   const updatedBmi = loadedUpdates.length === 0 ? "" : loadedUpdates[0].bmi;
+  const updatedMeta = loadedUpdates.length === 0 ? "" : loadedUpdates[0].meta;
+  const updatedVifat = loadedUpdates.length === 0 ? "" : loadedUpdates[0].vifat;
+  const updatedKcal = loadedUpdates.length === 0 ? "" : loadedUpdates[0].kcal;
+  const updatedMuscle =
+    loadedUpdates.length === 0 ? "" : loadedUpdates[0].muscle;
+  const updatedFat = loadedUpdates.length === 0 ? "" : loadedUpdates[0].fat;
 
   const UpId = loadedUpdates.length === 0 ? "" : loadedUpdates[0].id;
 
@@ -170,15 +176,36 @@ const EvalScreen = (props) => {
       }
     });
   });
-
-  const updateMetaInfo = useCallback(async (meta) => {
+  const editMetaInfo = useCallback(async (meta, UpId, Eid) => {
+    console.log("this is the updated id", UpId);
+    const UpdId = UpId.UpId;
     try {
-      dispatch(updateActions.metaInfo(meta));
+      dispatch(updateActions.metaEdit(meta, UpdId, Eid));
     } catch (err) {
       setError(err.message);
     }
-    loadDetails();
     setMetaModal(!metaModal);
+    loadDetails();
+  });
+
+  const updateMetaInfo = useCallback(async (meta, Eid, UpId) => {
+    const UpdId = UpId.UpId;
+
+    const toast = Toast.showLoading("Subiendo Edad Metabolica");
+    setTimeout(() => {
+      // Recommend
+      Toast.hide(toast);
+
+      // or Toast.hide()
+      // If you don't pass toast，it will hide the last toast by default.
+    }, 3000);
+    try {
+      dispatch(updateActions.metaInfo(meta, Eid, UpdId));
+    } catch (err) {
+      setError(err.message);
+    }
+    setMetaModal(!metaModal);
+    loadDetails();
   });
   const editBmiInfo = useCallback(async (bmi, UpId, Eid) => {
     console.log("this is the updated id", UpId);
@@ -192,9 +219,7 @@ const EvalScreen = (props) => {
     loadDetails();
   });
   const updateBmiInfo = useCallback(async (bmi, Eid) => {
-    console.log("testsubmit bmi");
-
-    const toast = Toast.showLoading("Subiendo Foto");
+    const toast = Toast.showLoading("Subiendo IMC");
     setTimeout(() => {
       // Recommend
       Toast.hide(toast);
@@ -476,35 +501,67 @@ const EvalScreen = (props) => {
               formikMaxLength={4}
             />
           )}
-          <DataModal
-            visible={metaModal}
-            backPress={tapBackground}
-            swipeComplete={() => setMetaModal(!metaModal)}
-            show={showAlert}
-            alertTitle={"Salir sin guardar?"}
-            alertCancel={"No, continuar"}
-            alertConfirm={"Si, sin guardar"}
-            cancelPressed={() => {
-              setShowAlert(false);
-            }}
-            confirmedPressed={() => {
-              setMetaModal(!metaModal);
-              setShowAlert(false);
-            }}
-            initialValues={{ meta: "" }}
-            submit={(values, actions) => {
-              const { meta } = values;
+          {updatedMeta ? (
+            <DataModal
+              visible={metaModal}
+              backPress={tapBackground}
+              swipeComplete={() => setMetaModal(!metaModal)}
+              show={showAlert}
+              alertTitle={"Salir sin guardar?"}
+              alertCancel={"No, continuar"}
+              alertConfirm={"Si, sin guardar"}
+              cancelPressed={() => {
+                setShowAlert(false);
+              }}
+              confirmedPressed={() => {
+                setMetaModal(!metaModal);
+                setShowAlert(false);
+              }}
+              initialValues={{ meta: "" }}
+              submit={(values, actions) => {
+                const { meta } = values;
 
-              updateMetaInfo(meta);
-              actions.setSubmitting(false);
-            }}
-            schema={validationSchemaEval}
-            genderSelect={false}
-            formikLabel={"EDAD METABOLICA"}
-            FormikKey={"meta"}
-            formikKeyboard={"numeric"}
-            formikMaxLength={2}
-          />
+                editMetaInfo(meta, { UpId }, { Eid });
+                actions.setSubmitting(false);
+              }}
+              schema={validationSchemaEval}
+              genderSelect={false}
+              formikLabel={"EDAD METABOLICA"}
+              FormikKey={"meta"}
+              formikKeyboard={"numeric"}
+              formikMaxLength={2}
+            />
+          ) : (
+            <DataModal
+              visible={metaModal}
+              backPress={tapBackground}
+              swipeComplete={() => setMetaModal(!metaModal)}
+              show={showAlert}
+              alertTitle={"Salir sin guardar?"}
+              alertCancel={"No, continuar"}
+              alertConfirm={"Si, sin guardar"}
+              cancelPressed={() => {
+                setShowAlert(false);
+              }}
+              confirmedPressed={() => {
+                setMetaModal(!metaModal);
+                setShowAlert(false);
+              }}
+              initialValues={{ meta: "" }}
+              submit={(values, actions) => {
+                const { meta } = values;
+
+                updateMetaInfo(meta, { Eid }, { UpId });
+                actions.setSubmitting(false);
+              }}
+              schema={validationSchemaEval}
+              genderSelect={false}
+              formikLabel={"EDAD METABOLICA"}
+              FormikKey={"meta"}
+              formikKeyboard={"numeric"}
+              formikMaxLength={2}
+            />
+          )}
           <DataModal
             visible={vifatModal}
             backPress={tapBackground}
@@ -783,6 +840,7 @@ const EvalScreen = (props) => {
                     composition={"Metabolica"}
                     current={parseInt(meta)}
                     Meta={15}
+                    update={meta - updatedMeta}
                   />
                 </View>
               </TouchableOpacity>
@@ -797,7 +855,14 @@ const EvalScreen = (props) => {
                   }}
                 >
                   <View>
-                    <UpdateDT current={meta} metaTitle={"Meta"} Meta={19} />
+                    <UpdateDT
+                      title1="Eval"
+                      title2="logro"
+                      metaTitle={"Meta"}
+                      Meta={25}
+                      update={updatedMeta}
+                      difference={updatedMeta === "" ? "" : meta - updatedMeta}
+                    />
                   </View>
                 </View>
               </TouchableOpacity>

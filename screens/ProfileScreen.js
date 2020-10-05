@@ -107,7 +107,9 @@ const ProfileScreen = (props) => {
   const [FImage, setFImage] = useState("");
   const [SImage, setSImage] = useState("");
   const updatedBmi = loadedUpdates.length === 0 ? "" : loadedUpdates[0].bmi;
+  const updatedMeta = loadedUpdates.length === 0 ? "" : loadedUpdates[0].meta;
   console.log("this is updatedBmi=", updatedBmi);
+  console.log("this is updated all=", updatedMeta);
   const [userPhoto, setUserPhoto] = useState();
   const [selectedImage, setSelectedImage] = useState();
   const dispatch = useDispatch();
