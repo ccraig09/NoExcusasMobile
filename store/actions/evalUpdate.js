@@ -28,7 +28,7 @@ export const fetchUpdates = (Eid) => {
         // );
         dispatch({
           type: SET_UPDATES,
-          updates: loadedUpdates.filter((per) => per.Eid.Eid === Eid),
+          updates: loadedUpdates.filter((per) => per.Eid === Eid),
         });
       });
     } catch (err) {
@@ -112,7 +112,7 @@ export const sideImage = async (blobs, Eid) => {
   });
 };
 
-export const bmiInfo = (bmi, Eid) => {
+export const bmiInfo = (bmi, Eid, EvTitle) => {
   return async () => {
     firebase.auth().onAuthStateChanged(function (user) {
       if (user) {
@@ -120,7 +120,7 @@ export const bmiInfo = (bmi, Eid) => {
         try {
           db.doc(userId)
             .collection("Evals")
-            .doc()
+            .doc(EvTitle)
             .set(
               {
                 bmi,
@@ -138,7 +138,8 @@ export const bmiInfo = (bmi, Eid) => {
     });
   };
 };
-export const bmiEdit = (bmi, UpdId, Eid) => {
+
+export const metaInfo = (meta, Eid, EvTitle) => {
   return async () => {
     firebase.auth().onAuthStateChanged(function (user) {
       if (user) {
@@ -146,33 +147,7 @@ export const bmiEdit = (bmi, UpdId, Eid) => {
         try {
           db.doc(userId)
             .collection("Evals")
-            .doc(UpdId)
-            .set(
-              {
-                bmi,
-                Eid,
-              },
-              { merge: true }
-            )
-            .catch(function (error) {
-              console.log("Error getting document:", error);
-            });
-        } catch (err) {
-          throw new Error(err.message);
-        }
-      }
-    });
-  };
-};
-export const metaEdit = (meta, UpdId, Eid) => {
-  return async () => {
-    firebase.auth().onAuthStateChanged(function (user) {
-      if (user) {
-        var userId = user.uid.toString();
-        try {
-          db.doc(userId)
-            .collection("Evals")
-            .doc(UpdId)
+            .doc(EvTitle)
             .set(
               {
                 meta,
@@ -190,7 +165,7 @@ export const metaEdit = (meta, UpdId, Eid) => {
     });
   };
 };
-export const metaInfo = (meta, Eid, UpdId) => {
+export const vifatInfo = (vifat, Eid, EvTitle) => {
   return async () => {
     firebase.auth().onAuthStateChanged(function (user) {
       if (user) {
@@ -198,36 +173,11 @@ export const metaInfo = (meta, Eid, UpdId) => {
         try {
           db.doc(userId)
             .collection("Evals")
-            .doc(UpdId)
-            .set(
-              {
-                meta,
-                Eid,
-              },
-              { merge: true }
-            )
-            .catch(function (error) {
-              console.log("Error getting document:", error);
-            });
-        } catch (err) {
-          throw new Error(err.message);
-        }
-      }
-    });
-  };
-};
-export const vifatInfo = (vifat) => {
-  return async () => {
-    firebase.auth().onAuthStateChanged(function (user) {
-      if (user) {
-        var userId = user.uid.toString();
-        try {
-          db.doc(userId)
-            .collection("Evals")
-            .doc()
+            .doc(EvTitle)
             .set(
               {
                 vifat,
+                Eid,
               },
               { merge: true }
             )
@@ -241,7 +191,7 @@ export const vifatInfo = (vifat) => {
     });
   };
 };
-export const kcalInfo = (kcal) => {
+export const kcalInfo = (kcal, Eid, EvTitle) => {
   return async () => {
     firebase.auth().onAuthStateChanged(function (user) {
       if (user) {
@@ -249,10 +199,11 @@ export const kcalInfo = (kcal) => {
         try {
           db.doc(userId)
             .collection("Evals")
-            .doc()
+            .doc(EvTitle)
             .set(
               {
                 kcal,
+                Eid,
               },
               { merge: true }
             )
@@ -266,7 +217,7 @@ export const kcalInfo = (kcal) => {
     });
   };
 };
-export const muscleInfo = (muscle) => {
+export const muscleInfo = (muscle, Eid, EvTitle) => {
   return async () => {
     firebase.auth().onAuthStateChanged(function (user) {
       if (user) {
@@ -274,10 +225,11 @@ export const muscleInfo = (muscle) => {
         try {
           db.doc(userId)
             .collection("Evals")
-            .doc()
+            .doc(EvTitle)
             .set(
               {
                 muscle,
+                Eid,
               },
               { merge: true }
             )
@@ -291,7 +243,7 @@ export const muscleInfo = (muscle) => {
     });
   };
 };
-export const fatInfo = (fat) => {
+export const fatInfo = (fat, Eid, EvTitle) => {
   return async () => {
     firebase.auth().onAuthStateChanged(function (user) {
       if (user) {
@@ -299,10 +251,11 @@ export const fatInfo = (fat) => {
         try {
           db.doc(userId)
             .collection("Evals")
-            .doc()
+            .doc(EvTitle)
             .set(
               {
                 fat,
+                Eid,
               },
               { merge: true }
             )

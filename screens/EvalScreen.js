@@ -44,6 +44,8 @@ const EvalScreen = (props) => {
 
   const EId = evalId;
   const EvalTitle = props.navigation.getParam("evalTitle");
+  const EvTitle = JSON.stringify(EvalTitle);
+  console.log("this is eval title", EvTitle);
   const [showAlert, setShowAlert] = useState(false);
   const [error, setError] = useState();
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -176,21 +178,8 @@ const EvalScreen = (props) => {
       }
     });
   });
-  const editMetaInfo = useCallback(async (meta, UpId, Eid) => {
-    console.log("this is the updated id", UpId);
-    const UpdId = UpId.UpId;
-    try {
-      dispatch(updateActions.metaEdit(meta, UpdId, Eid));
-    } catch (err) {
-      setError(err.message);
-    }
-    setMetaModal(!metaModal);
-    loadDetails();
-  });
 
-  const updateMetaInfo = useCallback(async (meta, Eid, UpId) => {
-    const UpdId = UpId.UpId;
-
+  const updateMetaInfo = useCallback(async (meta) => {
     const toast = Toast.showLoading("Subiendo Edad Metabolica");
     setTimeout(() => {
       // Recommend
@@ -200,25 +189,15 @@ const EvalScreen = (props) => {
       // If you don't pass toast，it will hide the last toast by default.
     }, 3000);
     try {
-      dispatch(updateActions.metaInfo(meta, Eid, UpdId));
+      dispatch(updateActions.metaInfo(meta, Eid, EvTitle));
     } catch (err) {
       setError(err.message);
     }
     setMetaModal(!metaModal);
     loadDetails();
   });
-  const editBmiInfo = useCallback(async (bmi, UpId, Eid) => {
-    console.log("this is the updated id", UpId);
-    const UpdId = UpId.UpId;
-    try {
-      dispatch(updateActions.bmiEdit(bmi, UpdId, Eid));
-    } catch (err) {
-      setError(err.message);
-    }
-    setImcModal(!imcModal);
-    loadDetails();
-  });
-  const updateBmiInfo = useCallback(async (bmi, Eid) => {
+
+  const updateBmiInfo = useCallback(async (bmi) => {
     const toast = Toast.showLoading("Subiendo IMC");
     setTimeout(() => {
       // Recommend
@@ -228,7 +207,7 @@ const EvalScreen = (props) => {
       // If you don't pass toast，it will hide the last toast by default.
     }, 3000);
     try {
-      dispatch(updateActions.bmiInfo(bmi, Eid));
+      dispatch(updateActions.bmiInfo(bmi, Eid, EvTitle));
     } catch (err) {
       setError(err.message);
     }
@@ -237,17 +216,33 @@ const EvalScreen = (props) => {
     // setTimeout(() => loadDetails(), 3000);
   });
   const updateVifat = useCallback(async (vifat) => {
+    const toast = Toast.showLoading("Subiendo Grasa Visceral");
+    setTimeout(() => {
+      // Recommend
+      Toast.hide(toast);
+
+      // or Toast.hide()
+      // If you don't pass toast，it will hide the last toast by default.
+    }, 3000);
     try {
-      dispatch(updateActions.vifatInfo(vifat));
+      dispatch(updateActions.vifatInfo(vifat, Eid, EvTitle));
     } catch (err) {
       setError(err.message);
     }
-    loadDetails();
     setVifatModal(!vifatModal);
+    loadDetails();
   });
   const updateKcalInfo = useCallback(async (kcal) => {
+    const toast = Toast.showLoading("Subiendo KCAL");
+    setTimeout(() => {
+      // Recommend
+      Toast.hide(toast);
+
+      // or Toast.hide()
+      // If you don't pass toast，it will hide the last toast by default.
+    }, 3000);
     try {
-      dispatch(updateActions.kcalInfo(kcal));
+      dispatch(updateActions.kcalInfo(kcal, Eid, EvTitle));
     } catch (err) {
       setError(err.message);
     }
@@ -255,8 +250,16 @@ const EvalScreen = (props) => {
     setKcalModal(!kcalModal);
   });
   const updateMuscleInfo = useCallback(async (muscle) => {
+    const toast = Toast.showLoading("Subiendo Músculo");
+    setTimeout(() => {
+      // Recommend
+      Toast.hide(toast);
+
+      // or Toast.hide()
+      // If you don't pass toast，it will hide the last toast by default.
+    }, 3000);
     try {
-      dispatch(updateActions.muscleInfo(muscle));
+      dispatch(updateActions.muscleInfo(muscle, Eid, EvTitle));
     } catch (err) {
       setError(err.message);
     }
@@ -264,13 +267,23 @@ const EvalScreen = (props) => {
     setMuscleModal(!muscleModal);
   });
   const updateFatInfo = useCallback(async (fat) => {
+    console.log("trying this Eid thing on submit fat", Eid);
+
+    const toast = Toast.showLoading("Subiendo Grasa");
+    setTimeout(() => {
+      // Recommend
+      Toast.hide(toast);
+
+      // or Toast.hide()
+      // If you don't pass toast，it will hide the last toast by default.
+    }, 3000);
     try {
-      dispatch(updateActions.fatInfo(fat));
+      dispatch(updateActions.fatInfo(fat, Eid, EvTitle));
     } catch (err) {
       setError(err.message);
     }
-    loadDetails();
     setFatModal(!fatModal);
+    loadDetails();
   });
 
   const deleteHandler = (docId, UpId, Eid) => {
@@ -439,129 +452,66 @@ const EvalScreen = (props) => {
             </View>
           </View>
 
-          {updatedBmi ? (
-            <DataModal
-              visible={imcModal}
-              backPress={tapBackground}
-              swipeComplete={() => setImcModal(!imcModal)}
-              show={showAlert}
-              alertTitle={"Salir sin guardar?"}
-              alertCancel={"No, continuar"}
-              alertConfirm={"Si, sin guardar"}
-              cancelPressed={() => {
-                setShowAlert(false);
-              }}
-              confirmedPressed={() => {
-                setImcModal(!imcModal);
-                setShowAlert(false);
-              }}
-              initialValues={{ bmi: "" }}
-              submit={(values, actions) => {
-                const { bmi } = values;
+          <DataModal
+            visible={imcModal}
+            backPress={tapBackground}
+            swipeComplete={() => setImcModal(!imcModal)}
+            show={showAlert}
+            alertTitle={"Salir sin guardar?"}
+            alertCancel={"No, continuar"}
+            alertConfirm={"Si, sin guardar"}
+            cancelPressed={() => {
+              setShowAlert(false);
+            }}
+            confirmedPressed={() => {
+              setImcModal(!imcModal);
+              setShowAlert(false);
+            }}
+            initialValues={{ bmi: "" }}
+            submit={(values, actions) => {
+              const { bmi } = values;
 
-                actions.setSubmitting(false);
-                editBmiInfo(bmi, { UpId }, { Eid });
-                setTimeout(() => loadDetails(), 2000);
-              }}
-              schema={validationSchemaEval}
-              genderSelect={false}
-              formikLabel={"IMC"}
-              FormikKey={"bmi"}
-              formikKeyboard={"numeric"}
-              formikMaxLength={4}
-            />
-          ) : (
-            <DataModal
-              visible={imcModal}
-              backPress={tapBackground}
-              swipeComplete={() => setImcModal(!imcModal)}
-              show={showAlert}
-              alertTitle={"Salir sin guardar?"}
-              alertCancel={"No, continuar"}
-              alertConfirm={"Si, sin guardar"}
-              cancelPressed={() => {
-                setShowAlert(false);
-              }}
-              confirmedPressed={() => {
-                setImcModal(!imcModal);
-                setShowAlert(false);
-              }}
-              initialValues={{ bmi: "" }}
-              submit={(values, actions) => {
-                const { bmi } = values;
+              updateBmiInfo(bmi, { Eid });
+              actions.setSubmitting(false);
+            }}
+            schema={validationSchemaEval}
+            genderSelect={false}
+            formikLabel={"IMC"}
+            FormikKey={"bmi"}
+            formikKeyboard={"numeric"}
+            formikMaxLength={4}
+          />
 
-                updateBmiInfo(bmi, { Eid });
-                actions.setSubmitting(false);
-              }}
-              schema={validationSchemaEval}
-              genderSelect={false}
-              formikLabel={"IMC"}
-              FormikKey={"bmi"}
-              formikKeyboard={"numeric"}
-              formikMaxLength={4}
-            />
-          )}
-          {updatedMeta ? (
-            <DataModal
-              visible={metaModal}
-              backPress={tapBackground}
-              swipeComplete={() => setMetaModal(!metaModal)}
-              show={showAlert}
-              alertTitle={"Salir sin guardar?"}
-              alertCancel={"No, continuar"}
-              alertConfirm={"Si, sin guardar"}
-              cancelPressed={() => {
-                setShowAlert(false);
-              }}
-              confirmedPressed={() => {
-                setMetaModal(!metaModal);
-                setShowAlert(false);
-              }}
-              initialValues={{ meta: "" }}
-              submit={(values, actions) => {
-                const { meta } = values;
+          <DataModal
+            visible={metaModal}
+            backPress={tapBackground}
+            swipeComplete={() => setMetaModal(!metaModal)}
+            show={showAlert}
+            alertTitle={"Salir sin guardar?"}
+            alertCancel={"No, continuar"}
+            alertConfirm={"Si, sin guardar"}
+            cancelPressed={() => {
+              setShowAlert(false);
+            }}
+            confirmedPressed={() => {
+              setMetaModal(!metaModal);
+              setShowAlert(false);
+            }}
+            initialValues={{ meta: "" }}
+            submit={(values, actions) => {
+              const { meta } = values;
 
-                editMetaInfo(meta, { UpId }, { Eid });
-                actions.setSubmitting(false);
-              }}
-              schema={validationSchemaEval}
-              genderSelect={false}
-              formikLabel={"EDAD METABOLICA"}
-              FormikKey={"meta"}
-              formikKeyboard={"numeric"}
-              formikMaxLength={2}
-            />
-          ) : (
-            <DataModal
-              visible={metaModal}
-              backPress={tapBackground}
-              swipeComplete={() => setMetaModal(!metaModal)}
-              show={showAlert}
-              alertTitle={"Salir sin guardar?"}
-              alertCancel={"No, continuar"}
-              alertConfirm={"Si, sin guardar"}
-              cancelPressed={() => {
-                setShowAlert(false);
-              }}
-              confirmedPressed={() => {
-                setMetaModal(!metaModal);
-                setShowAlert(false);
-              }}
-              initialValues={{ meta: "" }}
-              submit={(values, actions) => {
-                const { meta } = values;
+              updateMetaInfo(meta, { Eid });
+              actions.setSubmitting(false);
+            }}
+            schema={validationSchemaEval}
+            genderSelect={false}
+            formikLabel={"EDAD METABOLICA"}
+            FormikKey={"meta"}
+            formikKeyboard={"numeric"}
+            formikMaxLength={2}
+          />
 
-                updateMetaInfo(meta, { Eid }, { UpId });
-                actions.setSubmitting(false);
-              }}
-              schema={validationSchemaEval}
-              genderSelect={false}
-              formikLabel={"EDAD METABOLICA"}
-              FormikKey={"meta"}
-              formikKeyboard={"numeric"}
-              formikMaxLength={2}
-            />
-          )}
           <DataModal
             visible={vifatModal}
             backPress={tapBackground}
@@ -581,7 +531,7 @@ const EvalScreen = (props) => {
             submit={(values, actions) => {
               const { vifat } = values;
 
-              updateVifat(vifat);
+              updateVifat(vifat, { Eid });
               actions.setSubmitting(false);
             }}
             schema={validationSchemaEval}
@@ -610,7 +560,7 @@ const EvalScreen = (props) => {
             submit={(values, actions) => {
               const { kcal } = values;
 
-              updateKcalInfo(kcal);
+              updateKcalInfo(kcal), { Eid };
               actions.setSubmitting(false);
             }}
             schema={validationSchemaEval}
@@ -639,7 +589,7 @@ const EvalScreen = (props) => {
             submit={(values, actions) => {
               const { muscle } = values;
 
-              updateMuscleInfo(muscle);
+              updateMuscleInfo(muscle), { Eid };
               actions.setSubmitting(false);
             }}
             schema={validationSchemaEval}
@@ -667,8 +617,9 @@ const EvalScreen = (props) => {
             initialValues={{ fat: "" }}
             submit={(values, actions) => {
               const { fat } = values;
+              console.log("going to this Eid thing fat", Eid);
 
-              updateFatInfo(fat);
+              updateFatInfo(fat), { Eid };
               actions.setSubmitting(false);
             }}
             schema={validationSchemaEval}
@@ -745,6 +696,7 @@ const EvalScreen = (props) => {
                     composition={"Grasa"}
                     current={parseInt(fat)}
                     Meta={10}
+                    update={fat - updatedFat}
                   />
                 </View>
               </TouchableOpacity>
@@ -759,7 +711,14 @@ const EvalScreen = (props) => {
                   }}
                 >
                   <View>
-                    <UpdateDT current={fat} metaTitle={"Meta"} Meta={10} />
+                    <UpdateDT
+                      title1="Eval"
+                      title2="logro"
+                      metaTitle={"Meta"}
+                      Meta={10}
+                      update={updatedFat}
+                      difference={updatedFat === "" ? "" : fat - updatedFat}
+                    />
                   </View>
                 </View>
               </TouchableOpacity>
