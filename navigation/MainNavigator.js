@@ -20,11 +20,13 @@ import CategoryScreen from "../screens/CategoryScreen";
 import ClassStart from "../screens/ClassStart";
 import AuthScreen from "../screens/AuthScreen";
 import StartupScreen from "../screens/StartupScreen";
+import Timer from "../screens/Timer";
+import OnboardingScreen from "../screens/OnboardingScreen";
 
 import LogoutScreen from "../screens/LogoutScreen";
 
 const defaultStackNavOptions = {
-  // headerShown: false,
+  headerShown: false,
 };
 
 const HomeStack = createStackNavigator(
@@ -61,6 +63,19 @@ HomeStack.navigationOptions = ({ navigation }) => {
   };
 };
 
+const TimerStack = createStackNavigator(
+  {
+    timer: Timer,
+    onboarding: OnboardingScreen,
+  },
+  {
+    // mode: "modal",
+    // initialRouteName: "Categories",
+
+    defaultNavigationOptions: defaultStackNavOptions,
+    mode: "modal",
+  }
+);
 const ProfileStack = createStackNavigator(
   {
     Profile: ProfileScreen,
@@ -109,6 +124,24 @@ const tabScreenConfig = {
           <Text style={{ fontFamily: "open-sans-bold" }}>Profile</Text>
         ) : (
           "Profile"
+        ),
+    },
+  },
+  Timer: {
+    screen: TimerStack,
+    navigationOptions: {
+      tabBarLabel: "Favorites!",
+      tabBarIcon: (tabInfo) => {
+        return (
+          <Ionicons name="ios-timer" size={28} color={tabInfo.tintColor} />
+        );
+      },
+      tabBarColor: "gray",
+      tabBarLabel:
+        Platform.OS === "android" ? (
+          <Text style={{ fontFamily: "open-sans-bold" }}>Timer</Text>
+        ) : (
+          "Timer"
         ),
     },
   },

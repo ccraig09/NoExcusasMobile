@@ -1,10 +1,7 @@
 import React from "react";
-import { View, Text, Platform } from "react-native";
-import AnimatedProgressWheel from "react-native-progress-wheel";
-import ProgressCircle from "./ProgressCircle";
-import MetaFormula from "../../components/MetaFormula";
+import { View, Text } from "react-native";
 
-const ProgressWheel = (props, { value }) => {
+const MetaFormula = (props) => {
   const goal = () => {
     if (props.title === "BMI") {
       return "21.6";
@@ -66,62 +63,11 @@ const ProgressWheel = (props, { value }) => {
     }
   };
 
-  const A = props.current;
-  // const B = goal();
-  const P = Math.abs(props.update);
-  const C = (A - goal()).toFixed(2);
-  const D = P / C;
-  const X = isNaN(D) ? 0 : Math.abs(D.toFixed(2));
-  // console.log("this is the goal ", B);
-
-  let result;
-  if (X * 100 < 25) {
-    result = "red";
-  }
-  if (X * 100 >= 25 && X * 100 <= 75) {
-    result = "yellow";
-  }
-  if (X * 100 > 75) {
-    result = "#00ff00";
-  }
-  // console.log("x is equal to", Math.abs(X));
   return (
-    <View
-      style={{
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: "#ffc733",
-        padding: 10,
-        borderRadius: 10,
-      }}
-    >
-      <ProgressCircle
-        value={X}
-        size={140}
-        thickness={17}
-        color={result}
-        animationMethod="spring"
-        animationConfig={{ delay: 1000, stiffness: 30 }}
-        unfilledColor="grey"
-        shouldAnimateFirstValue={true}
-        onChange={props.onChange}
-      >
-        <Text style={{ fontSize: 18, fontWeight: "bold" }}>
-          {props.composition}
-        </Text>
-        <Text
-          style={{
-            color: result,
-            fontSize: 15,
-            fontFamily: "aliens",
-            fontWeight: "bold",
-          }}
-        >
-          {(X * 100).toFixed(2)} %
-        </Text>
-      </ProgressCircle>
+    <View>
+      <Text>{goal()}</Text>
     </View>
   );
 };
 
-export default ProgressWheel;
+export default MetaFormula;

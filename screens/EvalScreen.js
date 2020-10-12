@@ -45,7 +45,6 @@ const EvalScreen = (props) => {
   const EId = evalId;
   const EvalTitle = props.navigation.getParam("evalTitle");
   const EvTitle = JSON.stringify(EvalTitle);
-  console.log("this is eval title", EvTitle);
   const [showAlert, setShowAlert] = useState(false);
   const [error, setError] = useState();
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -66,6 +65,12 @@ const EvalScreen = (props) => {
   const kcal = loadedMemberDeets.KCAL;
   const meta = loadedMemberDeets.Metabolical;
   const vifat = loadedMemberDeets.ViFat;
+  const gender =
+    typeof loadedMemberDeets.Gender === "undefined"
+      ? ""
+      : loadedMemberDeets.Gender;
+  const age =
+    typeof loadedMemberDeets.Age === "undefined" ? "" : loadedMemberDeets.Age;
   const Eid = EId;
   // const UpId = updatedId;
   const [FImage, setFImage] = useState(null);
@@ -267,8 +272,6 @@ const EvalScreen = (props) => {
     setMuscleModal(!muscleModal);
   });
   const updateFatInfo = useCallback(async (fat) => {
-    console.log("trying this Eid thing on submit fat", Eid);
-
     const toast = Toast.showLoading("Subiendo Grasa");
     setTimeout(() => {
       // Recommend
@@ -318,7 +321,6 @@ const EvalScreen = (props) => {
   };
 
   const frontImageTakenHandler = useCallback(async (uri) => {
-    console.log("sending out command");
     const response = await fetch(uri);
     const blob = await response.blob();
     try {
@@ -617,7 +619,6 @@ const EvalScreen = (props) => {
             initialValues={{ fat: "" }}
             submit={(values, actions) => {
               const { fat } = values;
-              console.log("going to this Eid thing fat", Eid);
 
               updateFatInfo(fat), { Eid };
               actions.setSubmitting(false);
@@ -653,9 +654,9 @@ const EvalScreen = (props) => {
               >
                 <View style={styles.wheel}>
                   <ProgressWheel
+                    title="BMI"
                     composition={"IMC"}
                     current={parseInt(bmi)}
-                    Meta={18}
                     update={bmi - updatedBmi}
                     // onChange={() => loadDetails()}
                   />
@@ -673,10 +674,10 @@ const EvalScreen = (props) => {
                 >
                   <View>
                     <UpdateDT
+                      title="BMI"
                       title1="Eval"
                       title2="logro"
                       metaTitle={"Meta"}
-                      Meta={18}
                       update={updatedBmi}
                       difference={updatedBmi === "" ? "" : bmi - updatedBmi}
                     />
@@ -694,8 +695,10 @@ const EvalScreen = (props) => {
                 <View style={styles.wheel}>
                   <ProgressWheel
                     composition={"Grasa"}
+                    title={"Grasa"}
+                    gender={gender}
+                    age={age}
                     current={parseInt(fat)}
-                    Meta={10}
                     update={fat - updatedFat}
                   />
                 </View>
@@ -712,10 +715,12 @@ const EvalScreen = (props) => {
                 >
                   <View>
                     <UpdateDT
+                      title={"Grasa"}
+                      gender={gender}
+                      age={age}
                       title1="Eval"
                       title2="logro"
                       metaTitle={"Meta"}
-                      Meta={10}
                       update={updatedFat}
                       difference={updatedFat === "" ? "" : fat - updatedFat}
                     />
@@ -733,9 +738,12 @@ const EvalScreen = (props) => {
               >
                 <View style={styles.wheel}>
                   <ProgressWheel
+                    title={"Músculo"}
+                    gender={gender}
+                    age={age}
                     composition={"Músculo"}
                     current={parseInt(muscle)}
-                    Meta={48}
+                    update={muscle - updatedMuscle}
                   />
                 </View>
               </TouchableOpacity>
@@ -750,7 +758,18 @@ const EvalScreen = (props) => {
                   }}
                 >
                   <View>
-                    <UpdateDT current={muscle} metaTitle={"Meta"} Meta={48} />
+                    <UpdateDT
+                      title={"Músculo"}
+                      gender={gender}
+                      age={age}
+                      title1="Eval"
+                      title2="logro"
+                      metaTitle={"Meta"}
+                      update={updatedMuscle}
+                      difference={
+                        updatedMuscle === "" ? "" : muscle - updatedMuscle
+                      }
+                    />
                   </View>
                 </View>
               </TouchableOpacity>
@@ -759,20 +778,22 @@ const EvalScreen = (props) => {
             <View>
               <TouchableOpacity
                 onPress={() => {
-                  setKcalModal(true);
+                  setVifatModal(true);
                 }}
               >
                 <View style={styles.wheel}>
                   <ProgressWheel
-                    composition={"KCAL"}
-                    current={parseInt(kcal)}
-                    Meta={2000}
+                    title={"Grasa Viseral"}
+                    composition={"Viseral"}
+                    current={parseInt(vifat)}
+                    Meta={6}
+                    update={vifat - updatedVifat}
                   />
                 </View>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => {
-                  setKcalModal(true);
+                  setVifatModal(true);
                 }}
               >
                 <View
@@ -781,7 +802,17 @@ const EvalScreen = (props) => {
                   }}
                 >
                   <View>
-                    <UpdateDT current={kcal} metaTitle={"Meta"} Meta={2000} />
+                    <UpdateDT
+                      title={"Grasa Viseral"}
+                      title1="Eval"
+                      title2="logro"
+                      metaTitle={"Meta"}
+                      Meta={10}
+                      update={updatedVifat}
+                      difference={
+                        updatedVifat === "" ? "" : vifat - updatedVifat
+                      }
+                    />
                   </View>
                 </View>
               </TouchableOpacity>
@@ -798,7 +829,8 @@ const EvalScreen = (props) => {
                   <ProgressWheel
                     composition={"Metabolica"}
                     current={parseInt(meta)}
-                    Meta={15}
+                    title={"Metabolica"}
+                    age={age}
                     update={meta - updatedMeta}
                   />
                 </View>
@@ -815,10 +847,11 @@ const EvalScreen = (props) => {
                 >
                   <View>
                     <UpdateDT
+                      title={"Metabolica"}
+                      age={age}
                       title1="Eval"
                       title2="logro"
                       metaTitle={"Meta"}
-                      Meta={25}
                       update={updatedMeta}
                       difference={updatedMeta === "" ? "" : meta - updatedMeta}
                     />
@@ -830,20 +863,21 @@ const EvalScreen = (props) => {
             <View>
               <TouchableOpacity
                 onPress={() => {
-                  setVifatModal(true);
+                  setKcalModal(true);
                 }}
               >
                 <View style={styles.wheel}>
                   <ProgressWheel
-                    composition={"Viseral"}
-                    current={parseInt(vifat)}
-                    Meta={1}
+                    composition={"KCAL"}
+                    current={parseInt(kcal)}
+                    Meta={2000}
+                    update={kcal - updatedKcal}
                   />
                 </View>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => {
-                  setVifatModal(true);
+                  setKcalModal(true);
                 }}
               >
                 <View
@@ -852,7 +886,14 @@ const EvalScreen = (props) => {
                   }}
                 >
                   <View>
-                    <UpdateDT current={vifat} metaTitle={"Meta"} Meta={3} />
+                    <UpdateDT
+                      title1="Eval"
+                      title2="logro"
+                      metaTitle={"Meta"}
+                      Meta={10}
+                      update={updatedKcal}
+                      difference={updatedKcal === "" ? "" : kcal - updatedKcal}
+                    />
                   </View>
                 </View>
               </TouchableOpacity>

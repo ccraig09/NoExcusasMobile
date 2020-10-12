@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useReducer, useEffect } from "react";
+import React from "react";
 import { View, Text } from "react-native";
 
 const Formula = (props) => {
@@ -21,13 +21,13 @@ const Formula = (props) => {
     if (props.bmi < "18.5") {
       return "Peso inferior al normal";
     }
-    if (props.bmi > "18.6" && props.bmi < "24.9") {
+    if (props.bmi >= "18.6" && props.bmi <= "24.9") {
       return "Normal";
     }
-    if (props.bmi > "25" && props.bmi < "29.9") {
+    if (props.bmi >= "25" && props.bmi <= "29.9") {
       return "Sobrepeso";
     }
-    if (props.bmi > "30") {
+    if (props.bmi >= "30") {
       return "Obesidad";
     }
   };

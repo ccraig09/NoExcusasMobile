@@ -70,8 +70,6 @@ const ImgPicker = (props) => {
 
   const deleteImageHandler = (Eid, title) => {
     // console.log("props for docId", props.docId);
-    console.log("props for title", title);
-    console.log("props for Eid", Eid);
     Alert.alert("¿Usted esta seguro?", "Quiere borrar esta foto?", [
       { text: "No", style: "default" },
       {

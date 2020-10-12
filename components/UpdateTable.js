@@ -2,6 +2,7 @@ import * as React from "react";
 import { DataTable } from "react-native-paper";
 import styled from "styled-components";
 import { Dimensions } from "react-native";
+import MetaFormula from "../components/MetaFormula";
 
 let screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
@@ -17,8 +18,16 @@ const UpdateDT = (props) => {
         </DataTable.Header>
         <DataTable.Row>
           <DataTable.Cell>{props.update}</DataTable.Cell>
-          <DataTable.Cell>{props.difference}</DataTable.Cell>
-          <DataTable.Cell numeric>{props.Meta}</DataTable.Cell>
+          <DataTable.Cell>{Math.abs(props.difference)}</DataTable.Cell>
+          <DataTable.Cell numeric>
+            {
+              <MetaFormula
+                title={props.title}
+                gender={props.gender}
+                age={props.age}
+              />
+            }
+          </DataTable.Cell>
         </DataTable.Row>
       </DataTable>
     </DataContainer>

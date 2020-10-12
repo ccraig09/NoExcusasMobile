@@ -108,8 +108,6 @@ const ProfileScreen = (props) => {
   const [SImage, setSImage] = useState("");
   const updatedBmi = loadedUpdates.length === 0 ? "" : loadedUpdates[0].bmi;
   const updatedMeta = loadedUpdates.length === 0 ? "" : loadedUpdates[0].meta;
-  console.log("this is updatedBmi=", updatedBmi);
-  console.log("this is updated all=", updatedMeta);
   const [userPhoto, setUserPhoto] = useState();
   const [selectedImage, setSelectedImage] = useState();
   const dispatch = useDispatch();
@@ -206,7 +204,6 @@ const ProfileScreen = (props) => {
       if (user) {
         var userId = user.uid.toString();
         var storage = firebase.storage().ref();
-        console.log("loading image");
         storage
           .child(`UserBaseImages/${userId}/FrontImage`)
           .getDownloadURL()
@@ -371,7 +368,6 @@ const ProfileScreen = (props) => {
   });
 
   const addEvalSquareHandler = useCallback(async (title) => {
-    console.log("submitting evals ");
     try {
       await dispatch(addEvalAction.createEval(title));
     } catch (err) {
@@ -477,9 +473,7 @@ const ProfileScreen = (props) => {
     setShowAll(true);
   };
 
-  const compPress = useCallback(() => {
-    console.log("pressed the button");
-  });
+  const compPress = useCallback(() => {});
 
   const tapBackground = () => {
     setShowAlert(true);
@@ -593,7 +587,6 @@ const ProfileScreen = (props) => {
                     }}
                     onSubmit={(values) => {
                       const { name, last } = values;
-                      console.log("submitting ihope", name);
                       submitHandler(name, last);
                     }}
                     validationSchema={validationSchema}
