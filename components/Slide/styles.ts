@@ -9,11 +9,11 @@ export const styles = StyleSheet.create({
     flex: 1,
     maxWidth: "100%",
     display: "flex",
-    flexDirection: "row",
+    // flexDirection: "row",
     flexWrap: "wrap",
-    alignItems: "center",
-    alignContent: "center",
-    justifyContent: "center",
+    // alignItems: "center",
+    // alignContent: "center",
+    // justifyContent: "center",
     height: 200,
   },
   slideText: {
@@ -24,8 +24,14 @@ export const styles = StyleSheet.create({
   title: {
     width: "100%",
     textAlign: "left",
-    fontSize: 20,
+    fontSize: 30,
+    textDecorationLine: "underline",
     fontWeight: "bold",
+  },
+  progress: {
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 50,
   },
 });
 

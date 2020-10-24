@@ -86,6 +86,8 @@ export const Carousel = (props: any) => {
                     fat={item.fat}
                     vifat={item.vifat}
                     muscle={item.muscle}
+                    comp={item.comp}
+                    updated={item.updated}
                   />
                 );
             }

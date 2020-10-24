@@ -13,7 +13,6 @@ import {
   KeyboardAvoidingView,
   TouchableOpacity,
   Text,
-  Button,
   Picker,
   Alert,
   FlatList,
@@ -28,7 +27,7 @@ import Toast from "react-native-tiny-toast";
 
 import styled, { useTheme } from "styled-components";
 import { useSelector, useDispatch } from "react-redux";
-import { Avatar } from "react-native-elements";
+import { Avatar, Button } from "react-native-elements";
 import HeaderButton from "../components/UI/HeaderButton";
 import EvalBlock from "../components/EvalBlock";
 import Carousel from "../components/Carousel";
@@ -41,6 +40,7 @@ import * as addEvalAction from "../store/actions/evals";
 import ImagePicker from "../components/ImagePicker";
 import firebase from "../components/firebase";
 import { SafeAreaView } from "react-native-safe-area-context";
+import UpdateDT from "../components/UpdateTable";
 
 import BaseEvalDT from "../components/BaseEvalDataTable";
 import * as Description from "../components/UI/descriptions";
@@ -639,24 +639,44 @@ const ProfileScreen = (props) => {
               {/* {this.state.Bcg2 ? (
                     <Background source={{ uri: this.state.Bcg2 }} />
                   ) : null} */}
-              <Background source={require("../assets/yellow.png")} />
+              {/* <Background source={require("../assets/yellow.png")} /> */}
               {/* <Name>{this.props.name}</Name> */}
+              <AvatarView>
+                <Avatar
+                  rounded
+                  size="xlarge"
+                  style={{ width: 100, height: 100 }}
+                  source={{
+                    uri: userPhoto,
+                  }}
+                  showEditButton={true}
+                />
+                <View style={styles.displayName}>
+                  {/* <UpdateDT
+                    screen="profile"
+                    title1="Dias Activo"
+                    title2="14"
+                    metaTitle="123 Ltrs"
+                  /> */}
+                  <Text style={styles.hello}>{greetingMessage}, </Text>
+                  <Text style={styles.name}>{firstName} </Text>
+                  <Button
+                    title="Editar Perfil"
+                    type="outline"
+                    titleStyle={{ color: "black", fontSize: 12 }}
+                    buttonStyle={{
+                      borderColor: "black",
+                      borderRadius: 12,
+                      height: 28,
+                      width: 100,
+                      alignItems: "center",
+                      padding: -5,
+                      marginTop: 7,
+                    }}
+                  />
+                </View>
+              </AvatarView>
             </Header>
-            <AvatarView>
-              <Avatar
-                rounded
-                size="xlarge"
-                style={{ width: 125, height: 125 }}
-                source={{
-                  uri: userPhoto,
-                }}
-                showEditButton={true}
-              />
-            </AvatarView>
-            <View style={styles.displayName}>
-              <Text style={styles.hello}>{greetingMessage}, </Text>
-              <Text style={styles.hello}>{firstName} </Text>
-            </View>
             <TouchableOpacity
               onPress={() => {
                 showAll ? showHandler() : hideHandler();
@@ -669,11 +689,11 @@ const ProfileScreen = (props) => {
                 }}
               >
                 <View>
-                  <Text style={{ color: "grey", marginTop: 20 }}>
+                  <Text style={{ color: "grey", marginTop: 10 }}>
                     {!showAll ? "Mostrar todo" : "Ocultar todo"}
                   </Text>
                 </View>
-                <View style={{ marginTop: 20, marginLeft: 15 }}>
+                <View style={{ marginTop: 10, marginLeft: 15 }}>
                   <Ionicons
                     name={
                       showAll
@@ -702,7 +722,7 @@ const ProfileScreen = (props) => {
                   <View>
                     <Subtitle>{"evaluación".toUpperCase()}</Subtitle>
                   </View>
-                  <View style={{ marginTop: 20, marginLeft: 15 }}>
+                  <View style={{ marginTop: 10, marginLeft: 15 }}>
                     <Ionicons
                       name={
                         showEval
@@ -808,7 +828,7 @@ const ProfileScreen = (props) => {
                   <View>
                     <Subtitle>{"datos basicos".toUpperCase()}</Subtitle>
                   </View>
-                  <View style={{ marginTop: 20, marginLeft: 15 }}>
+                  <View style={{ marginTop: 10, marginLeft: 15 }}>
                     <Ionicons
                       name={
                         showDatos
@@ -1216,7 +1236,7 @@ const ProfileScreen = (props) => {
                   <View>
                     <Subtitle>{"Progreso".toUpperCase()}</Subtitle>
                   </View>
-                  <View style={{ marginTop: 20, marginLeft: 15 }}>
+                  <View style={{ marginTop: 10, marginLeft: 15 }}>
                     <Ionicons
                       name={
                         showProgreso
@@ -1236,13 +1256,15 @@ const ProfileScreen = (props) => {
                 itemsPerInterval={1}
                 items={[
                   {
-                    title: "BMI",
+                    title: "IMC",
                     result: bmi,
                     edit: () => {
                       setImcModal(true);
                     },
                     button: "Editar IMC",
                     bmi: bmi,
+                    comp: bmi,
+                    updated: updatedBmi,
                   },
                   {
                     title: "Grasa",
@@ -1254,6 +1276,7 @@ const ProfileScreen = (props) => {
                     gender: gender,
                     age: age,
                     fat: fat,
+                    comp: fat,
                   },
                   {
                     title: "Músculo",
@@ -1532,7 +1555,7 @@ const ProfileScreen = (props) => {
                     <View>
                       <Subtitle>{"progress imagen".toUpperCase()}</Subtitle>
                     </View>
-                    <View style={{ marginTop: 20, marginLeft: 15 }}>
+                    <View style={{ marginTop: 10, marginLeft: 15 }}>
                       <Ionicons
                         name={
                           showImagen
@@ -1697,9 +1720,15 @@ const styles = StyleSheet.create({
   },
   centered: { flex: 1, justifyContent: "center", alignItems: "center" },
   hello: {
+    marginTop: 2,
     fontWeight: "bold",
-    textAlign: "center",
+    textAlign: "left",
     fontSize: 15,
+  },
+  name: {
+    fontSize: 30,
+    fontWeight: "bold",
+    color: Colors.noExprimary,
   },
   basicInfo: {
     fontWeight: "bold",
@@ -1710,10 +1739,8 @@ const styles = StyleSheet.create({
   },
 
   displayName: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 80,
+    marginTop: 10,
+    marginLeft: 12,
   },
   modalOverlay: {
     position: "absolute",
@@ -1751,12 +1778,12 @@ const styles = StyleSheet.create({
 });
 
 const RootView = styled.View`
-  background: black;
+  background: #f2f2f2;
   flex: 1;
 `;
 const Container = styled.View`
   flex: 1;
-  background-color: #f0f3f5;
+  background-color: #f2f2f2;
   border-top-left-radius: 10px;
   border-top-right-radius: 10px;
 `;
@@ -1803,8 +1830,8 @@ const Item = styled.View`
 `;
 
 const Header = styled.View`
-  height: 200px;
-  background: #3c4560;
+  height: 130px;
+  background: #f2f2f2;
 `;
 const Name = styled.Text`
   font-size: 30px;
@@ -1825,15 +1852,17 @@ const Background = styled.Image`
 `;
 const AvatarView = styled.View`
   width: 150px;
-  height: 150px;
+  height: 110px;
   border-radius: 75px;
   position: absolute;
-  top: 120px;
-  left: 38%;
-  margin-left: -22px;
-  z-index: 1;
-  justify-content: center;
-  align-items: center;
+  flex-direction: row;
+  /* top: 120px; */
+  margin-top: 10px;
+  /* left: 38%; */
+  margin-left: 10px;
+  /* z-index: 1; */
+  /* justify-content: center;
+  align-items: center; */
   box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
 `;
 const Subtitle = styled.Text`
@@ -1841,7 +1870,8 @@ const Subtitle = styled.Text`
   font-weight: 600;
   font-size: 25px;
   margin-left: 20px;
-  margin-top: 20px;
+  margin-top: 10px;
+  margin-bottom: 10px;
   text-transform: uppercase;
 `;
 

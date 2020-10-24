@@ -3,7 +3,7 @@ import { View, Text } from "react-native";
 
 const Formula = (props) => {
   const res = () => {
-    if (props.title === "BMI") {
+    if (props.title === "IMC") {
       return bmiRes();
     }
     if (props.title === "Grasa") {

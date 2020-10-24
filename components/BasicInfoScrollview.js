@@ -12,10 +12,11 @@ const BasicInfoScroll = (props) => {
     <ScrollView
       style={{
         flexDirection: "row",
-        padding: 20,
-        paddingLeft: 12,
+        // padding: 10,
+        // paddingLeft: 10,
         marginRight: 10,
-        marginTop: 5,
+        marginLeft: -10,
+        marginTop: 2,
       }}
       horizontal={true}
       showsHorizontalScrollIndicator={false}
@@ -24,8 +25,8 @@ const BasicInfoScroll = (props) => {
         style={{
           justifyContent: "center",
           alignItems: "center",
-          padding: 10,
-          width: 190,
+          // padding: 10,
+          width: 85,
         }}
         onPress={props.agePress}
       >
@@ -35,7 +36,7 @@ const BasicInfoScroll = (props) => {
             style={{
               fontFamily: "aliens",
               color: "grey",
-              fontSize: 40,
+              fontSize: 20,
               textAlign: "center",
             }}
           >
@@ -47,8 +48,8 @@ const BasicInfoScroll = (props) => {
         style={{
           justifyContent: "center",
           alignItems: "center",
-          padding: 10,
-          width: 190,
+          // padding: 10,
+          width: 100,
         }}
         onPress={props.heightPress}
       >
@@ -58,7 +59,7 @@ const BasicInfoScroll = (props) => {
             style={{
               fontFamily: "aliens",
               color: "#ffc733",
-              fontSize: 40,
+              fontSize: 20,
               textAlign: "center",
             }}
           >
@@ -70,8 +71,8 @@ const BasicInfoScroll = (props) => {
         style={{
           justifyContent: "center",
           alignItems: "center",
-          padding: 10,
-          width: 190,
+          // padding: 10,
+          width: 100,
         }}
         onPress={props.weightPress}
       >
@@ -81,7 +82,7 @@ const BasicInfoScroll = (props) => {
             style={{
               fontFamily: "aliens",
               color: "grey",
-              fontSize: 40,
+              fontSize: 20,
               textAlign: "center",
             }}
           >
@@ -93,8 +94,8 @@ const BasicInfoScroll = (props) => {
         style={{
           justifyContent: "center",
           alignItems: "center",
-          padding: 10,
-          width: 190,
+          // padding: 10,
+          width: 100,
         }}
         onPress={props.genderPress}
       >
@@ -104,7 +105,7 @@ const BasicInfoScroll = (props) => {
             style={{
               fontFamily: "aliens",
               color: "#ffc733",
-              fontSize: 40,
+              fontSize: 20,
               textAlign: "center",
             }}
           >
@@ -120,7 +121,7 @@ const styles = StyleSheet.create({
   basicInfo: {
     fontWeight: "bold",
     textAlign: "center",
-    fontSize: 40,
+    fontSize: 17,
     color: "#6C6C6C",
     fontStyle: "italic",
   },

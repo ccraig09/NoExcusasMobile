@@ -25,7 +25,7 @@ export default EvalBlock;
 
 const Item = styled.View`
   background: #ffc733;
-  height: 60px;
+  height: 40px;
   width: 90px;
   padding: 12px 16px 12px;
   border-radius: 10px;
