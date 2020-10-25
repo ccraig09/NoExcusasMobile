@@ -17,6 +17,7 @@ const BasicInfoScroll = (props) => {
         marginRight: 10,
         marginLeft: -10,
         marginTop: 2,
+        backgroundColor: "white",
       }}
       horizontal={true}
       showsHorizontalScrollIndicator={false}

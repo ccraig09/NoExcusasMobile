@@ -22,6 +22,7 @@ import AuthScreen from "../screens/AuthScreen";
 import StartupScreen from "../screens/StartupScreen";
 import Timer from "../screens/Timer";
 import OnboardingScreen from "../screens/OnboardingScreen";
+import EditProfile from "../screens/EditProfile";
 
 import LogoutScreen from "../screens/LogoutScreen";
 
@@ -80,6 +81,7 @@ const ProfileStack = createStackNavigator(
   {
     Profile: ProfileScreen,
     Eval: EvalScreen,
+    Edit: EditProfile,
   },
   {
     // mode: "modal",

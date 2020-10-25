@@ -26,7 +26,7 @@ export const styles = StyleSheet.create({
     display: "flex",
     flexDirection: "row",
     overflow: "hidden",
-    backgroundColor: "#ffc733",
+    backgroundColor: "white",
     borderRadius: 7,
   },
   view: {

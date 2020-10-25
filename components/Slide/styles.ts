@@ -3,13 +3,13 @@ import { StyleSheet } from "react-native";
 export const styles = StyleSheet.create({
   slide: {
     paddingHorizontal: 20,
-    // paddingBottom: 10,
-    // paddingTop: 30,
+    paddingBottom: 20,
+    paddingTop: 10,
     flexBasis: "100%",
     flex: 1,
     maxWidth: "100%",
     display: "flex",
-    // flexDirection: "row",
+    flexDirection: "row",
     flexWrap: "wrap",
     // alignItems: "center",
     // alignContent: "center",
@@ -19,19 +19,35 @@ export const styles = StyleSheet.create({
   slideText: {
     width: "100%",
     textAlign: "left",
-    fontSize: 20,
+    fontSize: 15,
   },
-  title: {
+  slideMeta: {
     width: "100%",
     textAlign: "left",
-    fontSize: 30,
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  resultText: {
+    width: "100%",
+    textAlign: "left",
+    fontSize: 20,
+    color: "grey",
+    fontFamily: "aliens",
+  },
+  title: {
+    // width: "100%",
+    textAlign: "left",
+
+    fontSize: 20,
     textDecorationLine: "underline",
     fontWeight: "bold",
   },
   progress: {
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 50,
+    position: "absolute",
+    marginTop: 40,
+    marginLeft: 80,
   },
 });
 

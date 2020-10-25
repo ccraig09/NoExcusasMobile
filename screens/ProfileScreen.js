@@ -108,6 +108,11 @@ const ProfileScreen = (props) => {
   const [SImage, setSImage] = useState("");
   const updatedBmi = loadedUpdates.length === 0 ? "" : loadedUpdates[0].bmi;
   const updatedMeta = loadedUpdates.length === 0 ? "" : loadedUpdates[0].meta;
+  const updatedVifat = loadedUpdates.length === 0 ? "" : loadedUpdates[0].vifat;
+  const updatedKcal = loadedUpdates.length === 0 ? "" : loadedUpdates[0].kcal;
+  const updatedMuscle =
+    loadedUpdates.length === 0 ? "" : loadedUpdates[0].muscle;
+  const updatedFat = loadedUpdates.length === 0 ? "" : loadedUpdates[0].fat;
   const [userPhoto, setUserPhoto] = useState();
   const [selectedImage, setSelectedImage] = useState();
   const dispatch = useDispatch();
@@ -663,6 +668,7 @@ const ProfileScreen = (props) => {
                   <Button
                     title="Editar Perfil"
                     type="outline"
+                    onPress={() => props.navigation.navigate("Edit")}
                     titleStyle={{ color: "black", fontSize: 12 }}
                     buttonStyle={{
                       borderColor: "black",
@@ -686,14 +692,18 @@ const ProfileScreen = (props) => {
                 style={{
                   flexDirection: "row",
                   marginLeft: 20,
+                  justifyContent: "flex-end",
+                  marginRight: 10,
+                  marginTop: -20,
+                  marginBottom: -30,
                 }}
               >
                 <View>
-                  <Text style={{ color: "grey", marginTop: 10 }}>
+                  <Text style={{ color: "grey" }}>
                     {!showAll ? "Mostrar todo" : "Ocultar todo"}
                   </Text>
                 </View>
-                <View style={{ marginTop: 10, marginLeft: 15 }}>
+                <View style={{ marginLeft: 15 }}>
                   <Ionicons
                     name={
                       showAll
@@ -701,11 +711,171 @@ const ProfileScreen = (props) => {
                         : "ios-arrow-dropup-circle"
                     }
                     size={20}
-                    color={Colors.noExprimary}
+                    color={Colors.noExBright}
                   />
                 </View>
               </View>
             </TouchableOpacity>
+
+            <View style={styles.edit}>
+              <TouchableOpacity
+                onPress={() => {
+                  setShowDatos((prevState) => !prevState);
+                }}
+              >
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  <View>
+                    <Subtitle>{"datos basicos".toUpperCase()}</Subtitle>
+                  </View>
+                  <View style={{ marginLeft: 15 }}>
+                    <Ionicons
+                      name={
+                        showDatos
+                          ? "ios-arrow-dropdown-circle"
+                          : "ios-arrow-dropup-circle"
+                      }
+                      size={20}
+                      color={Colors.noExBright}
+                    />
+                  </View>
+                </View>
+              </TouchableOpacity>
+            </View>
+
+            {showDatos && (
+              <BasicInfoScroll
+                agePress={() => {
+                  setAgeModal(true);
+                }}
+                heightPress={() => {
+                  setHeightModal(true);
+                }}
+                weightPress={() => {
+                  setWeightModal(true);
+                }}
+                genderPress={() => {
+                  setGenderModal(true);
+                }}
+                age={age}
+                height={height}
+                weight={weight}
+                gender={gender}
+              />
+            )}
+
+            <View style={styles.edit}>
+              <TouchableOpacity
+                onPress={() => {
+                  setShowProgreso((prevState) => !prevState);
+                }}
+              >
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  <View>
+                    <Subtitle>{"Evaluación".toUpperCase()}</Subtitle>
+                  </View>
+                  <View style={{ marginLeft: 15 }}>
+                    <Ionicons
+                      name={
+                        showProgreso
+                          ? "ios-arrow-dropdown-circle"
+                          : "ios-arrow-dropup-circle"
+                      }
+                      size={20}
+                      color={Colors.noExBright}
+                    />
+                  </View>
+                </View>
+              </TouchableOpacity>
+            </View>
+            {showProgreso && (
+              <Carousel
+                style="slides"
+                itemsPerInterval={1}
+                items={[
+                  {
+                    title: "IMC",
+                    result: bmi,
+                    edit: () => {
+                      setImcModal(true);
+                    },
+                    button: "Editar IMC",
+                    bmi: bmi,
+                    comp: bmi,
+                    updated: updatedBmi,
+                  },
+                  {
+                    title: "Grasa",
+                    result: fat,
+                    edit: () => {
+                      setFatModal(true);
+                    },
+                    button: "Editar Grasa",
+                    gender: gender,
+                    age: age,
+                    fat: fat,
+                    comp: fat,
+                    updated: updatedFat,
+                  },
+                  {
+                    title: "Músculo",
+                    result: muscle,
+                    edit: () => {
+                      setMuscleModal(true);
+                    },
+                    button: "Editar Músculo",
+                    muscle: muscle,
+                    age: age,
+                    gender: gender,
+                    comp: muscle,
+                    updated: updatedMuscle,
+                  },
+                  {
+                    title: "KCAL",
+                    result: kcal,
+                    edit: () => {
+                      setKcalModal(true);
+                    },
+                    button: "Editar KCAL",
+                    comp: kcal,
+                    updated: updatedKcal,
+                  },
+                  {
+                    title: "Edad Metabolica",
+                    result: meta,
+                    edit: () => {
+                      setMetaModal(true);
+                    },
+                    button: "Editar Edad Metabolica",
+                    comp: meta,
+                    updated: updatedMeta,
+                  },
+                  {
+                    title: "Grasa Viseral",
+                    result: vifat,
+                    edit: () => {
+                      setVifatModal(true);
+                    },
+                    button: "Editar Grasa Viseral",
+                    vifat: vifat,
+                    comp: vifat,
+                    updated: updatedVifat,
+                  },
+                ]}
+              />
+            )}
+
             <View style={styles.edit}>
               <TouchableOpacity
                 onPress={() => {
@@ -720,17 +890,17 @@ const ProfileScreen = (props) => {
                   }}
                 >
                   <View>
-                    <Subtitle>{"evaluación".toUpperCase()}</Subtitle>
+                    <Subtitle>{"Progreso".toUpperCase()}</Subtitle>
                   </View>
-                  <View style={{ marginTop: 10, marginLeft: 15 }}>
+                  <View style={{ marginLeft: 15 }}>
                     <Ionicons
                       name={
                         showEval
                           ? "ios-arrow-dropdown-circle"
                           : "ios-arrow-dropup-circle"
                       }
-                      size={25}
-                      color={Colors.noExprimary}
+                      size={20}
+                      color={Colors.noExBright}
                     />
                   </View>
                 </View>
@@ -739,14 +909,14 @@ const ProfileScreen = (props) => {
                 onPress={() => {
                   setEvalModal(true);
                 }}
-                style={{ marginRight: 20, marginTop: 10 }}
+                style={{ marginRight: 20 }}
               >
                 {showEval && (
                   <View
                     style={{
                       width: 35,
                       height: 30,
-                      borderColor: Colors.noExprimary,
+                      borderColor: Colors.noExBright,
                       borderRadius: 10,
                       justifyContent: "center",
                       alignItems: "center",
@@ -755,8 +925,8 @@ const ProfileScreen = (props) => {
                   >
                     <Ionicons
                       name={Platform.OS === "android" ? "md-add" : "ios-add"}
-                      size={25}
-                      color={Colors.noExprimary}
+                      size={20}
+                      color="grey"
                     />
                   </View>
                 )}
@@ -812,36 +982,6 @@ const ProfileScreen = (props) => {
                 />
               ))}
 
-            <View style={styles.edit}>
-              <TouchableOpacity
-                onPress={() => {
-                  setShowDatos((prevState) => !prevState);
-                }}
-              >
-                <View
-                  style={{
-                    flexDirection: "row",
-                    justifyContent: "center",
-                    alignItems: "center",
-                  }}
-                >
-                  <View>
-                    <Subtitle>{"datos basicos".toUpperCase()}</Subtitle>
-                  </View>
-                  <View style={{ marginTop: 10, marginLeft: 15 }}>
-                    <Ionicons
-                      name={
-                        showDatos
-                          ? "ios-arrow-dropdown-circle"
-                          : "ios-arrow-dropup-circle"
-                      }
-                      size={25}
-                      color={Colors.noExprimary}
-                    />
-                  </View>
-                </View>
-              </TouchableOpacity>
-            </View>
             <DataModal
               visible={evalModal}
               backPress={tapBackground}
@@ -1200,196 +1340,6 @@ const ProfileScreen = (props) => {
               FormikKey={"gender"}
               formikKeyboard={"numeric"}
             />
-            {showDatos && (
-              <BasicInfoScroll
-                agePress={() => {
-                  setAgeModal(true);
-                }}
-                heightPress={() => {
-                  setHeightModal(true);
-                }}
-                weightPress={() => {
-                  setWeightModal(true);
-                }}
-                genderPress={() => {
-                  setGenderModal(true);
-                }}
-                age={age}
-                height={height}
-                weight={weight}
-                gender={gender}
-              />
-            )}
-            <View style={styles.edit}>
-              <TouchableOpacity
-                onPress={() => {
-                  setShowProgreso((prevState) => !prevState);
-                }}
-              >
-                <View
-                  style={{
-                    flexDirection: "row",
-                    justifyContent: "center",
-                    alignItems: "center",
-                  }}
-                >
-                  <View>
-                    <Subtitle>{"Progreso".toUpperCase()}</Subtitle>
-                  </View>
-                  <View style={{ marginTop: 10, marginLeft: 15 }}>
-                    <Ionicons
-                      name={
-                        showProgreso
-                          ? "ios-arrow-dropdown-circle"
-                          : "ios-arrow-dropup-circle"
-                      }
-                      size={25}
-                      color={Colors.noExprimary}
-                    />
-                  </View>
-                </View>
-              </TouchableOpacity>
-            </View>
-            {showProgreso && (
-              <Carousel
-                style="slides"
-                itemsPerInterval={1}
-                items={[
-                  {
-                    title: "IMC",
-                    result: bmi,
-                    edit: () => {
-                      setImcModal(true);
-                    },
-                    button: "Editar IMC",
-                    bmi: bmi,
-                    comp: bmi,
-                    updated: updatedBmi,
-                  },
-                  {
-                    title: "Grasa",
-                    result: fat,
-                    edit: () => {
-                      setFatModal(true);
-                    },
-                    button: "Editar Grasa",
-                    gender: gender,
-                    age: age,
-                    fat: fat,
-                    comp: fat,
-                  },
-                  {
-                    title: "Músculo",
-                    result: muscle,
-                    edit: () => {
-                      setMuscleModal(true);
-                    },
-                    button: "Editar Músculo",
-                    muscle: muscle,
-                    age: age,
-                    gender: gender,
-                  },
-                  {
-                    title: "KCAL",
-                    result: kcal,
-                    edit: () => {
-                      setKcalModal(true);
-                    },
-                    button: "Editar KCAL",
-                  },
-                  {
-                    title: "Edad Metabolica",
-                    result: meta,
-                    edit: () => {
-                      setMetaModal(true);
-                    },
-                    button: "Editar Edad Metabolica",
-                  },
-                  {
-                    title: "Grasa Viseral",
-                    result: vifat,
-                    edit: () => {
-                      setVifatModal(true);
-                    },
-                    button: "Editar Grasa Viseral",
-                    vifat: vifat,
-                  },
-                ]}
-              />
-
-              // <View style={styles.wheelBlock}>
-              //   <View>
-              //     <TouchableOpacity
-              //       onPress={() => {
-              //         setImcModal(true);
-              //       }}
-              //     >
-              //       <View style={styles.wheel}>
-              //         <ProgressWheel
-              //           composition={"IMC"}
-              //           current={parseInt(bmi)}
-              //           Meta={18}
-              //           update={updatedBmi}
-              //         />
-              //       </View>
-              //     </TouchableOpacity>
-              //     <TouchableOpacity
-              //       onPress={() => {
-              //         setImcModal(true);
-              //       }}
-              //     >
-              //       <View
-              //         style={{
-              //           marginTop: 10,
-              //         }}
-              //       >
-              //         <View>
-              //           <BaseEvalDT
-              //             current={bmi}
-              //             metaTitle={"Meta"}
-              //             Meta={18}
-              //           />
-              //         </View>
-              //       </View>
-              //     </TouchableOpacity>
-              //   </View>
-
-              //   <View>
-              //     <TouchableOpacity
-              //       onPress={() => {
-              //         setFatModal(true);
-              //       }}
-              //     >
-              //       <View style={styles.wheel}>
-              //         <ProgressWheel
-              //           composition={"Grasa"}
-              //           current={parseInt(fat)}
-              //           Meta={10}
-              //         />
-              //       </View>
-              //     </TouchableOpacity>
-              //     <TouchableOpacity
-              //       onPress={() => {
-              //         setFatModal(true);
-              //       }}
-              //     >
-              //       <View
-              //         style={{
-              //           marginTop: 10,
-              //         }}
-              //       >
-              //         <View>
-              //           <BaseEvalDT
-              //             current={fat}
-              //             metaTitle={"Meta"}
-              //             Meta={10}
-              //           />
-              //         </View>
-              //       </View>
-              //     </TouchableOpacity>
-              //   </View>
-              // </View>
-            )}
 
             {/* {showProgreso && (
               <View style={styles.wheelBlock}>
@@ -1555,15 +1505,15 @@ const ProfileScreen = (props) => {
                     <View>
                       <Subtitle>{"progress imagen".toUpperCase()}</Subtitle>
                     </View>
-                    <View style={{ marginTop: 10, marginLeft: 15 }}>
+                    <View style={{ marginLeft: 15 }}>
                       <Ionicons
                         name={
                           showImagen
                             ? "ios-arrow-dropdown-circle"
                             : "ios-arrow-dropup-circle"
                         }
-                        size={25}
-                        color={Colors.noExprimary}
+                        size={20}
+                        color={Colors.noExBright}
                       />
                     </View>
                   </View>
@@ -1726,7 +1676,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
   },
   name: {
-    fontSize: 30,
+    fontSize: 25,
     fontWeight: "bold",
     color: Colors.noExprimary,
   },
@@ -1741,6 +1691,7 @@ const styles = StyleSheet.create({
   displayName: {
     marginTop: 10,
     marginLeft: 12,
+    width: "100%",
   },
   modalOverlay: {
     position: "absolute",
@@ -1868,7 +1819,7 @@ const AvatarView = styled.View`
 const Subtitle = styled.Text`
   color: #b8bece;
   font-weight: 600;
-  font-size: 25px;
+  font-size: 20px;
   margin-left: 20px;
   margin-top: 10px;
   margin-bottom: 10px;

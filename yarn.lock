@@ -5992,6 +5992,21 @@ react-native-snap-carousel@^3.9.1:
     prop-types "^15.6.1"
     react-addons-shallow-compare "15.6.2"
 
+react-native-speedometer-chart@^0.7.5:
+  version "0.7.5"
+  resolved "https://registry.yarnpkg.com/react-native-speedometer-chart/-/react-native-speedometer-chart-0.7.5.tgz#0dcb0f996a1e262231a957bb75fb4435c33cffe4"
+  integrity sha512-50hjoeQb6CK1ehyAGWCGD5zLvCHY1SpyGcUrfyxI8npcKB/dA6B/LDtdRgVx1E/tuk3hsgx09aIEgSSyE6jjUg==
+  dependencies:
+    color "^3.1.2"
+    prop-types "^15.7.2"
+
+react-native-speedometer@^1.0.5:
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/react-native-speedometer/-/react-native-speedometer-1.0.5.tgz#228b0710d7cbf257b07ae4615825eda86f746d3d"
+  integrity sha512-vloJbiIATVFBMayTZXE9Zf5GD8daBJsUxU83xxNo/vynfX84omu3nMgwYxpAqwO4oDOI1Nj86pFzPkU7kPqGIA==
+  dependencies:
+    prop-types "^15.6.2"
+
 react-native-status-bar-height@^2.5.0:
   version "2.5.0"
   resolved "https://registry.yarnpkg.com/react-native-status-bar-height/-/react-native-status-bar-height-2.5.0.tgz#bc0fb85230603850aab9667ee8111a62954de90c"
