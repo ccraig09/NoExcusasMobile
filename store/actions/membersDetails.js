@@ -42,7 +42,7 @@ export const fetchMemberDetails = () => {
   };
 };
 
-export const baseDetails = (name, last) => {
+export const baseName = (name) => {
   return async () => {
     firebase.auth().onAuthStateChanged(function (user) {
       if (user) {
@@ -52,6 +52,29 @@ export const baseDetails = (name, last) => {
             .set(
               {
                 FirstName: name,
+                Nametimestamp: firebase.firestore.FieldValue.serverTimestamp(),
+              },
+              { merge: true }
+            )
+            .catch(function (error) {
+              console.log("Error getting document:", error);
+            });
+        } catch (err) {
+          setError(err.message);
+        }
+      }
+    });
+  };
+};
+export const baseLast = (last) => {
+  return async () => {
+    firebase.auth().onAuthStateChanged(function (user) {
+      if (user) {
+        var userId = user.uid.toString();
+        try {
+          db.doc(userId)
+            .set(
+              {
                 LastName: last,
                 Nametimestamp: firebase.firestore.FieldValue.serverTimestamp(),
               },

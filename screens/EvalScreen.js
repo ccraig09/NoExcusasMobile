@@ -954,6 +954,7 @@ const EvalScreen = (props) => {
 
 EvalScreen.navigationOptions = {
   headerShown: false,
+  mode: "modal",
 };
 
 export default EvalScreen;

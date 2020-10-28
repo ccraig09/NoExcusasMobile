@@ -9,18 +9,15 @@ import {
 
 const BasicInfoScroll = (props) => {
   return (
-    <ScrollView
+    <View
       style={{
         flexDirection: "row",
-        // padding: 10,
-        // paddingLeft: 10,
-        marginRight: 10,
-        marginLeft: -10,
         marginTop: 2,
         backgroundColor: "white",
+        width: "100%",
+        justifyContent: "center",
+        alignItems: "center",
       }}
-      horizontal={true}
-      showsHorizontalScrollIndicator={false}
     >
       <TouchableOpacity
         style={{
@@ -114,7 +111,7 @@ const BasicInfoScroll = (props) => {
           </Text>
         </View>
       </TouchableOpacity>
-    </ScrollView>
+    </View>
   );
 };
 

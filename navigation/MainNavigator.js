@@ -79,7 +79,7 @@ const TimerStack = createStackNavigator(
 );
 const ProfileStack = createStackNavigator(
   {
-    Profile: ProfileScreen,
+    Perfil: ProfileScreen,
     Eval: EvalScreen,
     Edit: EditProfile,
   },
@@ -90,6 +90,18 @@ const ProfileStack = createStackNavigator(
     mode: "modal",
   }
 );
+
+ProfileStack.navigationOptions = ({ navigation }) => {
+  var tabBarVisible = true;
+  const routeName = navigation.state.routes[navigation.state.index].routeName;
+
+  if (routeName == "Edit" || routeName == "Eval") {
+    tabBarVisible = false;
+  }
+  return {
+    tabBarVisible,
+  };
+};
 
 const LogoutStack = createStackNavigator({
   Logout: LogoutScreen,
@@ -111,7 +123,7 @@ const tabScreenConfig = {
         ),
     },
   },
-  Profile: {
+  Perfil: {
     screen: ProfileStack,
     navigationOptions: {
       tabBarLabel: "Favorites!",
@@ -123,9 +135,9 @@ const tabScreenConfig = {
       tabBarColor: "gray",
       tabBarLabel:
         Platform.OS === "android" ? (
-          <Text style={{ fontFamily: "open-sans-bold" }}>Profile</Text>
+          <Text style={{ fontFamily: "open-sans-bold" }}>Perfil</Text>
         ) : (
-          "Profile"
+          "Perfil"
         ),
     },
   },
