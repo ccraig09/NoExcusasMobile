@@ -36,6 +36,26 @@ export const Slide = (props: any) => {
       return props.age;
     }
   };
+  const max = () => {
+    if (props.title === "IMC") {
+      return "40";
+    }
+    if (props.title === "Grasa") {
+      return "50";
+    }
+    if (props.title === "Grasa Viseral") {
+      return "20";
+    }
+    if (props.title === "Músculo") {
+      return "50";
+    }
+    if (props.title === "Edad Metabolica") {
+      return "80";
+    }
+    if (props.title === "KCAL") {
+      return "2000";
+    }
+  };
 
   const fatRes = () => {
     if (props.gender === "F" && props.age >= "20" && props.age <= "39") {
@@ -133,7 +153,7 @@ export const Slide = (props: any) => {
           <TouchableOpacity onPress={props.edit}>
             <Speedometer
               value={parseInt(props.comp)}
-              totalValue={100}
+              totalValue={max()}
               internalColor={color}
               size={150}
               text={parseInt(props.comp)}

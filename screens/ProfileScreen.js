@@ -1531,14 +1531,16 @@ const ProfileScreen = (props) => {
                 >
                   <ImagePicker
                     onImageTaken={frontImageTakenHandler}
-                    title="Base Frontal"
+                    title="Imagen Frontal"
+                    emoji={"🧍"}
                     source={FImage}
                     onDelete={frontImageDeleteHandler}
                     refresh={() => loadDetails()}
                   />
                   <ImagePicker
                     onImageTaken={sideImageTakenHandler}
-                    title="Base Lateral"
+                    title="Imagen Lateral"
+                    emoji={"🚶"}
                     source={SImage}
                     onDelete={sideImageDeleteHandler}
                     refresh={() => loadDetails()}

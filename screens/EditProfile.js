@@ -145,13 +145,17 @@ const EditProfile = (props) => {
                       backgroundColor: Colors.noExBright,
                     }}
                     onPress={() => {
-                      Alert.alert("Guardar Cambios?", "test", [
-                        ({
-                          text: "No",
-                          style: "cancel",
-                        },
-                        { text: "si", onPress: () => handleNameChange(name) }),
-                      ]);
+                      Alert.alert(
+                        "Guardar Cambios?",
+                        `Cambia nombre a${name}?`,
+                        [
+                          {
+                            text: "No",
+                            style: "cancel",
+                          },
+                          { text: "Si", onPress: () => handleNameChange(name) },
+                        ]
+                      );
                     }}
                   />
                 </View>

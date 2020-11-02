@@ -187,10 +187,17 @@ const DataModal = (props) => {
                       </View>
                     ) : (
                       <View style={{ marginTop: 10 }}>
-                        <Image style={styles.image} source={props.bodyIcon} />
-                        <Text style={{ marginBottom: 10 }}>
-                          {props.description}
-                        </Text>
+                        {props.description ? (
+                          <View>
+                            <Image
+                              style={styles.image}
+                              source={props.bodyIcon}
+                            />
+                            <Text style={{ marginBottom: 10 }}>
+                              {props.description}
+                            </Text>
+                          </View>
+                        ) : null}
                         <View
                           style={{
                             justifyContent: "center",

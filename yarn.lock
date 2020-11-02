@@ -5858,12 +5858,34 @@ react-native-gesture-handler@~1.7.0:
     invariant "^2.2.4"
     prop-types "^15.7.2"
 
+react-native-image-pan-zoom@^2.1.12:
+  version "2.1.12"
+  resolved "https://registry.yarnpkg.com/react-native-image-pan-zoom/-/react-native-image-pan-zoom-2.1.12.tgz#eb98bf56fb5610379bdbfdb63219cc1baca98fd2"
+  integrity sha512-BF66XeP6dzuANsPmmFsJshM2Jyh/Mo1t8FsGc1L9Q9/sVP8MJULDabB1hms+eAoqgtyhMr5BuXV3E1hJ5U5H6Q==
+
 react-native-image-progress@^1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/react-native-image-progress/-/react-native-image-progress-1.1.1.tgz#95bbe0875c7ebd54286df69cb37b598b94c54eb0"
   integrity sha512-5rI2UjUo1bJoggU3lZAa+Wv29bm+N322XVR49mxfczfhaOyFdoXMIRgd5x2eXG+RQi9PcLleD6wxVDxGAPPO9Q==
   dependencies:
     prop-types "^15.5.10"
+
+react-native-image-view@^2.1.9:
+  version "2.1.9"
+  resolved "https://registry.yarnpkg.com/react-native-image-view/-/react-native-image-view-2.1.9.tgz#635306360c42ad2479f364161c47d2557f9240fd"
+  integrity sha512-+DA/+tLM7KHaLs41Hdd+m5UpGX2qtEdMamMZCsXCsJ5J6RwWrqBXQrGVB9Op7dIkZW2DDRVKZTP/FuSNEGtzJg==
+
+react-native-image-viewing@^0.2.0:
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/react-native-image-viewing/-/react-native-image-viewing-0.2.0.tgz#3c0bc67cfb9aa7607cec632139d7ef4c45e07e4e"
+  integrity sha512-j2JXv86WRXGNme4LPsNCJ/2MgX+oVbmJ5ZLbGrYbKXcCPe9OshqlQI5L3SdbAxWu/F5pubcMaXp0zoYNaZVuzA==
+
+react-native-image-zoom-viewer@^3.0.1:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/react-native-image-zoom-viewer/-/react-native-image-zoom-viewer-3.0.1.tgz#a2bd5fb3bda15e0686ce88fcde8576726495d7fb"
+  integrity sha512-la6s5DNSuq4GCRLsi5CZ29FPjgTpdCuGIRdO5T9rUrAtxrlpBPhhSnHrbmPVxsdtOUvxHacTh2Gfa9+RraMZQA==
+  dependencies:
+    react-native-image-pan-zoom "^2.1.12"
 
 react-native-input-spinner@^1.2.19:
   version "1.2.19"
@@ -5938,6 +5960,11 @@ react-native-ratings@^7.2.0:
   dependencies:
     lodash "^4.17.4"
     prop-types "^15.5.10"
+
+react-native-raw-bottom-sheet@^2.2.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/react-native-raw-bottom-sheet/-/react-native-raw-bottom-sheet-2.2.0.tgz#d11dabb86aadb014273767ef7b554924b13633c5"
+  integrity sha512-qL4JKIqvbcVxbkKzeh51hjV7suoJN3ouxzvLmOg0FBUV1yiJAfEbacjQdtRCI6+OU5pyGFBIifLsTXcFDwHggg==
 
 react-native-reanimated@~1.13.0:
   version "1.13.1"
@@ -6171,6 +6198,11 @@ readable-stream@^2.0.1, readable-stream@^2.0.6, readable-stream@^2.2.2, readable
     safe-buffer "~5.1.1"
     string_decoder "~1.1.1"
     util-deprecate "~1.0.1"
+
+reanimated-bottom-sheet@^1.0.0-alpha.22:
+  version "1.0.0-alpha.22"
+  resolved "https://registry.yarnpkg.com/reanimated-bottom-sheet/-/reanimated-bottom-sheet-1.0.0-alpha.22.tgz#01a200946f1a461f01f1e773e5b4961c2df2e53b"
+  integrity sha512-NxecCn+2iA4YzkFuRK5/b86GHHS2OhZ9VRgiM4q18AC20YE/psRilqxzXCKBEvkOjP5AaAvY0yfE7EkEFBjTvw==
 
 recompose@^0.30.0:
   version "0.30.0"

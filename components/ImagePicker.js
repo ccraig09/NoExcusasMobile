@@ -1,27 +1,41 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Button,
   Text,
   StyleSheet,
   ActivityIndicator,
+  Modal,
   Alert,
+  TouchableHighlight,
+  TouchableOpacity,
 } from "react-native";
 import { useDispatch } from "react-redux";
 import * as ImagePicker from "expo-image-picker";
 import * as Permissions from "expo-permissions";
+import { Ionicons } from "@expo/vector-icons";
+
 import Image from "react-native-image-progress";
 import * as updateActions from "../store/actions/evalUpdate";
 import * as detailsActions from "../store/actions/membersDetails";
+import ImageView from "react-native-image-viewing";
 
 import Colors from "../constants/Colors";
-import { TouchableOpacity } from "react-native-gesture-handler";
+import { TouchableWithoutFeedback } from "react-native-gesture-handler";
 
 const ImgPicker = (props) => {
   const dispatch = useDispatch();
 
   const [pickedImage, setPickedImage] = useState();
   const [isLoading, setIsLoading] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [zoom, setZoom] = useState();
+
+  const images = [
+    {
+      uri: props.source,
+    },
+  ];
 
   const verifyPermissions = async () => {
     const result = await Permissions.askAsync(
@@ -39,6 +53,10 @@ const ImgPicker = (props) => {
     return true;
   };
 
+  useEffect(() => {
+    setZoom(false);
+  }, [setZoom]);
+
   const takeImageHandler = async () => {
     const hasPermission = await verifyPermissions();
     if (!hasPermission) {
@@ -51,6 +69,7 @@ const ImgPicker = (props) => {
     });
 
     props.onImageTaken(image.uri);
+    setIsOpen(false);
   };
 
   const selectImageHandler = async () => {
@@ -66,6 +85,7 @@ const ImgPicker = (props) => {
     });
 
     props.onImageTaken(image.uri);
+    setIsOpen(false);
   };
 
   const deleteImageHandler = (Eid, title) => {
@@ -76,10 +96,10 @@ const ImgPicker = (props) => {
         text: "Si",
         style: "destructive",
         onPress: () => {
-          if (title === "Base Frontal") {
+          if (title === "Imagen Frontal") {
             dispatch(detailsActions.deleteBaseFront());
           }
-          if (title === "Base Lateral") {
+          if (title === "Imagen Lateral") {
             dispatch(detailsActions.deleteBaseLateral());
           }
           if (title === "Lateral") {
@@ -97,50 +117,162 @@ const ImgPicker = (props) => {
 
   return (
     <View style={styles.imagePicker}>
-      <View style={styles.imagePreview}>
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Text style={{ fontSize: 16, marginBottom: 5 }}>{props.title}</Text>
+        <Text style={{ fontSize: 25, marginBottom: 5 }}>{props.emoji}</Text>
+      </View>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={isOpen}
+        onRequestClose={() => {
+          setIsOpen(false);
+        }}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <TouchableOpacity
+              style={{
+                ...styles.openButton,
+                backgroundColor: Colors.noExBright,
+              }}
+              onPress={() => {
+                takeImageHandler();
+              }}
+            >
+              <View style={styles.modalButton}>
+                <Ionicons name="ios-camera" size={24} color="black" />
+                <Text style={styles.textStyle}>Cámara</Text>
+              </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={{
+                ...styles.openButton,
+                backgroundColor: Colors.noExBright,
+              }}
+              onPress={() => {
+                selectImageHandler();
+              }}
+            >
+              <View style={styles.modalButton}>
+                <Ionicons name="md-photos" size={24} color="black" />
+                <Text style={styles.textStyle}>Galería</Text>
+              </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={{
+                ...styles.openButton,
+                backgroundColor: Colors.noExBright,
+              }}
+              onPress={() => {
+                setIsOpen(false);
+              }}
+            >
+              <View style={styles.modalButton}>
+                <Ionicons name="ios-close" size={24} color="black" />
+                <Text style={styles.textStyle}>Cancelar</Text>
+              </View>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+      <TouchableOpacity
+        style={styles.imagePreview}
+        onPress={() => {
+          setZoom(true);
+        }}
+        disabled={props.source ? false : true}
+        onLongPress={deleteImageHandler.bind(this, props.Eid, props.title)}
+      >
         {!props.source ? (
-          <Text>Añade tu foto aqui.</Text>
-        ) : (
+          <View>
+            <TouchableOpacity
+              onPress={() => {
+                setIsOpen(true);
+              }}
+              style={{
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <Text>Añade tu foto aqui.</Text>
+
+              <View
+                style={{
+                  width: 35,
+                  height: 30,
+
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <Ionicons
+                  name={Platform.OS === "android" ? "md-add" : "ios-add"}
+                  size={30}
+                  color="black"
+                />
+              </View>
+            </TouchableOpacity>
+            <View
+              style={{
+                padding: 2,
+                marginBottom: 5,
+                alignItems: "center",
+                justifyContent: "center",
+                position: "absolute",
+                top: 100,
+              }}
+            >
+              <Text style={{ fontSize: 10 }}>No Carga la foto?</Text>
+              <TouchableOpacity onPress={props.refresh}>
+                <Text style={{ fontSize: 12, color: "blue" }}>Refrescar</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        ) : zoom === false ? (
           <Image
             style={styles.image}
             source={props.source ? { uri: props.source } : null}
           />
+        ) : (
+          <ImageView
+            images={images}
+            imageIndex={0}
+            visible={zoom}
+            onRequestClose={() => setZoom(false)}
+            FooterComponent={({ imageIndex }) => (
+              <TouchableOpacity
+                style={{
+                  justifyContent: "center",
+                  alignItems: "center",
+                  marginBottom: 30,
+                }}
+                onPress={deleteImageHandler.bind(this, props.Eid, props.title)}
+              >
+                <Ionicons name="ios-trash" size={50} color="white" />
+              </TouchableOpacity>
+              // <ImageFooter imageIndex={imageIndex} imagesCount={images.length} />
+            )}
+          />
         )}
-      </View>
-      <View
-        style={{
-          borderColor: Colors.noExprimary,
-          borderRadius: 5,
-          borderWidth: 2,
-          padding: 2,
-          marginBottom: 5,
-        }}
-      >
-        <Text style={{ fontSize: 13 }}>No Carga la foto?</Text>
-        <TouchableOpacity onPress={props.refresh}>
-          <Text style={{ fontSize: 17, color: "blue" }}>Refrescar</Text>
-        </TouchableOpacity>
-      </View>
-      <Text style={{ fontSize: 20 }}>{props.title}</Text>
-      <Button
-        title="Tomar Foto"
-        color={Colors.noExprimary}
-        onPress={takeImageHandler}
-      />
-      <Button
-        title="Eligir Imagen"
-        color={Colors.noExprimary}
-        onPress={selectImageHandler}
-      />
+      </TouchableOpacity>
 
-      {props.source ? (
-        <Button
-          title="Borrar Imagen"
-          color={Colors.noExprimary}
+      {/* {props.source ? (
+        <TouchableOpacity
           onPress={deleteImageHandler.bind(this, props.Eid, props.title)}
-          // disabled={!props.source}
-        />
-      ) : null}
+        >
+          <Ionicons name="ios-trash" size={30} color="black" />
+        </TouchableOpacity>
+      ) : null} */}
     </View>
   );
 };
@@ -160,6 +292,51 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderColor: "#ccc",
     borderWidth: 1,
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 22,
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 35,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  openButton: {
+    backgroundColor: "#F194FF",
+    borderRadius: 20,
+    padding: 10,
+    elevation: 2,
+    marginBottom: 5,
+    marginTop: 5,
+  },
+  textStyle: {
+    color: "black",
+    fontWeight: "bold",
+    textAlign: "center",
+    marginLeft: 8,
+  },
+  modalButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    width: 150,
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: "center",
   },
   image: {
     width: "100%",
