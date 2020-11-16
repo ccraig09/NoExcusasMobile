@@ -115,6 +115,29 @@ export const fatInfo = (fat) => {
     });
   };
 };
+export const dateUpload = (dateChanged) => {
+  return async () => {
+    firebase.auth().onAuthStateChanged(function (user) {
+      if (user) {
+        var userId = user.uid.toString();
+        try {
+          db.doc(userId)
+            .set(
+              {
+                dateChanged,
+              },
+              { merge: true }
+            )
+            .catch(function (error) {
+              console.log("Error getting document:", error);
+            });
+        } catch (err) {
+          setError(err.message);
+        }
+      }
+    });
+  };
+};
 // export const evalUpdate = (kcal) => {
 //   return async () => {
 //     firebase.auth().onAuthStateChanged(function (user) {

@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { styles } from "./styles";
-import Formula from "../Formula";
+import Formula from "../FormulaEval";
 import ProgressWheel from "../../components/UI/ProgressWheelBase";
 import Speedometer from "react-native-speedometer-chart";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -32,7 +32,7 @@ export const Slide = (props: any) => {
     if (props.title === "Músculo") {
       return muscleRes();
     }
-    if (props.title === "Metabolica") {
+    if (props.title === "Edad Metabolica") {
       return props.age;
     }
   };
@@ -144,6 +144,10 @@ export const Slide = (props: any) => {
             </TouchableOpacity>
           </View>
           <View style={{ marginTop: 25 }}>
+            <Text style={{ ...styles.slideMeta }}>Nuevo:</Text>
+            <Text style={{ ...styles.slideText }}>{props.updated}</Text>
+          </View>
+          <View style={{ marginTop: 5 }}>
             <Text style={{ ...styles.slideMeta }}>Meta:</Text>
             <Text style={{ ...styles.slideText }}>{goal()}</Text>
           </View>
@@ -162,7 +166,7 @@ export const Slide = (props: any) => {
               Toca para editar
             </Text>
             <Speedometer
-              value={parseInt(props.comp)}
+              value={parseInt(props.updated)}
               totalValue={parseInt(max())}
               internalColor={color}
               size={150}
@@ -181,6 +185,12 @@ export const Slide = (props: any) => {
             title={props.title}
             vifat={props.vifat}
             muscle={props.muscle}
+            updatedVifat={props.updatedVifat}
+            updatedMeta={props.updatedMeta}
+            updatedKcal={props.updatedKcal}
+            updatedMuscle={props.updatedMuscle}
+            updatedFat={props.updatedFat}
+            updatedBmi={props.updatedBmi}
           />
         </View>
         {/* </View> */}

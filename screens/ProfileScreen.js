@@ -48,6 +48,12 @@ import ProgressWheel from "../components/UI/ProgressWheel";
 import DataModal from "../components/DataModal";
 import BasicInfoScroll from "../components/BasicInfoScrollview";
 import Forumula from "../components/Formula";
+// import DateTimePicker from "@react-native-community/datetimepicker";
+import DateTimePicker from "react-native-modal-datetime-picker";
+
+import moment from "moment";
+import localization from "moment/locale/es-us";
+
 import Formula from "../components/Formula";
 
 let screenWidth = Dimensions.get("window").width;
@@ -106,6 +112,9 @@ const ProfileScreen = (props) => {
   const [evalModal, setEvalModal] = useState(false);
   const [FImage, setFImage] = useState("");
   const [SImage, setSImage] = useState("");
+  const [date, setDate] = useState(new Date());
+  const [extendedDate, setExtendedDate] = useState(false);
+
   const updatedBmi = loadedUpdates.length === 0 ? "" : loadedUpdates[0].bmi;
   const updatedMeta = loadedUpdates.length === 0 ? "" : loadedUpdates[0].meta;
   const updatedVifat = loadedUpdates.length === 0 ? "" : loadedUpdates[0].vifat;
@@ -116,9 +125,11 @@ const ProfileScreen = (props) => {
   const [userPhoto, setUserPhoto] = useState();
   const [selectedImage, setSelectedImage] = useState();
   const dispatch = useDispatch();
+  const [show, setShow] = useState(false);
+
   const firstName =
     typeof loadedMemberDeets.FirstName === "undefined"
-      ? "__"
+      ? ""
       : loadedMemberDeets.FirstName;
   const lastName =
     typeof loadedMemberDeets.LastName === "undefined"
@@ -132,6 +143,10 @@ const ProfileScreen = (props) => {
       : loadedMemberDeets.Height;
   const bmi =
     typeof loadedMemberDeets.BMI === "undefined" ? "" : loadedMemberDeets.BMI;
+  const memFecha =
+    typeof loadedMemberDeets.dateChanged === "undefined"
+      ? ""
+      : loadedMemberDeets.dateChanged;
   const fat =
     typeof loadedMemberDeets.Fat === "undefined" ? "" : loadedMemberDeets.Fat;
   const muscle =
@@ -165,7 +180,7 @@ const ProfileScreen = (props) => {
 
   const loadDetails = useCallback(async () => {
     setError(null);
-    setIsRefreshing(true);
+    setIsLoading(true);
     dispatch(addEvalAction.fetchMemberEvals());
 
     try {
@@ -179,8 +194,8 @@ const ProfileScreen = (props) => {
     } catch (err) {
       setError(err.message);
     }
-    setIsRefreshing(false);
-  }, [dispatch, setIsRefreshing, setError]);
+    setIsLoading(false);
+  }, [dispatch, setIsLoading, setError]);
 
   useEffect(() => {
     const willFocusSub = props.navigation.addListener("willFocus", loadDetails);
@@ -190,10 +205,10 @@ const ProfileScreen = (props) => {
   }, [loadDetails]);
 
   useEffect(() => {
-    setIsLoading(true);
+    // setIsLoading(true);
 
     loadDetails();
-    setIsLoading(false);
+    // setIsLoading(false);
   }, [dispatch, loadDetails]);
 
   const selectEvalHandler = (id, title, docTitle) => {
@@ -219,16 +234,16 @@ const ProfileScreen = (props) => {
           .catch(function (error) {
             switch (error.code) {
               case "storage/object-not-found":
-                // console.log(error);
+                console.log(error);
                 break;
               case "storage/unauthorized":
                 // User doesn't have permission to access the object
-                // console.log(error);
+                console.log(error);
                 break;
 
               case "storage/canceled":
                 // User canceled the upload
-                // console.log(error);
+                console.log(error);
 
                 break;
             }
@@ -373,13 +388,19 @@ const ProfileScreen = (props) => {
   });
 
   const addEvalSquareHandler = useCallback(async (title) => {
+    setEvalModal(!evalModal);
     try {
       await dispatch(addEvalAction.createEval(title));
     } catch (err) {
       setError(err.message);
     }
-    loadDetails();
-    setEvalModal(!evalModal);
+    const toast = Toast.showLoading("Agregando Eval");
+    setTimeout(() => {
+      loadDetails();
+    }, 1000);
+    setTimeout(() => {
+      Toast.hide(toast);
+    }, 2000);
   });
 
   const deleteHandler = (docId) => {
@@ -391,7 +412,13 @@ const ProfileScreen = (props) => {
         style: "destructive",
         onPress: () => {
           dispatch(addEvalAction.deleteEval(docId));
-          loadDetails();
+          const toast = Toast.showLoading("Borrando Eval");
+          setTimeout(() => {
+            loadDetails();
+          }, 1000);
+          setTimeout(() => {
+            Toast.hide(toast);
+          }, 2000);
         },
       },
     ]);
@@ -400,6 +427,7 @@ const ProfileScreen = (props) => {
   const frontImageTakenHandler = useCallback(async (uri) => {
     const response = await fetch(uri);
     const blob = await response.blob();
+    setFImage(uri);
     try {
       await dispatch(detailsActions.frontImage(blob));
     } catch (err) {
@@ -413,7 +441,7 @@ const ProfileScreen = (props) => {
       // or Toast.hide()
       // If you don't pass toast，it will hide the last toast by default.
     }, 3000);
-    setTimeout(() => loadDetails(), 4000);
+    setTimeout(() => loadDetails(), 3000);
     setTimeout(() => baseFrontImageLoad(), 4500);
   });
 
@@ -433,6 +461,7 @@ const ProfileScreen = (props) => {
   const sideImageTakenHandler = useCallback(async (uri) => {
     const response = await fetch(uri);
     const blobS = await response.blob();
+    setSImage(uri);
     try {
       await dispatch(detailsActions.sideImage(blobS));
     } catch (err) {
@@ -478,7 +507,23 @@ const ProfileScreen = (props) => {
     setShowAll(true);
   };
 
-  const compPress = useCallback(() => {});
+  const onChange = (event, selectedDate) => {
+    const currentDate = selectedDate || date;
+    setShow(false);
+    setDate(currentDate);
+  };
+
+  const dateHandler = useCallback(async (date) => {
+    setExtendedDate(false);
+    var dateChanged = moment(date).locale("es-us", localization).format("LL");
+    try {
+      dispatch(detailsActions.dateUpload(dateChanged));
+    } catch (err) {
+      setError(err.message);
+    }
+    setExtendedDate(false);
+    loadDetails();
+  });
 
   const tapBackground = () => {
     setShowAlert(true);
@@ -640,50 +685,29 @@ const ProfileScreen = (props) => {
               />
             }
           >
-            <Header>
-              {/* {this.state.Bcg2 ? (
-                    <Background source={{ uri: this.state.Bcg2 }} />
-                  ) : null} */}
-              {/* <Background source={require("../assets/yellow.png")} /> */}
-              {/* <Name>{this.props.name}</Name> */}
-              <AvatarView>
-                <Avatar
-                  rounded
-                  size="xlarge"
-                  style={{ width: 100, height: 100 }}
-                  source={{
-                    uri: userPhoto,
-                  }}
-                  showEditButton={true}
-                />
-                <View style={styles.displayName}>
-                  {/* <UpdateDT
-                    screen="profile"
-                    title1="Dias Activo"
-                    title2="14"
-                    metaTitle="123 Ltrs"
-                  /> */}
-                  <Text style={styles.hello}>{greetingMessage}, </Text>
-                  <Text style={styles.name}>{firstName} </Text>
-                  <Button
-                    title="Editar Perfil"
-                    type="outline"
-                    onPress={() => props.navigation.navigate("Edit")}
-                    titleStyle={{ color: "black", fontSize: 12 }}
-                    buttonStyle={{
-                      borderColor: "black",
-                      borderRadius: 12,
-                      height: 28,
-                      width: 100,
-                      alignItems: "center",
-                      padding: -5,
-                      marginTop: 7,
+            <TouchableOpacity onPress={() => props.navigation.navigate("Edit")}>
+              <Header>
+                <AvatarView>
+                  <Avatar
+                    rounded
+                    size="xlarge"
+                    style={{ width: 100, height: 100 }}
+                    source={{
+                      uri: userPhoto,
                     }}
+                    showEditButton={true}
                   />
-                </View>
-              </AvatarView>
-            </Header>
-            <TouchableOpacity
+                  <View style={styles.displayName}>
+                    <Text style={styles.hello}>{greetingMessage}, </Text>
+                    <Text style={styles.name}>{firstName} </Text>
+                    <View style={styles.button2}>
+                      <Text style={{ fontSize: 13 }}>Editar Perfil</Text>
+                    </View>
+                  </View>
+                </AvatarView>
+              </Header>
+            </TouchableOpacity>
+            {/* <TouchableOpacity
               onPress={() => {
                 showAll ? showHandler() : hideHandler();
               }}
@@ -694,7 +718,7 @@ const ProfileScreen = (props) => {
                   marginLeft: 20,
                   justifyContent: "flex-end",
                   marginRight: 10,
-                  marginTop: -20,
+                  marginTop: 10,
                   marginBottom: -30,
                 }}
               >
@@ -715,7 +739,7 @@ const ProfileScreen = (props) => {
                   />
                 </View>
               </View>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
 
             <View style={styles.edit}>
               <TouchableOpacity
@@ -748,26 +772,26 @@ const ProfileScreen = (props) => {
               </TouchableOpacity>
             </View>
 
-            {showDatos && (
-              <BasicInfoScroll
-                agePress={() => {
-                  setAgeModal(true);
-                }}
-                heightPress={() => {
-                  setHeightModal(true);
-                }}
-                weightPress={() => {
-                  setWeightModal(true);
-                }}
-                genderPress={() => {
-                  setGenderModal(true);
-                }}
-                age={age}
-                height={height}
-                weight={weight}
-                gender={gender}
-              />
-            )}
+            {/* {showDatos && ( */}
+            <BasicInfoScroll
+              agePress={() => {
+                setAgeModal(true);
+              }}
+              heightPress={() => {
+                setHeightModal(true);
+              }}
+              weightPress={() => {
+                setWeightModal(true);
+              }}
+              genderPress={() => {
+                setGenderModal(true);
+              }}
+              age={age}
+              height={height}
+              weight={weight}
+              gender={gender}
+            />
+            {/* )} */}
 
             <View style={styles.edit}>
               <TouchableOpacity
@@ -800,80 +824,137 @@ const ProfileScreen = (props) => {
               </TouchableOpacity>
             </View>
             {showProgreso && (
-              <Carousel
-                style="slides"
-                itemsPerInterval={1}
-                items={[
-                  {
-                    title: "IMC",
-                    result: bmi,
-                    edit: () => {
-                      setImcModal(true);
-                    },
-                    button: "Editar IMC",
-                    bmi: bmi,
-                    comp: bmi,
-                    updated: updatedBmi,
-                  },
-                  {
-                    title: "Grasa",
-                    result: fat,
-                    edit: () => {
-                      setFatModal(true);
-                    },
-                    button: "Editar Grasa",
-                    gender: gender,
-                    age: age,
-                    fat: fat,
-                    comp: fat,
-                    updated: updatedFat,
-                  },
-                  {
-                    title: "Músculo",
-                    result: muscle,
-                    edit: () => {
-                      setMuscleModal(true);
-                    },
-                    button: "Editar Músculo",
-                    muscle: muscle,
-                    age: age,
-                    gender: gender,
-                    comp: muscle,
-                    updated: updatedMuscle,
-                  },
-                  {
-                    title: "KCAL",
-                    result: kcal,
-                    edit: () => {
-                      setKcalModal(true);
-                    },
-                    button: "Editar KCAL",
-                    comp: kcal,
-                    updated: updatedKcal,
-                  },
-                  {
-                    title: "Edad Metabolica",
-                    result: meta,
-                    edit: () => {
-                      setMetaModal(true);
-                    },
-                    button: "Editar Edad Metabolica",
-                    comp: meta,
-                    updated: updatedMeta,
-                  },
-                  {
-                    title: "Grasa Viseral",
-                    result: vifat,
-                    edit: () => {
-                      setVifatModal(true);
-                    },
-                    button: "Editar Grasa Viseral",
-                    vifat: vifat,
-                    comp: vifat,
-                    updated: updatedVifat,
-                  },
-                ]}
-              />
+              <View>
+                <View style={{ marginLeft: 20 }}>
+                  <TouchableOpacity
+                    onPress={() => {
+                      setExtendedDate(true);
+                    }}
+                  >
+                    <Text>Fecha:</Text>
+                    {!memFecha ? (
+                      <Text>Haz click para agregar fecha</Text>
+                    ) : (
+                      <Text>{memFecha}</Text>
+                    )}
+                  </TouchableOpacity>
+                </View>
+                <View>
+                  {extendedDate && (
+                    <View>
+                      <DateTimePicker
+                        mode="date"
+                        isVisible={extendedDate}
+                        locale="es-ES"
+                        onConfirm={
+                          (date) => {
+                            dateHandler(date);
+                          }
+                          // this.handleDatePicked(date, "start", "showStart")
+                        }
+                        onCancel={() => {
+                          setExtendedDate(false);
+                        }}
+                        cancelTextIOS={"Cancelar"}
+                        confirmTextIOS={"Confirmar"}
+                        headerTextIOS={"Elige una fecha"}
+                      />
+                      {/* <DateTimePicker
+                        // testID="dateTimePicker"
+                        value={date}
+                        mode={"date"}
+                        // is24Hour={true}
+                        display="spinner"
+                        minimumDate={new Date(2019, 0, 1)}
+                        locale="es-ES"
+                        onChange={onChange}
+                      /> */}
+                    </View>
+                  )}
+                </View>
+                <View>
+                  <Carousel
+                    style="slides"
+                    itemsPerInterval={1}
+                    items={[
+                      {
+                        title: "IMC",
+                        result: bmi,
+                        edit: () => {
+                          setImcModal(true);
+                        },
+                        button: "Editar IMC",
+                        bmi: bmi,
+                        comp: bmi,
+                        updated: updatedBmi,
+                        updatedBmi: updatedBmi,
+                      },
+                      {
+                        title: "Grasa",
+                        result: fat,
+                        edit: () => {
+                          setFatModal(true);
+                        },
+                        button: "Editar Grasa",
+                        gender: gender,
+                        age: age,
+                        fat: fat,
+                        comp: fat,
+                        updated: updatedFat,
+                        updatedFat: updatedFat,
+                      },
+                      {
+                        title: "Músculo",
+                        result: muscle,
+                        edit: () => {
+                          setMuscleModal(true);
+                        },
+                        button: "Editar Músculo",
+                        muscle: muscle,
+                        age: age,
+                        gender: gender,
+                        comp: muscle,
+                        updated: updatedMuscle,
+                        updatedMuscle: updatedMuscle,
+                      },
+                      {
+                        title: "KCAL",
+                        result: kcal,
+                        edit: () => {
+                          setKcalModal(true);
+                        },
+                        button: "Editar KCAL",
+                        comp: kcal,
+                        updated: updatedKcal,
+                        updatedKcal: updatedKcal,
+                      },
+                      {
+                        title: "Edad Metabolica",
+                        result: meta,
+                        edit: () => {
+                          setMetaModal(true);
+                        },
+                        button: "Editar Edad Metabolica",
+                        comp: meta,
+                        updated: updatedMeta,
+                        updatedMeta: updatedMeta,
+                      },
+                      {
+                        title: "Grasa Viseral",
+                        result: vifat,
+                        edit: () => {
+                          setVifatModal(true);
+                        },
+                        button: "Editar Grasa Viseral",
+                        vifat: vifat,
+                        comp: vifat,
+                        updated: updatedVifat,
+                        updatedVifat: updatedVifat,
+                      },
+                    ]}
+                  />
+                </View>
+              </View>
             )}
 
             <View style={styles.edit}>
@@ -914,20 +995,33 @@ const ProfileScreen = (props) => {
                 {showEval && (
                   <View
                     style={{
-                      width: 35,
-                      height: 30,
-                      borderColor: Colors.noExBright,
-                      borderRadius: 10,
+                      flexDirection: "row",
                       justifyContent: "center",
                       alignItems: "center",
-                      borderWidth: 2,
                     }}
                   >
-                    <Ionicons
-                      name={Platform.OS === "android" ? "md-add" : "ios-add"}
-                      size={20}
-                      color="grey"
-                    />
+                    <View>
+                      <Text style={{ fontSize: 10, color: "silver" }}>
+                        Agregar Evaluación{" "}
+                      </Text>
+                    </View>
+                    <View
+                      style={{
+                        width: 35,
+                        height: 30,
+                        borderColor: Colors.noExBright,
+                        borderRadius: 10,
+                        justifyContent: "center",
+                        alignItems: "center",
+                        borderWidth: 2,
+                      }}
+                    >
+                      <Ionicons
+                        name={Platform.OS === "android" ? "md-add" : "ios-add"}
+                        size={20}
+                        color="grey"
+                      />
+                    </View>
                   </View>
                 )}
               </TouchableOpacity>
@@ -1006,10 +1100,11 @@ const ProfileScreen = (props) => {
               }}
               schema={validationSchemaBase}
               genderSelect={false}
-              formikLabel={"TITLE"}
+              formikLabel={"Título"}
               FormikKey={"title"}
+              maxSub={"máximo 12 caracteres"}
               // formikKeyboard={"numeric"}
-              // formikMaxLength={2}
+              formikMaxLength={12}
             />
             <DataModal
               visible={imcModal}
@@ -1606,6 +1701,25 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowRadius: 4,
   },
+  button2: {
+    marginBottom: 10,
+    // marginTop: -15,
+    width: 100,
+    height: 20,
+    marginLeft: -5,
+    backgroundColor: "#DDDDDD",
+    borderRadius: 10,
+    borderColor: "black",
+    // borderWidth: 1,
+    elevation: 5,
+    // alignSelf: "center",
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "black",
+    shadowOpacity: 0.26,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
+  },
   buttonText: {
     fontSize: 15,
     fontWeight: "bold",
@@ -1692,8 +1806,10 @@ const styles = StyleSheet.create({
 
   displayName: {
     marginTop: 10,
-    marginLeft: 12,
+    marginLeft: 10,
     width: "100%",
+    // justifyContent: "flex-start",
+    // alignItems: "flex-start",
   },
   modalOverlay: {
     position: "absolute",

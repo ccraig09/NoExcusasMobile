@@ -9,109 +9,115 @@ import {
 
 const BasicInfoScroll = (props) => {
   return (
-    <View
+    <ScrollView
       style={{
-        flexDirection: "row",
+        horizontal: true,
         marginTop: 2,
         backgroundColor: "white",
         width: "100%",
-        justifyContent: "center",
-        alignItems: "center",
       }}
     >
-      <TouchableOpacity
+      <View
         style={{
           justifyContent: "center",
           alignItems: "center",
-          // padding: 10,
-          width: 85,
+          flexDirection: "row",
         }}
-        onPress={props.agePress}
       >
-        <View>
-          <Text style={styles.basicInfo}>EDAD</Text>
-          <Text
-            style={{
-              fontFamily: "aliens",
-              color: "grey",
-              fontSize: 20,
-              textAlign: "center",
-            }}
-          >
-            {props.age}
-          </Text>
-        </View>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={{
-          justifyContent: "center",
-          alignItems: "center",
-          // padding: 10,
-          width: 100,
-        }}
-        onPress={props.heightPress}
-      >
-        <View>
-          <Text style={styles.basicInfo}>ALTURA</Text>
-          <Text
-            style={{
-              fontFamily: "aliens",
-              color: "#ffc733",
-              fontSize: 20,
-              textAlign: "center",
-            }}
-          >
-            {props.height}
-          </Text>
-        </View>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={{
-          justifyContent: "center",
-          alignItems: "center",
-          // padding: 10,
-          width: 100,
-        }}
-        onPress={props.weightPress}
-      >
-        <View>
-          <Text style={styles.basicInfo}>PESO</Text>
-          <Text
-            style={{
-              fontFamily: "aliens",
-              color: "grey",
-              fontSize: 20,
-              textAlign: "center",
-            }}
-          >
-            {props.weight}
-          </Text>
-        </View>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={{
-          justifyContent: "center",
-          alignItems: "center",
-          // padding: 10,
-          width: 100,
-        }}
-        onPress={props.genderPress}
-      >
-        <View>
-          <Text style={styles.basicInfo}>GÉNERO</Text>
-          <Text
-            style={{
-              fontFamily: "aliens",
-              color: "#ffc733",
-              fontSize: 20,
-              textAlign: "center",
-            }}
-          >
-            {props.gender}
-          </Text>
-        </View>
-      </TouchableOpacity>
-    </View>
+        <TouchableOpacity
+          style={{
+            justifyContent: "center",
+            alignItems: "center",
+            // padding: 10,
+            width: 85,
+          }}
+          onPress={props.agePress}
+        >
+          <View>
+            <Text style={styles.basicInfo}>EDAD</Text>
+            <Text
+              style={{
+                fontFamily: "aliens",
+                color: "grey",
+                fontSize: 20,
+                textAlign: "center",
+              }}
+            >
+              {props.age}
+            </Text>
+          </View>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={{
+            justifyContent: "center",
+            alignItems: "center",
+            // padding: 10,
+            width: 100,
+          }}
+          onPress={props.heightPress}
+        >
+          <View>
+            <Text style={styles.basicInfo}>ALTURA</Text>
+            <Text
+              style={{
+                fontFamily: "aliens",
+                color: "#ffc733",
+                fontSize: 20,
+                textAlign: "center",
+              }}
+            >
+              {props.height}
+            </Text>
+          </View>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={{
+            justifyContent: "center",
+            alignItems: "center",
+            // padding: 10,
+            width: 100,
+          }}
+          onPress={props.weightPress}
+        >
+          <View>
+            <Text style={styles.basicInfo}>PESO</Text>
+            <Text
+              style={{
+                fontFamily: "aliens",
+                color: "grey",
+                fontSize: 20,
+                textAlign: "center",
+              }}
+            >
+              {props.weight}
+            </Text>
+          </View>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={{
+            justifyContent: "center",
+            alignItems: "center",
+            // padding: 10,
+            width: 100,
+          }}
+          onPress={props.genderPress}
+        >
+          <View>
+            <Text style={styles.basicInfo}>GÉNERO</Text>
+            <Text
+              style={{
+                fontFamily: "aliens",
+                color: "#ffc733",
+                fontSize: 20,
+                textAlign: "center",
+              }}
+            >
+              {props.gender}
+            </Text>
+          </View>
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
   );
 };
 

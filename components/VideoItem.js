@@ -13,6 +13,7 @@ import {
   StyleSheet,
   Image,
 } from "react-native";
+import * as ScreenOrientation from "expo-screen-orientation";
 
 let screenWidth = Dimensions.get("window").width;
 let screenHeight = Dimensions.get("window").height;
@@ -21,6 +22,12 @@ let logoimg = "../assets/icon-noexlogo.png";
 const VideoItem = (props) => {
   const [hasPermission, setHasPermission] = useState(null);
   const [type, setType] = useState(Camera.Constants.Type.front);
+
+  // async function changeScreenOrientation() {
+  //   await ScreenOrientation.lockAsync(
+  //     ScreenOrientation.OrientationLock.LANDSCAPE_LEFT
+  //   );
+  // }
 
   useEffect(() => {
     (async () => {
@@ -33,7 +40,7 @@ const VideoItem = (props) => {
     return <View />;
   }
   if (hasPermission === false) {
-    return <Text>No access to camera</Text>;
+    return <Text>No hay permiso para la cámara</Text>;
   }
 
   return (
@@ -47,6 +54,10 @@ const VideoItem = (props) => {
           shouldPlay
           useNativeControls={true}
           resizeMode="contain"
+          onReadyForDisplay={(params) => {
+            params.naturalSize.orientation = "landscape";
+            console.log("params---->", params.naturalSize.orientation);
+          }}
           style={{ width: screenWidth, height: 345 }}
         />
         <CloseView>
@@ -71,7 +82,7 @@ const VideoItem = (props) => {
             // flexDirection: "row",
           }}
         >
-          <Image
+          {/* <Image
             style={{
               width: 200,
               height: 200,
@@ -79,7 +90,7 @@ const VideoItem = (props) => {
             source={{
               uri: "https://media.giphy.com/media/WOUNY23l02q9DQFuZF/giphy.gif",
             }}
-          />
+          /> */}
 
           {/* <TouchableOpacity
             style={{

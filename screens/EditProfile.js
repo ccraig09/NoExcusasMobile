@@ -125,7 +125,7 @@ const EditProfile = (props) => {
                   style={{ width: 200, fontSize: 25 }}
                   label="Nombre"
                   placeholder={fName}
-                  placeholderTextColor={"black"}
+                  placeholderTextColor={"silver"}
                   onChangeText={(value) => setName(value)}
                 />
 
@@ -147,7 +147,7 @@ const EditProfile = (props) => {
                     onPress={() => {
                       Alert.alert(
                         "Guardar Cambios?",
-                        `Cambia nombre a${name}?`,
+                        `Cambia nombre a ${name}?`,
                         [
                           {
                             text: "No",

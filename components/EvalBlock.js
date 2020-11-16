@@ -24,8 +24,8 @@ export const EvalBlock = (props) => {
 export default EvalBlock;
 
 const Item = styled.View`
-  background: white;
-  height: 40px;
+  background: #dddddd;
+  height: 60px;
   width: 90px;
   padding: 12px 16px 12px;
   border-radius: 10px;

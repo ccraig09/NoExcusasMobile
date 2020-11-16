@@ -26,6 +26,9 @@ const OnBoardingScreen = ({ navigation }) => {
   return (
     <OnBoarding
       SkipButtonComponent={Skip}
+      onSkip={() => {
+        navigation.navigate("Home");
+      }}
       NextButtonComponent={Next}
       DoneButtonComponent={Done}
       pages={[
@@ -56,6 +59,17 @@ const OnBoardingScreen = ({ navigation }) => {
               source={require("../assets/icon-noexlogo.png")}
             />
           ),
+          subtitle: "Hello",
+        },
+        {
+          backgroundColor: "blue",
+          image: (
+            <Image
+              style={styles.image}
+              source={require("../assets/icon-noexlogo.png")}
+            />
+          ),
+          title: "Aqui vamos a",
           subtitle: (
             <View>
               <Text>Age</Text>
@@ -71,17 +85,6 @@ const OnBoardingScreen = ({ navigation }) => {
               />
             </View>
           ),
-        },
-        {
-          backgroundColor: "blue",
-          image: (
-            <Image
-              style={styles.image}
-              source={require("../assets/icon-noexlogo.png")}
-            />
-          ),
-          title: "Aqui vamos a",
-          subtitle: "poner mas shit o algo",
         },
         {
           backgroundColor: "green",

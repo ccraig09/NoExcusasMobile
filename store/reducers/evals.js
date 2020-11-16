@@ -24,11 +24,10 @@ export default (state = initalState, action) => {
         userEvals: state.userEvals.concat(newEval),
       };
     case DELETE_EVAL:
-      return initalState;
-    // {
-    //   ...state,
-    //   userEvals: state.userEvals.filter((eva) => eva.id !== action.eid),
-    // };
+      return {
+        ...state,
+        userEvals: state.userEvals.filter((eva) => eva.id !== action.eid),
+      };
   }
   return state;
 };

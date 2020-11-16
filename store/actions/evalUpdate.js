@@ -138,6 +138,32 @@ export const bmiInfo = (bmi, Eid, EvTitle) => {
     });
   };
 };
+export const dateUpload = (dateChanged, Eid, EvTitle) => {
+  return async () => {
+    firebase.auth().onAuthStateChanged(function (user) {
+      if (user) {
+        var userId = user.uid.toString();
+        try {
+          db.doc(userId)
+            .collection("Evals")
+            .doc(EvTitle)
+            .set(
+              {
+                dateChanged,
+                Eid,
+              },
+              { merge: true }
+            )
+            .catch(function (error) {
+              console.log("Error getting document:", error);
+            });
+        } catch (err) {
+          throw new Error(err.message);
+        }
+      }
+    });
+  };
+};
 
 export const metaInfo = (meta, Eid, EvTitle) => {
   return async () => {

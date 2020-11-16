@@ -38,15 +38,26 @@ const ImgPicker = (props) => {
   ];
 
   const verifyPermissions = async () => {
+    // (async () => {
+    //   if (Platform.OS !== "web") {
+    //     const { status } =
+    //       (await ImagePicker.requestCameraRollPermissionsAsync()) &
+    //       (await ImagePicker.getCameraRollPermissionsAsync());
+
+    //     if (status !== "granted") {
+    //       alert("Lo siento, necesitamos permiso para acceder a la cámara");
+    //     }
+    //   }
+    // })();
     const result = await Permissions.askAsync(
       Permissions.CAMERA_ROLL,
       Permissions.CAMERA
     );
     if (result.status !== "granted") {
       Alert.alert(
-        "Insufficient permissions!",
-        "You need to grant camera permissions to use this app.",
-        [{ text: "Okay" }]
+        "¡Permisos insuficientes!",
+        "Lo siento, necesitamos permiso para acceder a la cámara.",
+        [{ text: "Listo" }]
       );
       return false;
     }
@@ -67,9 +78,9 @@ const ImgPicker = (props) => {
       // aspect: [16, 9],
       quality: 0.5,
     });
+    setIsOpen(false);
 
     props.onImageTaken(image.uri);
-    setIsOpen(false);
   };
 
   const selectImageHandler = async () => {
@@ -83,9 +94,9 @@ const ImgPicker = (props) => {
       // aspect: [16, 9],
       quality: 0.5,
     });
+    setIsOpen(false);
 
     props.onImageTaken(image.uri);
-    setIsOpen(false);
   };
 
   const deleteImageHandler = (Eid, title) => {
@@ -265,14 +276,6 @@ const ImgPicker = (props) => {
           />
         )}
       </TouchableOpacity>
-
-      {/* {props.source ? (
-        <TouchableOpacity
-          onPress={deleteImageHandler.bind(this, props.Eid, props.title)}
-        >
-          <Ionicons name="ios-trash" size={30} color="black" />
-        </TouchableOpacity>
-      ) : null} */}
     </View>
   );
 };

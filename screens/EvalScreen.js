@@ -5,13 +5,13 @@ import {
   ScrollView,
   TouchableOpacity,
   Platform,
+  TouchableNativeFeedback,
   StyleSheet,
   ActivityIndicator,
   RefreshControl,
   View,
   Alert,
   Text,
-  Button,
 } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
 import styled from "styled-components";
@@ -22,6 +22,9 @@ import ImagePicker from "../components/ImagePicker";
 import firebase from "../components/firebase";
 import * as detailsActions from "../store/actions/membersDetails";
 import Toast from "react-native-tiny-toast";
+import { Button } from "react-native-elements";
+
+import Carousel from "../components/CarouselEval";
 
 import * as yup from "yup";
 
@@ -29,6 +32,11 @@ import ProgressWheel from "../components/UI/ProgressWheel";
 import UpdateDT from "../components/UpdateTable";
 import DataModal from "../components/DataModal";
 import Colors from "../constants/Colors";
+// import DateTimePicker from "@react-native-community/datetimepicker";
+import DateTimePicker from "react-native-modal-datetime-picker";
+
+import moment from "moment";
+import localization from "moment/locale/es-us";
 
 let screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
@@ -56,6 +64,8 @@ const EvalScreen = (props) => {
   const [muscleModal, setMuscleModal] = useState(false);
   const [fatModal, setFatModal] = useState(false);
   const [metaModal, setMetaModal] = useState(false);
+  const [date, setDate] = useState(new Date());
+  const [show, setShow] = useState(false);
 
   // const updatedBmi = loadedUpdates;
   // const updatedId = loadedUpdates;
@@ -82,8 +92,12 @@ const EvalScreen = (props) => {
   const updatedMuscle =
     loadedUpdates.length === 0 ? "" : loadedUpdates[0].muscle;
   const updatedFat = loadedUpdates.length === 0 ? "" : loadedUpdates[0].fat;
+  const memFecha =
+    loadedUpdates.length === 0 ? "" : loadedUpdates[0].dateChanged;
 
   const UpId = loadedUpdates.length === 0 ? "" : loadedUpdates[0].id;
+
+  var fecha = moment(memFecha);
 
   const loadDetails = useCallback(async () => {
     setError(null);
@@ -323,6 +337,8 @@ const EvalScreen = (props) => {
   const frontImageTakenHandler = useCallback(async (uri) => {
     const response = await fetch(uri);
     const blob = await response.blob();
+    setFImage(uri);
+
     try {
       await dispatch(updateActions.frontImage(blob, Eid));
     } catch (err) {
@@ -354,6 +370,8 @@ const EvalScreen = (props) => {
   const sideImageTakenHandler = useCallback(async (uri) => {
     const response = await fetch(uri);
     const blobS = await response.blob();
+    setSImage(uri);
+
     try {
       await dispatch(updateActions.sideImage(blobS, Eid));
     } catch (err) {
@@ -386,6 +404,23 @@ const EvalScreen = (props) => {
   const tapBackground = () => {
     setShowAlert(true);
   };
+
+  const onChange = (event, selectedDate) => {
+    const currentDate = selectedDate || date;
+    setDate(currentDate);
+    setShow(false);
+  };
+
+  const dateHandler = useCallback(async (date) => {
+    var dateChanged = moment(date).locale("es-us", localization).format("LL");
+    try {
+      dispatch(updateActions.dateUpload(dateChanged, Eid, EvTitle));
+    } catch (err) {
+      setError(err.message);
+    }
+    setShow(false);
+    loadDetails();
+  });
 
   const validationSchemaEval = yup.object().shape({
     bmi: yup
@@ -441,18 +476,55 @@ const EvalScreen = (props) => {
           }
         >
           <View style={styles.titleBar}>
-            <View>
+            <View style={{ marginBottom: 25 }}>
               <Text style={styles.evalTitle}>{EvalTitle}</Text>
-              <Text style={{ marginLeft: 20 }}>"Date Picker"</Text>
             </View>
             <View style={{ marginRight: 20 }}>
               <Button
                 title="Borrar"
-                color="red"
+                buttonStyle={{
+                  borderRadius: 12,
+                  backgroundColor: "red",
+                }}
                 onPress={deleteHandler.bind(this, docId, UpId, Eid)}
               />
             </View>
           </View>
+          <View style={{ marginLeft: 20 }}>
+            <TouchableOpacity
+              onPress={() => {
+                setShow(true);
+              }}
+            >
+              <Text>Fecha:</Text>
+              {!memFecha ? (
+                <Text>Haz click para agregar fecha</Text>
+              ) : (
+                <Text>{memFecha}</Text>
+              )}
+            </TouchableOpacity>
+          </View>
+          {/* {show && ( */}
+          <View>
+            <DateTimePicker
+              mode="date"
+              isVisible={show}
+              locale="es-ES"
+              onConfirm={
+                (date) => {
+                  dateHandler(date);
+                }
+                // this.handleDatePicked(date, "start", "showStart")
+              }
+              onCancel={() => {
+                setShow(false);
+              }}
+              cancelTextIOS={"Cancelar"}
+              confirmTextIOS={"Confirmar"}
+              headerTextIOS={"Elige una fecha"}
+            />
+          </View>
+          {/* )} */}
 
           <DataModal
             visible={imcModal}
@@ -645,7 +717,89 @@ const EvalScreen = (props) => {
               </View>
             )}
           </View>
-          <View style={styles.wheelBlock}>
+          <Carousel
+            style="slides"
+            itemsPerInterval={1}
+            items={[
+              {
+                title: "IMC",
+                result: bmi,
+                edit: () => {
+                  setImcModal(true);
+                },
+                button: "Editar IMC",
+                bmi: bmi,
+                comp: bmi,
+                updated: updatedBmi,
+                updatedBmi: updatedBmi,
+              },
+              {
+                title: "Grasa",
+                result: fat,
+                edit: () => {
+                  setFatModal(true);
+                },
+                button: "Editar Grasa",
+                gender: gender,
+                age: age,
+                fat: fat,
+                comp: fat,
+                updated: updatedFat,
+                updatedFat: updatedFat,
+              },
+              {
+                title: "Músculo",
+                result: muscle,
+                edit: () => {
+                  setMuscleModal(true);
+                },
+                button: "Editar Músculo",
+                muscle: muscle,
+                age: age,
+                gender: gender,
+                comp: muscle,
+                updated: updatedMuscle,
+                updatedMuscle: updatedMuscle,
+              },
+              {
+                title: "KCAL",
+                result: kcal,
+                edit: () => {
+                  setKcalModal(true);
+                },
+                button: "Editar KCAL",
+                comp: kcal,
+                updated: updatedKcal,
+                updatedKcal: updatedKcal,
+              },
+              {
+                title: "Edad Metabolica",
+                result: meta,
+                edit: () => {
+                  setMetaModal(true);
+                },
+                button: "Editar Edad Metabolica",
+                comp: meta,
+                age: age,
+
+                updated: updatedMeta,
+                updatedMeta: updatedMeta,
+              },
+              {
+                title: "Grasa Viseral",
+                result: vifat,
+                edit: () => {
+                  setVifatModal(true);
+                },
+                button: "Editar Grasa Viseral",
+                vifat: vifat,
+                comp: vifat,
+                updated: updatedVifat,
+                updatedVifat: updatedVifat,
+              },
+            ]}
+          />
+          {/* <View style={styles.wheelBlock}>
             <View>
               <TouchableOpacity
                 onPress={() => {
@@ -898,7 +1052,7 @@ const EvalScreen = (props) => {
                 </View>
               </TouchableOpacity>
             </View>
-          </View>
+          </View> */}
           <View>
             <Subtitle>{"progress imagen".toUpperCase()}</Subtitle>
             <View

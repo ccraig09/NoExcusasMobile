@@ -6,9 +6,14 @@ import {
   AsyncStorage,
 } from "react-native";
 import { useDispatch } from "react-redux";
+import firebase from "../components/firebase";
 
 import Colors from "../constants/Colors";
 import * as authActions from "../store/actions/auth";
+
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
 
 const StartupScreen = (props) => {
   const dispatch = useDispatch();

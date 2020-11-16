@@ -37,15 +37,13 @@ const HomeScreen = (props) => {
   const classes = useSelector((state) => state.products.availableClasses);
   const loadedMemberDeets = useSelector((state) => state.memberdeets.details);
   const userEvals = useSelector((state) => state.evals.userEvals);
-  // const [firstName, setFirstName] = useState();
+  const [userName, setUserName] = useState();
   const [lastName, setLastName] = useState();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [userPhoto, setUserPhoto] = useState();
-  const firstName =
-    typeof loadedMemberDeets === "undefined"
-      ? "caros"
-      : loadedMemberDeets.FirstName;
+  // const firstName =
+  //   typeof loadedMemberDeets === "undefined" ? "" : loadedMemberDeets.FirstName;
 
   // const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
@@ -53,6 +51,7 @@ const HomeScreen = (props) => {
 
   useEffect(() => {
     setIsLoading(true);
+
     dispatch(addEvalAction.fetchMemberEvals());
     // dispatch(updateActions.fetchUpdates());
     // console.log("user eval title should be", userEvals);
@@ -63,12 +62,18 @@ const HomeScreen = (props) => {
 
   const loadDetails = useCallback(async () => {
     setError(null);
-    setIsRefreshing(true);
+    setIsLoading(true);
+    await dispatch(detailsActions.fetchMemberDetails());
     try {
       // await dispatch(detailsActions.fetchMemberDetails());
-      AsyncStorage.getItem("userData").then((value) => {
+      await AsyncStorage.getItem("userData").then((value) => {
         const data = JSON.parse(value);
         setUserPhoto(data.avatar);
+        setUserName(
+          typeof loadedMemberDeets === "undefined"
+            ? data.givenName
+            : loadedMemberDeets.FirstName
+        );
       });
       //   AsyncStorage.getItem("resData").then((value) => {
       //     const data = JSON.parse(value);
@@ -80,8 +85,8 @@ const HomeScreen = (props) => {
     } catch (err) {
       setError(err.message);
     }
-    setIsRefreshing(false);
-  }, [dispatch, setError, setIsRefreshing]);
+    setIsLoading(false);
+  }, [dispatch, setError, setIsLoading]);
 
   // const user = AsyncStorage.getItem("userId");
   // if (!user) {
@@ -133,7 +138,7 @@ const HomeScreen = (props) => {
               <View style={styles.displayName}>
                 <Text style={styles.subtitle}>{greetingMessage}, </Text>
                 {/* <View style={{ flexDirection: "row" }}> */}
-                <Text style={styles.hello}>{firstName}</Text>
+                <Text style={styles.hello}>{userName}</Text>
               </View>
             </View>
             <View style={{ alignItems: "flex-end" }}>
@@ -232,12 +237,11 @@ const styles = StyleSheet.create({
   },
   hello: {
     fontWeight: "bold",
-    color: "#3c4560",
+    color: Colors.noExprimary,
     fontSize: 20,
   },
   subtitle: {
-    color: "#b8bece",
-    fontWeight: "500",
+    fontWeight: "bold",
     fontSize: 16,
   },
 });

@@ -66,8 +66,8 @@ HomeStack.navigationOptions = ({ navigation }) => {
 
 const TimerStack = createStackNavigator(
   {
-    timer: Timer,
     onboarding: OnboardingScreen,
+    timer: Timer,
   },
   {
     // mode: "modal",

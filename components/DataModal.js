@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   TouchableOpacity,
@@ -19,6 +19,7 @@ import AwesomeAlert from "react-native-awesome-alerts";
 import Colors from "../constants/Colors";
 
 const DataModal = (props) => {
+  const [values, setValue] = useState({ name: "Hello" });
   const FieldWrapper = ({ children, label, formikProps, formikKey }) => (
     <View style={{ marginHorizontal: 20, marginVertical: 5 }}>
       <Text style={{ marginBottom: 3 }}>{label}</Text>
@@ -37,6 +38,7 @@ const DataModal = (props) => {
       marginBottom: 3,
       borderRadius: 10,
       color: "black",
+      width: 150,
     };
 
     if (formikProps.touched[formikKey] && formikProps.errors[formikKey]) {
@@ -212,6 +214,19 @@ const DataModal = (props) => {
                             maxLength={props.formikMaxLength}
                             placeholder={props.formikPlaceholder}
                           />
+                          {props.maxSub && (
+                            <View>
+                              <Text
+                                style={{
+                                  color: "silver",
+                                  marginTop: -15,
+                                  marginBottom: 5,
+                                }}
+                              >
+                                {props.maxSub}
+                              </Text>
+                            </View>
+                          )}
                         </View>
                       </View>
                     )}

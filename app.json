@@ -2,6 +2,9 @@
   "expo": {
     "name": "NoExcusasMobile",
     "slug": "NoExcusasMobile",
+    "facebookScheme": "fb525920638107168",
+    "facebookAppId": "525920638107168",
+    "facebookDisplayName": "rnNoExcusas",
     "platforms": ["ios", "android", "web"],
     "version": "1.0.0",
     "orientation": "portrait",
@@ -16,7 +19,8 @@
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "requireFullScreen": true
     }
   }
 }
