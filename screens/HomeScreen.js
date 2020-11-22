@@ -42,39 +42,50 @@ const HomeScreen = (props) => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [userPhoto, setUserPhoto] = useState();
-  // const firstName =
-  //   typeof loadedMemberDeets === "undefined" ? "" : loadedMemberDeets.FirstName;
 
-  // const [isLoading, setIsLoading] = useState(false);
+  const firstName =
+    typeof loadedMemberDeets.FirstName === "undefined"
+      ? userName
+      : loadedMemberDeets.FirstName;
+
   const dispatch = useDispatch();
   const [error, setError] = useState();
 
   useEffect(() => {
-    setIsLoading(true);
+    const willFocusSub = props.navigation.addListener("willFocus", loadDetails);
+    return () => {
+      willFocusSub.remove();
+    };
+  }, [loadDetails]);
 
-    dispatch(addEvalAction.fetchMemberEvals());
+  useEffect(() => {
     // dispatch(updateActions.fetchUpdates());
     // console.log("user eval title should be", userEvals);
-    loadDetails().then(() => {
-      setIsLoading(false);
-    });
-  }, [dispatch, loadDetails]);
+    loadDetails();
+  }, []);
 
   const loadDetails = useCallback(async () => {
     setError(null);
     setIsLoading(true);
-    await dispatch(detailsActions.fetchMemberDetails());
+    // dispatch(addEvalAction.fetchMemberEvals());
+
     try {
-      // await dispatch(detailsActions.fetchMemberDetails());
-      await AsyncStorage.getItem("userData").then((value) => {
+      dispatch(detailsActions.fetchMemberDetails());
+      AsyncStorage.getItem("userData").then((value) => {
         const data = JSON.parse(value);
+        // console.log("laoded deets", loadedMemberDeets);
         setUserPhoto(data.avatar);
         setUserName(
-          typeof loadedMemberDeets === "undefined"
+          !loadedMemberDeets.FirstName
             ? data.givenName
-            : loadedMemberDeets.FirstName
+            : loadedMemberDeets.FirstName,
+          console.log("loaded name is signserver", data.givenName),
+          console.log("loaded name is", loadedMemberDeets.FirstName)
+          // : loadedMemberDeets.FirstName
         );
       });
+      dispatch(detailsActions.baseName(userName));
+      console.log("homescreen name is", userName);
       //   AsyncStorage.getItem("resData").then((value) => {
       //     const data = JSON.parse(value);
       //     console.log("resData should be and is ", data);
@@ -86,17 +97,8 @@ const HomeScreen = (props) => {
       setError(err.message);
     }
     setIsLoading(false);
-  }, [dispatch, setError, setIsLoading]);
+  }, [dispatch, setError, setIsLoading, setUserPhoto]);
 
-  // const user = AsyncStorage.getItem("userId");
-  // if (!user) {
-  //   console.log(user);
-  //   return (
-  //     <View style={styles.centered}>
-  //       <ActivityIndicator size="large" color={Colors.noExprimary} />
-  //     </View>
-  //   );
-  // }
   if (isLoading) {
     return (
       <View style={styles.centered}>
@@ -138,7 +140,7 @@ const HomeScreen = (props) => {
               <View style={styles.displayName}>
                 <Text style={styles.subtitle}>{greetingMessage}, </Text>
                 {/* <View style={{ flexDirection: "row" }}> */}
-                <Text style={styles.hello}>{userName}</Text>
+                <Text style={styles.hello}>{firstName}</Text>
               </View>
             </View>
             <View style={{ alignItems: "flex-end" }}>

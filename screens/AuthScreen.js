@@ -170,40 +170,37 @@ const AuthScreen = (props) => {
 
         firebase.auth().onAuthStateChanged(function (user) {
           if (user) {
-            console.log("this is authstatechange user  ", user);
+            // console.log("this is authstatechange user  ", user);
             const userRes = user.toJSON().stsTokenManager;
             // user.getIdToken().then(function (idToken) {
             var token = userRes.accessToken.toString();
             var userId = user.uid.toString();
             // var time = userRes.expirationTime.toString();
-            console.log("this is tkn", token);
-            console.log("this is id", userId);
+            // console.log("this is tkn", token);
+            // console.log("this is id", userId);
             // console.log("this is time", time);
 
             var avatar = result.user.photoUrl;
-            var givenName = result.user.givenName;
-            console.log("avatar uri should be", avatar);
-            console.log("avatar NAME should be", result.user);
+            var givenName = result.user.givenName.toString();
+            // console.log("avatar uri should be", avatar);
+            console.log("avatar NAME should be", givenName);
 
-            dispatch(
-              authActions.signInWithGoogleAsync(
-                userId,
-                token,
-                avatar,
-                givenName
-              )
-            );
-
-            saveDataToStorage(avatar, token, userId, givenName);
+            // dispatch(
+            //   authActions.signInWithGoogleAsync(
+            //     userId,
+            //     token,
+            //     avatar,
+            //     givenName
+            //   )
+            // );
 
             // const expirationDate = new Date(
             //   new Date().getTime() + parseInt(userRes.expirationTime) * 1000
             // );
             saveDataToStorage(avatar, givenName, token, userId);
+            props.navigation.navigate("Main");
           }
         });
-
-        props.navigation.navigate("Main");
       } else {
         return { cancelled: true };
       }
@@ -259,13 +256,13 @@ const AuthScreen = (props) => {
             console.log("this is pic", avatar);
             console.log("this is name", givenName);
 
-            dispatch(
-              authActions.loginWithFacebook(userId, token, avatar, givenName)
-            );
+            // dispatch(
+            //   authActions.loginWithFacebook(userId, token, avatar, givenName)
+            // );
 
             // dispatch(authenticate(userId, token));
 
-            saveDataToStorage(avatar, token, userId, givenName);
+            saveDataToStorage(avatar, givenName, token, userId);
           }
         });
         props.navigation.navigate("Main");

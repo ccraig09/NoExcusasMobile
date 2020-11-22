@@ -23,9 +23,9 @@ export const authenticate = (userId, token) => {
 //   loginWithFacebook();
 // }, []);
 
-export function signInWithGoogleAsync(userId, token) {
+export function signInWithGoogleAsync(userId, token, avatar, givenName) {
   return async (dispatch) => {
-    dispatch(authenticate(userId, token));
+    dispatch(authenticate(userId, token, avatar, givenName));
   };
 }
 

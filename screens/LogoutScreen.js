@@ -8,9 +8,9 @@ const LogoutSreen = (props) => {
   return (
     <View style={styles.screen}>
       <Button
-        title="Logout"
+        title="Cerrar sesión"
         onPress={() => {
-          Alert.alert("Are you sure you want to logout?", "", [
+          Alert.alert("Cerrar sesión?", "", [
             {
               text: "No",
               style: "default",

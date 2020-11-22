@@ -99,6 +99,7 @@ const ProfileScreen = (props) => {
   const [showAlert, setShowAlert] = useState(false);
 
   const [modalVisible, setModalVisible] = useState(false);
+  const [userName, setUserName] = useState();
   const [ageModal, setAgeModal] = useState(false);
   const [heightModal, setHeightModal] = useState(false);
   const [weightModal, setWeightModal] = useState(false);
@@ -129,7 +130,7 @@ const ProfileScreen = (props) => {
 
   const firstName =
     typeof loadedMemberDeets.FirstName === "undefined"
-      ? ""
+      ? userName
       : loadedMemberDeets.FirstName;
   const lastName =
     typeof loadedMemberDeets.LastName === "undefined"
@@ -184,10 +185,15 @@ const ProfileScreen = (props) => {
     dispatch(addEvalAction.fetchMemberEvals());
 
     try {
-      await dispatch(detailsActions.fetchMemberDetails());
+      dispatch(detailsActions.fetchMemberDetails());
       await AsyncStorage.getItem("userData").then((value) => {
         const data = JSON.parse(value);
         setUserPhoto(data.avatar);
+        setUserName(
+          !loadedMemberDeets.FirstName
+            ? data.givenName
+            : loadedMemberDeets.FirstName
+        );
       });
       baseFrontImageLoad();
       baseSideImageLoad();
@@ -234,16 +240,16 @@ const ProfileScreen = (props) => {
           .catch(function (error) {
             switch (error.code) {
               case "storage/object-not-found":
-                console.log(error);
+                console.log("no pic yet");
                 break;
               case "storage/unauthorized":
                 // User doesn't have permission to access the object
-                console.log(error);
+                // console.log(error);
                 break;
 
               case "storage/canceled":
                 // User canceled the upload
-                console.log(error);
+                // console.log(error);
 
                 break;
             }
@@ -278,7 +284,7 @@ const ProfileScreen = (props) => {
 
               case "storage/canceled":
                 // User canceled the upload
-                // console.log(error);
+                console.log(error);
 
                 break;
             }
@@ -685,7 +691,14 @@ const ProfileScreen = (props) => {
               />
             }
           >
-            <TouchableOpacity onPress={() => props.navigation.navigate("Edit")}>
+            <TouchableOpacity
+              onPress={() =>
+                props.navigation.navigate("Edit", {
+                  avatar: userPhoto,
+                  name: firstName,
+                })
+              }
+            >
               <Header>
                 <AvatarView>
                   <Avatar
@@ -1704,6 +1717,7 @@ const styles = StyleSheet.create({
   button2: {
     marginBottom: 10,
     // marginTop: -15,
+    marginTop: 5,
     width: 100,
     height: 20,
     marginLeft: -5,

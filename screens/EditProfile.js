@@ -31,21 +31,24 @@ const EditProfile = (props) => {
   const [nameModal, setNameModal] = useState(false);
   const [text, setText] = useState(false);
   const [fName, setFName] = useState();
-  const [name, setName] = useState();
+  const [userName, setUserName] = useState();
+  // const classId = props.navigation.getParam("avatar");
+  // const classId = props.navigation.getParam("name");
 
   const loadedMemberDeets = useSelector((state) => state.memberdeets.details);
 
   const firstName =
     typeof loadedMemberDeets.FirstName === "undefined"
-      ? "__"
+      ? userName
       : loadedMemberDeets.FirstName;
 
   const loadDetails = useCallback(async () => {
-    await AsyncStorage.getItem("userData").then((value) => {
-      const data = JSON.parse(value);
-      setUserPhoto(data.avatar);
-    });
-    setFName(firstName);
+    // await AsyncStorage.getItem("userData").then((value) => {
+    //   const data = JSON.parse(value);
+    setUserPhoto(props.navigation.getParam("avatar"));
+    setFName(props.navigation.getParam("name"));
+
+    // setFName(firstName);
   });
 
   useEffect(() => {
@@ -56,25 +59,25 @@ const EditProfile = (props) => {
     Nombre: yup.string().label("Nombre"),
   });
 
-  const disableCheck = (name) => {
-    if (name === fName) {
-      return true;
-    }
-  };
+  // const disableCheck = (name) => {
+  //   if (name === fName) {
+  //     return true;
+  //   }
+  // };
 
-  const submitName = useCallback(async (name) => {
+  const submitName = useCallback(async (userName) => {
     try {
-      dispatch(detailsActions.baseName(name));
+      dispatch(detailsActions.baseName(userName));
     } catch (err) {
-      setError(err.message);
+      console.log("caught and error :/", err.message);
     }
     loadDetails();
     // setAgeModal(!ageModal);
   });
 
-  const handleNameChange = (name) => {
-    console.log(name);
-    submitName(name);
+  const handleNameChange = (userName) => {
+    // console.log(name);
+    submitName(userName);
     props.navigation.goBack();
     loadDetails();
   };
@@ -126,7 +129,7 @@ const EditProfile = (props) => {
                   label="Nombre"
                   placeholder={fName}
                   placeholderTextColor={"silver"}
-                  onChangeText={(value) => setName(value)}
+                  onChangeText={(value) => setUserName(value)}
                 />
 
                 <View
@@ -147,13 +150,16 @@ const EditProfile = (props) => {
                     onPress={() => {
                       Alert.alert(
                         "Guardar Cambios?",
-                        `Cambia nombre a ${name}?`,
+                        `Cambia nombre a ${userName}?`,
                         [
                           {
                             text: "No",
                             style: "cancel",
                           },
-                          { text: "Si", onPress: () => handleNameChange(name) },
+                          {
+                            text: "Si",
+                            onPress: () => handleNameChange(userName),
+                          },
                         ]
                       );
                     }}

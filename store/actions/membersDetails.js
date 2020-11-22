@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 import MemberDetails from "../../models/memberDetail";
 export const UPDATE_MEMBER = "UPDATE_MEMBER";
 import { AsyncStorage } from "react-native";
@@ -10,10 +12,16 @@ export const db = firebase.firestore().collection("Members");
 
 export default firebase;
 
+// const [error, setError] = useState();
+
 export const fetchMemberDetails = () => {
   return async (dispatch, getState) => {
-    const userId = getState().auth.userId;
-    // console.log("get state worked and userid is:", userId);
+    // const userId = getState().auth.userId;
+    const userId = await AsyncStorage.getItem("userData").then((value) => {
+      const data = JSON.parse(value);
+      return data.userId;
+    });
+    console.log("get state worked and userid is:", userId);
     try {
       let loadedDetails;
 
@@ -42,7 +50,7 @@ export const fetchMemberDetails = () => {
   };
 };
 
-export const baseName = (name) => {
+export const baseName = (userName) => {
   return async () => {
     firebase.auth().onAuthStateChanged(function (user) {
       if (user) {
@@ -51,7 +59,7 @@ export const baseName = (name) => {
           db.doc(userId)
             .set(
               {
-                FirstName: name,
+                FirstName: userName,
                 Nametimestamp: firebase.firestore.FieldValue.serverTimestamp(),
               },
               { merge: true }
@@ -60,7 +68,7 @@ export const baseName = (name) => {
               console.log("Error getting document:", error);
             });
         } catch (err) {
-          setError(err.message);
+          console.log(err.message);
         }
       }
     });

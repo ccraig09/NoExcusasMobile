@@ -158,6 +158,8 @@ const EvalScreen = (props) => {
 
               case "storage/canceled":
                 // User canceled the upload
+                console.log(error);
+
                 break;
             }
           });
@@ -189,7 +191,7 @@ const EvalScreen = (props) => {
 
               case "storage/canceled":
                 // User canceled the upload
-                // console.log(error);
+                console.log(error);
 
                 break;
             }
